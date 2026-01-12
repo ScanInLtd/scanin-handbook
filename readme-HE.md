@@ -194,8 +194,8 @@ TypeScript, JavaScript, C/C++, Dart, C#
 ## תיעוד וסקריפטים
 
 ### 📚 תיעוד
-- **‏`docs/inventory.md`** – מיפוי מלא של מאגרי קוד
-- **‏`docs/renaming.md`** – קונבנציות ושמות
+- **‏`docs/inventory.md`** – רשימה מלאה של מאגרי קוד ותיאורם
+- **‏`docs/naming-conventions.md`** – קונבנציות שמות מאגרי קוד
 
 ### 🛠️ סקריפטים
 - **‏`transfer-repos.sh`**
