@@ -110,9 +110,9 @@
 
 ### ענן (GCP)
 
-- **‏Firebase**–שימוש ב Firestore (מסד נתונים מרכזי), Cloud Functions (התראות, תזמון, תחזוקה), Hosting (Web)
-- **‏Cloud Run**–שימוש ב Workers אצוותיים בקונטיינרים
-- **‏Compute Engine**–שימוש ב שירותים ארוכי־חיים (MQTT bridge, שירותי דוחות)
+- **‏Firebase** – שימוש ב Firestore (מסד נתונים מרכזי), Cloud Functions (התראות, תזמון, תחזוקה), Hosting (Web)
+- **‏Cloud Run** – שימוש ב Workers אצוותיים בקונטיינרים
+- **‏Compute Engine** – שימוש ב שירותים ארוכי־חיים (MQTT bridge, שירותי דוחות)
 
 ### מקומי / On-Prem
 
