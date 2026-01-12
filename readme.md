@@ -3,6 +3,8 @@
 > **Industrial building monitoring platform**  
 > Integrating on-site devices, cloud services, and analytics to deliver real-time monitoring, alerts, and reporting across multiple sensor technologies.
 
+> **Note:** This document provides a high-level technical overview of the ScanIn platform architecture. Source code repositories remain private.
+
 ---
 
 ## Table of Contents
