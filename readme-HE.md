@@ -154,7 +154,7 @@
 **שפות**  
 TypeScript, JavaScript, C/C++, Dart, C#
 
-**Frameworks**  
+**סביבות / Frameworks**  
 ‏Angular, Flutter, Express.js, PlatformIO
 
 **ענן ותשתיות**  
