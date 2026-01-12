@@ -33,6 +33,10 @@ ScanIn monitors structural integrity and environmental conditions across constru
 * **Batch processing**: Scheduled jobs for aggregation, smoothing, and chart preparation
 * **Hybrid runtime**: Cloud services for core platform, local services for vendor integrations and lab operations
 
+**Scope**
+
+This document provides a high-level technical overview; detailed implementation and operational procedures are documented in individual repositories.
+
 ---
 
 ## System at a Glance
@@ -225,3 +229,7 @@ Core services (ingestion, web platform, alerting) are stable and long-running. S
 - Renamed 12 legacy repos with "archive-" prefix
 - Standardized naming for all active repos (scanin-fw-*, scanin-svc-*, scanin-worker-*, scanin-tool-*)
 - Updated all repository descriptions
+
+---
+
+_Last updated: 2026-01-12_
