@@ -110,14 +110,14 @@
 
 ### ענן (GCP)
 
-- **Firebase** – Firestore (מסד נתונים מרכזי), Cloud Functions (התראות, תזמון, תחזוקה), Hosting (Web)
-- **Cloud Run** – Workers אצוותיים בקונטיינרים
+- **Firebase** – ‏Firestore (מסד נתונים מרכזי), Cloud Functions (התראות, תזמון, תחזוקה), Hosting (Web)
+- **Cloud Run** – ‏Workers אצוותיים בקונטיינרים
 - **Compute Engine** – שירותים ארוכי־חיים (MQTT bridge, שירותי דוחות)
 
 ### מקומי / On-Prem
 
-- **שירותי Windows** – אינטגרציות ספקים הדורשות גישה לרשת מקומית
-- **כלי מעבדה** – צריבת קושחה והקמת התקנים
+- **שירותי Windows** – ‏אינטגרציות ספקים הדורשות גישה לרשת מקומית
+- **כלי מעבדה** – ‏צריבת קושחה והקמת התקנים
 
 ---
 
@@ -125,27 +125,27 @@
 
 ### קושחה (Firmware)
 - **scanin-fw-datalogger**  
-  קושחת דאטא-לוגר ESP ואפליקציית Flutter BLE (Monorepo)
+  ‏קושחת דאטא-לוגר ESP ואפליקציית Flutter BLE (Monorepo)
 
 ### פלטפורמת Web
 - **scanin-web-platform**  
-  פלטפורמת Web מרכזית למשתמשים ואנשי שטח
+  ‏פלטפורמת Web מרכזית למשתמשים ואנשי שטח
 
 ### שירותים (Services)
-- **scanin-svc-mqtt-bridge** – גישור MQTT ↔ Firestore  
-- **scanin-svc-firebase-functions** – התראות, תזמון ודוחות  
-- **scanin-svc-reports** – יצירה והפצה של דוחות  
-- **scanin-svc-hexagon-ats-ingestion** – קליטת דוחות ATS ממייל  
-- **scanin-svc-beanair-vibration-processor** – עיבוד רעידות Beanair
+- **scanin-svc-mqtt-bridge** – ‏גישור MQTT ↔ Firestore  
+- **scanin-svc-firebase-functions** – ‏התראות, תזמון ודוחות  
+- **scanin-svc-reports** – ‏יצירה והפצה של דוחות  
+- **scanin-svc-hexagon-ats-ingestion** – ‏קליטת דוחות ATS ממייל  
+- **scanin-svc-beanair-vibration-processor** – ‏עיבוד רעידות Beanair
 
 ### עובדים (Workers)
-- **scanin-worker-prism-daily** – עיבוד יומי לחיישני פריזמה  
-- **scanin-worker-firestore-adjustments** – תיקוני נתונים ב־Firestore
+- **scanin-worker-prism-daily** – ‏עיבוד יומי לחיישני פריזמה  
+- **scanin-worker-firestore-adjustments** – ‏תיקוני נתונים ב־Firestore
 
 ### כלים (Tools)
-- **scanin-tool-esp-flasher** – כלי Windows לצריבת דאטא-לוגרים  
-- **scanin-tool-firestore-data-export** – ייצוא נתונים ל־Excel  
-- **scanin-tool-sensor-clone** – שכפול ועריכת חיישנים
+- **scanin-tool-esp-flasher** – ‏כלי Windows לצריבת דאטא-לוגרים  
+- **scanin-tool-firestore-data-export** – ‏ייצוא נתונים ל־Excel  
+- **scanin-tool-sensor-clone** – ‏שכפול ועריכת חיישנים
 
 ---
 
