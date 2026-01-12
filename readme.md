@@ -18,7 +18,7 @@
 - [Technology Stack](#technology-stack)
 - [Operational Model](#operational-model)
 - [Status & Maturity](#status--maturity)
-- [Documentation & Scripts](#documentation--scripts)
+- [Documentation](#documentation)
 
 ---
 
@@ -209,17 +209,10 @@ Core services (ingestion, web platform, alerting) are stable and long-running. S
 
 ---
 
-## Documentation & Scripts
+## Documentation
 
-### 📚 Documentation (`docs/`)
 - **[Repository Inventory](docs/inventory.md)** – Complete list of all ScanIn repositories and their purpose
 - **[Naming Conventions](docs/naming-conventions.md)** – Standardized repository naming patterns
-
-### 🛠️ Scripts (`scripts/`)
-- `generate-repo-map.sh` – Generate repository analysis from GitHub API
-- `transfer-repos.sh` – Transfer repositories between organizations
-- `rename-to-standard.sh` – Rename repositories to standardized naming convention
-- `update-local-remotes.sh` – Update local git remotes after repo transfers/renames
 
 ---
 
