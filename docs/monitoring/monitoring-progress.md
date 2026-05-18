@@ -21,16 +21,17 @@
 | Alert dedup logic | ✅ | `src/incidents/dedup.ts` |
 | Maintenance mode check | ✅ | `src/maintenance.ts` |
 | WhatsApp alert output (Green API) | ✅ | `src/alerts/whatsapp.ts` + `formatter.ts` |
-| ATS heartbeat check | ⬜ | Same pattern as bridge |
-| Vibration heartbeat check | ⬜ | Same pattern as bridge |
+| ATS heartbeat check | ✅ | `checks/ats.ts` — warn > 2h, critical > 6h |
+| Vibration heartbeat check | ✅ | `checks/vibration.ts` — warn > 30min, critical > 2h |
 | GCP Monitoring API (function execution/error counts) | ✅ | `checks/functions.ts` + writes to `system-heartbeats/firebase-functions` |
-| Daily jobs checks (reports/prism/cleanup) | ⬜ | |
-| Firestore Admin API (backup recency) | ⬜ | |
-| Daily summary (07:00 IST) | ⬜ | Formatter exists, needs daily tier wiring |
-| Daily metrics rotation (delete >30d) | ⬜ | |
+| Daily jobs checks (reports/prism/cleanup) | ✅ | `checks/daily-jobs.ts` |
+| Firestore Admin API (backup recency) | ✅ | `checks/backups.ts` — warn > 25h, critical > 48h |
+| Daily summary (07:00 IST) | ✅ | Wired in check-runner |
+| Daily metrics rotation (delete >30d) | ✅ | `rotation.ts` + incidents > 90d |
 | Bridge suppression → suppress function alerts | ✅ | Stale bridge suppresses zero-exec warnings |
 | Deploy to Cloud Run | ⬜ | Needs env vars + service account |
 | Create Cloud Scheduler jobs (5min/15min/daily) | ⬜ | |
+| GCP Compute API (bridge VM status) | ⬜ | Optional |
 | Canary sensor logic | ⬜ | Later |
 
 ### 2. `scanin-svc-mqtt-bridge`
