@@ -14,20 +14,22 @@
 
 | Task | Status | Notes |
 |---|---|---|
-| Create repo + project scaffold | 🟡 | |
-| Firestore constants (collection paths, schema) | ⬜ | |
-| Read heartbeat docs + evaluate staleness | ⬜ | |
+| Create repo + project scaffold | ✅ | Express + TS + Dockerfile |
+| Firestore constants (collection paths, schema) | ✅ | `src/constants.ts` |
+| Read heartbeat docs + evaluate staleness (bridge) | ✅ | `src/checks/bridge.ts` — 4 checks |
+| Incident management (create/update/resolve) | ✅ | `src/incidents/manager.ts` |
+| Alert dedup logic | ✅ | `src/incidents/dedup.ts` |
+| Maintenance mode check | ✅ | `src/maintenance.ts` |
+| WhatsApp alert output (Green API) | ✅ | `src/alerts/whatsapp.ts` + `formatter.ts` |
+| ATS heartbeat check | ⬜ | Same pattern as bridge |
+| Vibration heartbeat check | ⬜ | Same pattern as bridge |
 | GCP Monitoring API (function execution/error counts) | ⬜ | |
-| GCP Compute API (VM status) | ⬜ | |
+| Daily jobs checks (reports/prism/cleanup) | ⬜ | |
 | Firestore Admin API (backup recency) | ⬜ | |
-| Incident management (create/update/resolve) | ⬜ | |
-| Alert dedup logic | ⬜ | |
-| Maintenance mode check | ⬜ | |
-| WhatsApp alert output (Green API) | ⬜ | |
-| Daily summary (07:00 IST) | ⬜ | |
-| Incident timeline events | ⬜ | |
+| Daily summary (07:00 IST) | ⬜ | Formatter exists, needs daily tier wiring |
 | Daily metrics rotation (delete >30d) | ⬜ | |
-| Deploy to Cloud Run | ⬜ | |
+| Bridge suppression → suppress function alerts | ⬜ | |
+| Deploy to Cloud Run | ⬜ | Needs env vars + service account |
 | Create Cloud Scheduler jobs (5min/15min/daily) | ⬜ | |
 | Canary sensor logic | ⬜ | Later |
 
@@ -74,6 +76,18 @@
 | Add Firestore SDK / connection | ⬜ | May already exist |
 | Heartbeat write after each cycle | ⬜ | ~20 lines |
 | Deploy | ⬜ | |
+
+### 7. Web App (admin page)
+**Role:** Admin-only monitoring dashboard — read-only view of heartbeats, checks, incidents.
+
+| Task | Status | Notes |
+|---|---|---|
+| Admin route + page scaffold | ⬜ | `/admin/monitoring` |
+| Service cards (heartbeat status) | ⬜ | |
+| Health checks table | ⬜ | |
+| Active incidents display | ⬜ | |
+| Maintenance mode indicator | ⬜ | |
+| Recent resolved incidents | ⬜ | |
 
 ---
 
