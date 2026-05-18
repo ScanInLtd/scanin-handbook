@@ -57,8 +57,8 @@
 
 | Task | Status | Notes |
 |---|---|---|
-| Heartbeat write after run completes | ⬜ | ~10 lines, `system-heartbeats/daily-prism-calc` |
-| Deploy | ⬜ | |
+| Heartbeat write after run completes | ✅ | `writeHeartbeat()` in orchestrator/index.js |
+| Deploy | ⬜ | Pending next deploy or manual trigger |
 
 ### 5. ATS Ingestion (C#)
 **Role:** Add Firestore heartbeat write after each email check cycle.
@@ -114,7 +114,7 @@
 | `scanin-svc-watchdog` | ⬜ No | — | — | Cloud Run (dataloggerdev, us-central1) |
 | `scanin-svc-mqtt-bridge` (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | monitoring-bridge-vm (`./deploy.sh`) |
 | `scanin-svc-reports` (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Cloud Run (dataloggerdev) |
-| `daily-prism-orchestrator` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
+| `daily-prism-orchestrator` (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Cloud Run (dataloggerdev) |
 | ATS Ingestion (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Monitoring PC |
 | Vibration Processor (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Monitoring PC |
 
