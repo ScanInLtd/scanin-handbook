@@ -41,7 +41,7 @@
 | Subscribe to `$SYS/#` topics | ✅ | In `mqttService.js` |
 | Rolling metrics counters (in-memory) | ✅ | 5-min + 1-hour resets |
 | Heartbeat writer (every 5 min → `system-heartbeats/mqtt-bridge`) | ✅ | `heartbeatService.js`, server timestamps, try/catch |
-| Deploy to bridge VM | ⬜ | `./deploy.sh` option 1 |
+| Deploy to bridge VM | ✅ | Deployed 2026-05-19 |
 
 ### 3. `scanin-svc-reports`
 **Role:** Add heartbeat at end of orchestrator run.
@@ -89,7 +89,7 @@
 | Maintenance mode indicator | ✅ | Banner |
 | Recent resolved incidents | ✅ | Expandable, last 10 |
 | Webapp usage metrics | ⬜ | Deferred, low priority |
-| ⚠️ Verify Firestore paths match watchdog | ⬜ | Subcollection structure TBD |
+| ⚠️ Verify Firestore paths match watchdog | ✅ | Fixed to root collections |
 
 ---
 
@@ -97,7 +97,7 @@
 
 | Milestone | Depends on | Status |
 |---|---|---|
-| Bridge heartbeat visible in Firestore | Bridge deployed | ⬜ |
+| Bridge heartbeat visible in Firestore | Bridge deployed | ✅ |
 | Watchdog reads bridge + sends first alert | Watchdog + bridge | ⬜ |
 | Daily summary working | Watchdog | ⬜ |
 | All Node.js services reporting | Reports + prism | ⬜ |
@@ -111,7 +111,7 @@
 | Service | Deployed? | Version | Date | Where |
 |---|---|---|---|---|
 | `scanin-svc-watchdog` | ⬜ No | — | — | Cloud Run (dataloggerdev, us-central1) |
-| `scanin-svc-mqtt-bridge` (heartbeat) | ⬜ No | — | — | monitoring-bridge-vm (`./deploy.sh`) |
+| `scanin-svc-mqtt-bridge` (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | monitoring-bridge-vm (`./deploy.sh`) |
 | `scanin-svc-reports` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
 | `scanin-worker-prism-daily` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
 | ATS Ingestion (heartbeat) | ⬜ No | — | — | Natan's PC |
