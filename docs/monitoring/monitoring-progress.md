@@ -52,12 +52,12 @@
 | Heartbeat write after orchestrator completes | ⬜ | ~5 lines |
 | Deploy | ⬜ | |
 
-### 4. `scanin-worker-prism-daily`
-**Role:** Add heartbeat at end of orchestrator run.
+### 4. `daily-prism-orchestrator` (daily-prism-calc)
+**Role:** Add heartbeat at end of daily prism calculation run.
 
 | Task | Status | Notes |
 |---|---|---|
-| Heartbeat write after orchestrator completes | ⬜ | ~5 lines |
+| Heartbeat write after run completes | ⬜ | ~10 lines, `system-heartbeats/daily-prism-calc` |
 | Deploy | ⬜ | |
 
 ### 5. ATS Ingestion (C#)
@@ -114,7 +114,7 @@
 | `scanin-svc-watchdog` | ⬜ No | — | — | Cloud Run (dataloggerdev, us-central1) |
 | `scanin-svc-mqtt-bridge` (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | monitoring-bridge-vm (`./deploy.sh`) |
 | `scanin-svc-reports` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
-| `scanin-worker-prism-daily` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
+| `daily-prism-orchestrator` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
 | ATS Ingestion (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Monitoring PC |
 | Vibration Processor (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Monitoring PC |
 
