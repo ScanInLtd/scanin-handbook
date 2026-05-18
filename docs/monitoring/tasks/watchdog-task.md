@@ -5,8 +5,9 @@
 This is a Cloud Run service triggered by Cloud Scheduler at 3 intervals (5min, 15min, daily).
 It reads heartbeat documents from Firestore, queries GCP APIs, evaluates health, manages incidents, and sends WhatsApp alerts.
 
-For full system context, see: [System Monitoring Design](../system-monitoring-design.md)  
-For detailed per-component specs: [Monitoring Checks](../monitoring-checks.md)
+For full system context, see: [System Monitoring Design](https://github.com/ScanInLtd/scanin-handbook/blob/main/docs/monitoring/system-monitoring-design.md)  
+For detailed per-component specs: [Monitoring Checks](https://github.com/ScanInLtd/scanin-handbook/blob/main/docs/monitoring/monitoring-checks.md)  
+Local path (if cloned): `../scanin-handbook/docs/monitoring/`
 
 ---
 
