@@ -459,9 +459,9 @@ No unbounded growth. Current state is overwritten in place. History is capped an
 | Collection | Doc count | Growth | Writes/month |
 |---|---|---|---|
 | `system-heartbeats/{service}` | ~5 (one per service) | Fixed | ~8,640 per service |
-| `system-health/checks/{checkId}` | ~10 | Fixed (overwritten) | ~50K total |
-| `system-health/incidents/{id}` | 0–5 (active only) | Only during failures | Near zero normally |
-| `system-health/incidents/{id}/events/{ts}` | 5–10 per incident | Auto-pruned on resolve | Near zero |
+| `system-checks/{checkId}` | ~10 | Fixed (overwritten) | ~50K total |
+| `system-incidents/{id}` | 0–5 (active only) | Only during failures | Near zero normally |
+| `system-incidents/{id}/events/{ts}` | 5–10 per incident | Auto-pruned on resolve | Near zero |
 | `system-metrics/{component}/daily/{YYYY-MM-DD}` | ~300 max (10 components × 30 days) | Rotated: >30 days deleted | ~10/day |
 | `system-maintenance/{component}` | 0–2 | Manual, rare | Near zero |
 

@@ -216,8 +216,8 @@ These only confirm the process is running — they don't confirm business logic 
 ┌─────────────────────────────────────────────────────────┐
 │               FIRESTORE STATE                           │
 ├─────────────────────────────────────────────────────────┤
-│  system-health/checks/{checkId}    — latest per check   │
-│  system-health/incidents/{id}      — open incidents      │
+│  system-checks/{checkId}           — latest per check   │
+│  system-incidents/{id}             — open incidents      │
 │  system-metrics/{component}/daily/{date} — daily stats   │
 │  system-maintenance/{component}    — suppress alerts     │
 └────────────────────────┬────────────────────────────────┘
@@ -236,8 +236,8 @@ These only confirm the process is running — they don't confirm business logic 
 | Collection | Docs | Growth |
 |---|---|---|
 | `system-heartbeats/{service}` | 5 | Fixed (overwritten) |
-| `system-health/checks/{checkId}` | ~10 | Fixed (overwritten) |
-| `system-health/incidents/{id}` | 0–5 | Only during failures |
+| `system-checks/{checkId}` | ~10 | Fixed (overwritten) |
+| `system-incidents/{id}` | 0–5 | Only during failures |
 | `system-metrics/{component}/daily/{date}` | ~300 max | Rotated: >30 days deleted |
 | `system-maintenance/{component}` | 0–2 | Manual |
 
