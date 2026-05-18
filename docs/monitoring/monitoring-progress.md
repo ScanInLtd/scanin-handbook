@@ -29,7 +29,7 @@
 | Daily summary (07:00 IST) | ✅ | Wired in check-runner |
 | Daily metrics rotation (delete >30d) | ✅ | `rotation.ts` + incidents > 90d |
 | Bridge suppression → suppress function alerts | ✅ | Stale bridge suppresses zero-exec warnings |
-| Deploy to Cloud Run | ⬜ | Needs env vars + service account |
+| Deploy to Cloud Run | ⬜ | Needs service account (WhatsApp optional — not a blocker) |
 | Create Cloud Scheduler jobs (5min/15min/daily) | ⬜ | |
 | GCP Compute API (bridge VM status) | ⬜ | Optional |
 | Canary sensor logic | ⬜ | Later |
