@@ -159,7 +159,7 @@ Last 10 resolved incidents with timestamp, duration, component.
 }
 ```
 
-### prism-orchestrator
+### daily-prism-calc
 ```ts
 {
   status, lastSeenAt, lastRunAt, lastRunStatus,

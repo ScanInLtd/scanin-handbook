@@ -36,7 +36,7 @@ Each card shows:
 | ats-ingestion | 2h | 6h |
 | vibration-processor | 30 min | 2h |
 | reports-orchestrator | 24h (daily) | 24h |
-| prism-orchestrator | 24h (daily) | 24h |
+| daily-prism-calc | 24h (daily) | 24h |
 
 ---
 

@@ -41,7 +41,7 @@ Cloud Scheduler → Watchdog (Cloud Run)
 | ATS Ingestion (C#) | `ats-ingestion` | Each email check cycle |
 | Vibration Processor (C#) | `vibration-processor` | Each processing cycle |
 | Reports Orchestrator (Node.js) | `reports-orchestrator` | After each daily run |
-| Prism Orchestrator (Node.js) | `prism-orchestrator` | After each daily run |
+| Daily Prism Calc (Node.js) | `daily-prism-calc` | After each daily run |
 
 ## Full Design Docs
 

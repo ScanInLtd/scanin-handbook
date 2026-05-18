@@ -200,7 +200,7 @@ These only confirm the process is running — they don't confirm business logic 
 │  ATS ──→ system-heartbeats/ats-ingestion    (each cycle)│
 │  Vibration ──→ system-heartbeats/vibration-processor    │
 │  Reports ──→ system-heartbeats/reports-orchestrator     │
-│  Prism ──→ system-heartbeats/prism-orchestrator         │
+│  Prism ──→ system-heartbeats/daily-prism-calc           │
 └────────────────────────┬────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐

@@ -82,7 +82,7 @@ After querying GCP Monitoring API, write a summary doc so the admin UI can displ
 
 ### Daily (07:00 IST)
 1. Read `system-heartbeats/reports-orchestrator` → did it run today?
-2. Read `system-heartbeats/prism-orchestrator` → did it run today?
+2. Read `system-heartbeats/daily-prism-calc` → did it run today?
 3. GCP Cloud Monitoring API → `cleanUnconfirmedSensors` ran in last 25h?
 4. Firestore Admin API → latest backup < 25h?
 5. Rotate old metrics: delete `system-metrics/*/daily/*` older than 30 days

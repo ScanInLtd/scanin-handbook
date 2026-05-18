@@ -49,8 +49,8 @@
 
 | Task | Status | Notes |
 |---|---|---|
-| Heartbeat write after orchestrator completes | ⬜ | ~5 lines |
-| Deploy | ⬜ | |
+| Heartbeat write after orchestrator completes | ✅ | `writeHeartbeat()` in reports-orchestrator.js |
+| Deploy | ✅ | Cloud Run, new revision |
 
 ### 4. `daily-prism-orchestrator` (daily-prism-calc)
 **Role:** Add heartbeat at end of daily prism calculation run.
@@ -113,7 +113,7 @@
 |---|---|---|---|---|
 | `scanin-svc-watchdog` | ⬜ No | — | — | Cloud Run (dataloggerdev, us-central1) |
 | `scanin-svc-mqtt-bridge` (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | monitoring-bridge-vm (`./deploy.sh`) |
-| `scanin-svc-reports` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
+| `scanin-svc-reports` (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Cloud Run (dataloggerdev) |
 | `daily-prism-orchestrator` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
 | ATS Ingestion (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Monitoring PC |
 | Vibration Processor (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Monitoring PC |

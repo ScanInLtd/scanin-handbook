@@ -338,11 +338,11 @@ The bridge subscribes to `$SYS/#` topics on the broker (Mosquitto built-in stats
 **Trigger:** Cloud Scheduler daily at 00:05 IST.
 **Tier:** Daily (check at 07:00 IST)
 
-**Orchestrator writes to:** `system-heartbeats/prism-orchestrator`
+**Orchestrator writes to:** `system-heartbeats/daily-prism-calc`
 
 ```ts
 {
-  serviceName: "prism-orchestrator",
+  serviceName: "daily-prism-calc",
   lastSeenAt: Timestamp,
   lastRunAt: Timestamp,
   lastRunStatus: "success" | "partial" | "error",
@@ -474,7 +474,7 @@ system-heartbeats/mqtt-bridge           ← Bridge writes every 5 min (includes 
 system-heartbeats/ats-ingestion         ← ATS C# writes after each email check cycle
 system-heartbeats/vibration-processor   ← Vibration C# writes after each processing cycle
 system-heartbeats/reports-orchestrator  ← Reports writes at end of each daily run
-system-heartbeats/prism-orchestrator    ← Prism writes at end of each daily run
+system-heartbeats/daily-prism-calc      ← Prism writes at end of each daily run
 ```
 
 Each doc is overwritten in place. See Component Checks section for exact fields per service.
