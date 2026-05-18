@@ -169,6 +169,31 @@ Last 10 resolved incidents with timestamp, duration, component.
 
 ---
 
+## Webapp Usage Metrics (optional, low priority)
+
+Track basic platform usage — daily counters written to Firestore, not in-memory (multiple users/sessions).
+
+**Doc:** `system-metrics/webapp/daily/{YYYY-MM-DD}` (overwritten throughout the day, rotated after 30 days)
+
+```ts
+{
+  date: "2026-05-18",
+  uniqueUsers: 4,           // distinct UIDs that loaded the app
+  signIns: 6,               // auth events
+  sensorDataFetches: 342,   // chart page data queries (the main user action)
+  pageNavigations: 89,      // route changes (client-side, batch/debounce to avoid write spam)
+  // ... add more as UI team sees fit
+}
+```
+
+**Implementation:** Increment Firestore counters (`FieldValue.increment(1)`) on key actions. Since multiple users are concurrent, must use Firestore atomic increments — not in-memory counters.
+
+**Start with:** `sensorDataFetches` (chart page queries) + `uniqueUsers` + `signIns`. Let the UI team decide what else is relevant.
+
+**Value:** Detect "zero users for 2 days" → either holiday or something broken. Understand actual platform usage over time.
+
+---
+
 ## Priority
 
 Low — implement after all heartbeats + watchdog are deployed and running. This is the "nice to have" visibility layer. WhatsApp alerts are the primary notification mechanism.

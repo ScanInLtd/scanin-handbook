@@ -38,10 +38,10 @@
 
 | Task | Status | Notes |
 |---|---|---|
-| Subscribe to `$SYS/#` topics | ⬜ | |
-| Rolling metrics counters (in-memory) | ⬜ | |
-| Heartbeat writer (every 5 min → `system-heartbeats/mqtt-bridge`) | ⬜ | |
-| Deploy to bridge VM | ⬜ | |
+| Subscribe to `$SYS/#` topics | ✅ | In `mqttService.js` |
+| Rolling metrics counters (in-memory) | ✅ | 5-min + 1-hour resets |
+| Heartbeat writer (every 5 min → `system-heartbeats/mqtt-bridge`) | ✅ | `heartbeatService.js`, server timestamps, try/catch |
+| Deploy to bridge VM | ⬜ | `./deploy.sh` option 1 |
 
 ### 3. `scanin-svc-reports`
 **Role:** Add heartbeat at end of orchestrator run.
