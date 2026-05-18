@@ -23,12 +23,12 @@
 | WhatsApp alert output (Green API) | ✅ | `src/alerts/whatsapp.ts` + `formatter.ts` |
 | ATS heartbeat check | ⬜ | Same pattern as bridge |
 | Vibration heartbeat check | ⬜ | Same pattern as bridge |
-| GCP Monitoring API (function execution/error counts) | ⬜ | |
+| GCP Monitoring API (function execution/error counts) | ✅ | `checks/functions.ts` + writes to `system-heartbeats/firebase-functions` |
 | Daily jobs checks (reports/prism/cleanup) | ⬜ | |
 | Firestore Admin API (backup recency) | ⬜ | |
 | Daily summary (07:00 IST) | ⬜ | Formatter exists, needs daily tier wiring |
 | Daily metrics rotation (delete >30d) | ⬜ | |
-| Bridge suppression → suppress function alerts | ⬜ | |
+| Bridge suppression → suppress function alerts | ✅ | Stale bridge suppresses zero-exec warnings |
 | Deploy to Cloud Run | ⬜ | Needs env vars + service account |
 | Create Cloud Scheduler jobs (5min/15min/daily) | ⬜ | |
 | Canary sensor logic | ⬜ | Later |
