@@ -65,9 +65,9 @@
 
 | Task | Status | Notes |
 |---|---|---|
-| Add Firestore SDK / connection | ⬜ | May already exist |
-| Heartbeat write after each cycle | ⬜ | ~20 lines |
-| Deploy | ⬜ | |
+| Add Firestore SDK / connection | ✅ | Already had it |
+| Heartbeat write after each cycle | ✅ | `WriteHeartbeatAsync` in Program.cs |
+| Deploy | ⬜ | Natan's PC |
 
 ### 6. Vibration Processor (C#)
 **Role:** Add Firestore heartbeat write after each processing cycle.
