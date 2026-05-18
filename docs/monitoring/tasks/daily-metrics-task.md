@@ -151,45 +151,139 @@ await db.collection('system-metrics').doc('daily-prism-calc')
 
 ---
 
-## 6. Web App Admin UI (Angular)
+## 6. Web App Admin UI (Angular) — 30-Day Metrics Visualization
 
-**Task:** The services now write daily metrics to `system-metrics/{serviceName}/daily/{YYYY-MM-DD}`. Add a "30-day history" section to the System Monitoring admin page that reads these docs and displays trends per service.
+**Task:** Replace the plain tables with a modern chart-based dashboard for the 30-day service metrics. Use a charting library (e.g., `ngx-charts`, `chart.js` via `ng2-charts`, or `lightweight-charts`) to make the data visually useful.
 
-**Collection pattern:** `system-metrics/{serviceName}/daily/{date}`
+**Collection pattern:** `system-metrics/{serviceName}/daily/{YYYY-MM-DD}`
 
-**Services and their fields:**
+**Services and their primary metric:**
 
-| Service | Doc ID | Fields |
+| Service | Primary metric (chart) | Secondary (tooltip/badge) |
 |---|---|---|
-| mqtt-bridge | `system-metrics/mqtt-bridge/daily/*` | `messagesReceived`, `errors`, `cycles` |
-| ats-ingestion | `system-metrics/ats-ingestion/daily/*` | `emailsFound`, `emailsProcessed`, `emailsFailed`, `sensorsUpdated`, `cycles` |
-| vibration-processor | `system-metrics/vibration-processor/daily/*` | `samplesFound`, `samplesProcessed`, `samplesFailed`, `dinAlerts`, `cycles` |
-| reports-orchestrator | `system-metrics/reports-orchestrator/daily/*` | `reportsGenerated`, `reportsDelivered`, `reportsFailed`, `runs` |
-| daily-prism-calc | `system-metrics/daily-prism-calc/daily/*` | `sensorsProcessed`, `sensorsFailed`, `runs` |
+| mqtt-bridge | `messagesReceived` (bar/area chart) | `errors` (red dots on days with errors) |
+| ats-ingestion | `emailsProcessed` (bar chart) | `emailsFailed` (red overlay) |
+| vibration-processor | `samplesProcessed` (area chart) | `samplesFailed`, `dinAlerts` |
+| reports-orchestrator | `reportsDelivered` (bar chart) | `reportsFailed` |
+| daily-prism-calc | `sensorsProcessed` (bar chart) | `sensorsFailed` |
 
-**How to read (query last 30 days):**
+---
 
-```ts
-// Option A: query subcollection by doc ID range (efficient)
-const thirtyDaysAgo = new Date();
-thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-const startDate = thirtyDaysAgo.toISOString().slice(0, 10);
+### Design Requirements
 
-const snapshot = await this.firestore
-  .collection(`system-metrics/${serviceName}/daily`)
-  .ref.where(firebase.firestore.FieldPath.documentId(), '>=', startDate)
-  .orderBy(firebase.firestore.FieldPath.documentId())
-  .get();
+**Layout:**
+- Below the existing service cards, add a "30-Day Activity" section
+- One chart card per service, arranged in a responsive grid (2 columns on desktop, 1 on mobile)
+- Each card has: service name, a mini area/bar chart (30 bars = 30 days), and a summary line
 
-const days = snapshot.docs.map(doc => ({ date: doc.id, ...doc.data() }));
+**Chart style:**
+- Use small area charts or bar charts (not full-page — think sparkline-sized, ~120px height)
+- X-axis: dates (show only every 7th label to avoid clutter)
+- Y-axis: auto-scaled, no grid lines (clean look)
+- Color: green fill for success metrics, red accent for failures
+- Hover/tooltip: show exact numbers for that day
+
+**Summary line below each chart:**
+```
+Today: 4,320 msgs | 30-day avg: 4,100 | Errors: 0
 ```
 
-**Display suggestions:**
-- Simple table: one row per day, columns = key metrics
-- Sparklines on service cards showing 7-day or 30-day trend
-- Color cells red if `*Failed` > 0 that day
+**Empty state:** If no data for a service, show a muted "No activity in last 30 days" with a flat gray line
 
-**Priority:** Low — read-only, cosmetic. Can be added after core monitoring is stable.
+**Error highlighting:**
+- Days with failures > 0: show a small red dot or red bar segment
+- If today has errors: card border turns amber/red (like the service cards above)
+
+---
+
+### Recommended Library
+
+**`ng2-charts`** (Chart.js wrapper) — already widely used in Angular, lightweight, good defaults:
+
+```bash
+npm install ng2-charts chart.js
+```
+
+Or if you want something more minimal: **`sparkline-svg`** or inline SVG paths computed from the data.
+
+---
+
+### Data Fetching
+
+```ts
+// Query last 30 days for a service
+async loadMetrics(serviceName: string): Promise<DayMetric[]> {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const startDate = thirtyDaysAgo.toISOString().slice(0, 10);
+
+  const snapshot = await this.firestore
+    .collection(`system-metrics/${serviceName}/daily`)
+    .ref.where(firebase.firestore.FieldPath.documentId(), '>=', startDate)
+    .orderBy(firebase.firestore.FieldPath.documentId())
+    .get();
+
+  return snapshot.docs.map(doc => ({ date: doc.id, ...doc.data() }));
+}
+```
+
+**Load once on page init** (not real-time — daily data doesn't change live). Cache in component state.
+
+---
+
+### Chart.js Config Example (per service card)
+
+```ts
+// Bar chart for messagesReceived
+chartData = {
+  labels: days.map(d => d.date.slice(5)), // "05-19"
+  datasets: [
+    {
+      data: days.map(d => d.messagesReceived || 0),
+      backgroundColor: '#4ade80',  // green
+      borderRadius: 3,
+      barPercentage: 0.7
+    },
+    {
+      data: days.map(d => d.errors || 0),
+      backgroundColor: '#f87171',  // red
+      borderRadius: 3,
+      barPercentage: 0.7
+    }
+  ]
+};
+
+chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { display: false }, ticks: { maxTicksLimit: 5 } },
+    y: { grid: { display: false }, beginAtZero: true }
+  }
+};
+```
+
+---
+
+### Visual Mockup (text)
+
+```
+┌─────────────────────────────────────────┐
+│  MQTT Bridge                            │
+│  ▁▂▃▅▇█▇▅▆▇█▇▅▃▂▃▅▇█▇▅▆▇█▇▅▃▂▃▅     │
+│  Today: 4,320 msgs | Avg: 4,100 | 0 err│
+└─────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│  Vibration                              │
+│  ▁▂▃▅▇█▇▅▆▇█▇▅▃▂▃▅▇█▇▅▆▇█▇▅▃▂▃▅     │
+│  Today: 1,200 samples | Avg: 1,150 | 5🔴│
+└─────────────────────────────────────────┘
+```
+
+---
+
+**Priority:** Medium — improves usability significantly. Implement after heartbeats are stable (a few days of data).
 
 ---
 
