@@ -67,7 +67,7 @@
 |---|---|---|
 | Add Firestore SDK / connection | ✅ | Already had it |
 | Heartbeat write after each cycle | ✅ | `WriteHeartbeatAsync` in Program.cs |
-| Deploy | ⬜ | Natan's PC |
+| Deploy | ✅ | Monitoring PC (moved from Natan's PC) |
 
 ### 6. Vibration Processor (C#)
 **Role:** Add Firestore heartbeat write after each processing cycle.
@@ -76,7 +76,7 @@
 |---|---|---|
 | Add Firestore SDK / connection | ✅ | NuGet migration + `Google.Cloud.Firestore 3.2.0` |
 | Heartbeat write after each cycle | ✅ | `HeartbeatWriter.cs`, every 2 min |
-| Deploy | ⬜ | Needs firebase-credentials.json on Monitoring PC |
+| Deploy | ✅ | Deployed 2026-05-19 |
 
 ### 7. Web App (admin page)
 **Role:** Admin-only monitoring dashboard — read-only view of heartbeats, checks, incidents.
@@ -115,8 +115,8 @@
 | `scanin-svc-mqtt-bridge` (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | monitoring-bridge-vm (`./deploy.sh`) |
 | `scanin-svc-reports` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
 | `scanin-worker-prism-daily` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
-| ATS Ingestion (heartbeat) | ⬜ No | — | — | Natan's PC |
-| Vibration Processor (heartbeat) | ⬜ No | — | — | Monitoring PC |
+| ATS Ingestion (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Monitoring PC |
+| Vibration Processor (heartbeat) | ✅ Yes | 1.0.0 | 2026-05-19 | Monitoring PC |
 
 ---
 
