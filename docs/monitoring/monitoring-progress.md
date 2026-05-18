@@ -82,12 +82,14 @@
 
 | Task | Status | Notes |
 |---|---|---|
-| Admin route + page scaffold | ⬜ | `/admin/monitoring` |
-| Service cards (heartbeat status) | ⬜ | |
-| Health checks table | ⬜ | |
-| Active incidents display | ⬜ | |
-| Maintenance mode indicator | ⬜ | |
-| Recent resolved incidents | ⬜ | |
+| Admin route + page scaffold | ✅ | `/settings/system-monitoring` |
+| Service cards (heartbeat status) | ✅ | Color coded, staleness thresholds |
+| Health checks table | ✅ | Real-time Firestore listeners |
+| Active incidents display | ✅ | |
+| Maintenance mode indicator | ✅ | Banner |
+| Recent resolved incidents | ✅ | Expandable, last 10 |
+| Webapp usage metrics | ⬜ | Deferred, low priority |
+| ⚠️ Verify Firestore paths match watchdog | ⬜ | Subcollection structure TBD |
 
 ---
 
