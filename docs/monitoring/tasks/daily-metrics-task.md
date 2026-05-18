@@ -287,11 +287,42 @@ chartOptions = {
 
 ---
 
-## 7. Watchdog (Cloud Run, TypeScript)
+## 7. Watchdog — Firebase Functions Daily Metrics (TypeScript)
 
-**Task:** The watchdog's `rotation.ts` already deletes old docs from `system-metrics/*/daily/*` older than 30 days. Verify the rotation logic covers the new service names. Additionally, the daily summary alert (07:00 IST WhatsApp) can now include yesterday's stats.
+**Task:** The watchdog already queries GCP Monitoring API for Firebase Functions stats (every 15 min, high tier) and writes to `system-heartbeats/firebase-functions`. It should ALSO write a daily metrics increment so the UI can chart 30-day activity.
 
-**Verify rotation covers all 5 services:**
+**Doc:** `system-metrics/firebase-functions/daily/{YYYY-MM-DD}`  
+**Where:** In `checks/functions.ts`, after writing the heartbeat doc.  
+**Frequency:** Every 15 min (high tier) — increments accumulate through the day.
+
+**Rules:**
+- Use `FieldValue.increment()` — never overwrite, always increment
+- Use `{ merge: true }` — don't clobber other fields
+- Wrap in try/catch — never crash the check cycle
+
+```ts
+// After writing system-heartbeats/firebase-functions, also increment daily metrics:
+const today = new Date().toISOString().slice(0, 10);
+
+const totalInvocations = Object.values(functionStats).reduce((sum, f) => sum + f.executions, 0);
+const totalErrors = Object.values(functionStats).reduce((sum, f) => sum + f.errors, 0);
+
+await db.collection('system-metrics').doc('firebase-functions')
+  .collection('daily').doc(today)
+  .set({
+    totalInvocations: FieldValue.increment(totalInvocations),
+    totalErrors: FieldValue.increment(totalErrors),
+    checks: FieldValue.increment(1)  // how many times watchdog checked today
+  }, { merge: true });
+```
+
+---
+
+## 8. Watchdog — Rotation & Daily Summary (TypeScript)
+
+**Task:** The watchdog's `rotation.ts` already deletes old docs from `system-metrics/*/daily/*` older than 30 days. Verify the rotation logic covers all 6 services (including firebase-functions). Additionally, the daily summary alert (07:00 IST WhatsApp) can now include yesterday's stats.
+
+**Verify rotation covers all 6 services:**
 
 ```ts
 const services = [
@@ -299,7 +330,8 @@ const services = [
   'ats-ingestion',
   'vibration-processor',
   'reports-orchestrator',
-  'daily-prism-calc'
+  'daily-prism-calc',
+  'firebase-functions'
 ];
 
 // For each service, delete system-metrics/{svc}/daily/{date} where date < today - 30
@@ -314,7 +346,7 @@ const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
 const dateStr = yesterday.toISOString().slice(0, 10);
 
-const services = ['mqtt-bridge', 'ats-ingestion', 'vibration-processor', 'reports-orchestrator', 'daily-prism-calc'];
+const services = ['mqtt-bridge', 'ats-ingestion', 'vibration-processor', 'reports-orchestrator', 'daily-prism-calc', 'firebase-functions'];
 
 const lines: string[] = [];
 for (const svc of services) {
@@ -324,7 +356,7 @@ for (const svc of services) {
     const d = doc.data();
     // Example formatting:
     // "Bridge: 4320 msgs, 0 errors"
-    // "ATS: 8 emails processed, 0 failed"
+    // "Functions: 724 invocations, 0 errors"
     lines.push(formatStats(svc, d));
   }
 }
@@ -332,3 +364,30 @@ for (const svc of services) {
 ```
 
 **Priority:** Rotation = critical (prevents unbounded storage growth). Daily summary stats = nice-to-have.
+
+---
+
+## 9. Web App UI — Firebase Functions Config
+
+**Task:** Apply these settings for the `firebase-functions` service card and chart.
+
+### Staleness Thresholds
+
+The watchdog writes to `system-heartbeats/firebase-functions` every 15 minutes.
+
+| Warning | Critical |
+|---|---|
+| > 20 min | > 45 min |
+
+### Card Label
+
+Display as: **"Firebase Functions"** (not the raw doc ID `firebase-functions`)
+
+### 30-Day Chart
+
+| Setting | Value |
+|---|---|
+| Doc path | `system-metrics/firebase-functions/daily/{date}` |
+| Primary metric (green bar) | `totalInvocations` |
+| Failure metric (red highlight) | `totalErrors` |
+| Summary line | `Today: X invocations | Avg: Y | Z errors` |
