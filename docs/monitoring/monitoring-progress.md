@@ -104,6 +104,19 @@
 
 ---
 
+## Deployments
+
+| Service | Deployed? | Version | Date | Where |
+|---|---|---|---|---|
+| `scanin-svc-watchdog` | ⬜ No | — | — | Cloud Run (dataloggerdev, us-central1) |
+| `scanin-svc-mqtt-bridge` (heartbeat) | ⬜ No | — | — | monitoring-bridge-vm (`./deploy.sh`) |
+| `scanin-svc-reports` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
+| `scanin-worker-prism-daily` (heartbeat) | ⬜ No | — | — | Cloud Run (dataloggerdev) |
+| ATS Ingestion (heartbeat) | ⬜ No | — | — | Natan's PC |
+| Vibration Processor (heartbeat) | ⬜ No | — | — | Monitoring PC |
+
+---
+
 ## Design Docs
 
 - [System Monitoring Design](./system-monitoring-design.md) ✅
