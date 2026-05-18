@@ -74,9 +74,9 @@
 
 | Task | Status | Notes |
 |---|---|---|
-| Add Firestore SDK / connection | ⬜ | May already exist |
-| Heartbeat write after each cycle | ⬜ | ~20 lines |
-| Deploy | ⬜ | |
+| Add Firestore SDK / connection | ✅ | NuGet migration + `Google.Cloud.Firestore 3.2.0` |
+| Heartbeat write after each cycle | ✅ | `HeartbeatWriter.cs`, every 2 min |
+| Deploy | ⬜ | Needs firebase-credentials.json on Monitoring PC |
 
 ### 7. Web App (admin page)
 **Role:** Admin-only monitoring dashboard — read-only view of heartbeats, checks, incidents.
