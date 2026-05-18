@@ -49,7 +49,36 @@ POST /check?tier=daily       ← Cloud Scheduler at 07:00 IST
    - `handleAlerts` execution count + error rate (last 1h)
    - `evaluateMultiSensorRules` error rate (last 1h)
    - `scheduleCalcSensors` last execution time
-4. If bridge heartbeat is stale → suppress function alerts (expected: no data = no triggers)
+4. **Write function stats to Firestore** → `system-heartbeats/firebase-functions` (so UI can display them)
+5. If bridge heartbeat is stale → suppress function alerts (expected: no data = no triggers)
+
+#### Firebase Functions Heartbeat (written BY the watchdog)
+
+After querying GCP Monitoring API, write a summary doc so the admin UI can display function stats without needing GCP API access:
+
+**Doc:** `system-heartbeats/firebase-functions`
+
+```ts
+{
+  schemaVersion: 1,
+  serviceName: "firebase-functions",
+  lastSeenAt: ServerTimestamp,       // when watchdog last checked
+  status: "healthy" | "warning" | "error",  // error if any function has high error rate
+
+  functions: {
+    checkThresholds: { executions: 48, errors: 0 },
+    handleAlerts: { executions: 12, errors: 0 },
+    evaluateMultiSensorRules: { executions: 12, errors: 0 },
+    scheduleCalcSensors: { executions: 2, errors: 0 },
+    cleanUnconfirmedSensors: { executions: 1, errors: 0 }
+  }
+}
+```
+
+**Status logic:**
+- `error`: any function has error rate > 20% in last hour
+- `warning`: any function has error rate > 5% or zero executions when expected
+- `healthy`: all functions running normally
 
 ### Daily (07:00 IST)
 1. Read `system-heartbeats/reports-orchestrator` → did it run today?
@@ -69,11 +98,11 @@ POST /check?tier=daily       ← Cloud Scheduler at 07:00 IST
 2. Read maintenance docs → skip components in maintenance
 3. Run checks for that tier
 4. For each check result:
-   a. Read previous state from system-health/checks/{checkId}
+   a. Read previous state from system-checks/{checkId}
    b. Compare: same? changed? new?
    c. If degraded → create/update incident
    d. If recovered → close incident
-   e. Overwrite system-health/checks/{checkId}
+   e. Overwrite system-checks/{checkId}
 5. For each open incident:
    a. Check dedup rules (last alert time, reminder intervals)
    b. Send alert if needed (WhatsApp)
@@ -88,16 +117,17 @@ POST /check?tier=daily       ← Cloud Scheduler at 07:00 IST
 ### Read
 ```
 system-heartbeats/{serviceName}      ← written by services
-system-health/checks/{checkId}       ← own previous state
-system-health/incidents/{id}         ← open incidents
+system-checks/{checkId}              ← own previous state
+system-incidents/{id}                ← open incidents
 system-maintenance/{component}       ← maintenance mode
 ```
 
 ### Write
 ```
-system-health/checks/{checkId}       ← overwrite with latest result
-system-health/incidents/{id}         ← create/update/close
-system-health/incidents/{id}/events/{ts} ← incident timeline
+system-heartbeats/firebase-functions ← function stats (written by watchdog after GCP query)
+system-checks/{checkId}              ← overwrite with latest result
+system-incidents/{id}                ← create/update/close
+system-incidents/{id}/events/{ts}    ← incident timeline
 system-metrics/{component}/daily/{date}  ← daily snapshot (daily tier only)
 ```
 
