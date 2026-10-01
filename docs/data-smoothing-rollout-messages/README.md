@@ -1,5 +1,7 @@
 # Data Smoothing & Alerts Rollout — Team Messages
 
+> **SUPERSEDED (2026-10-01)** by [`../signal-and-alerts/plan.md`](../signal-and-alerts/plan.md). Do not hand these briefs out.
+
 Full design doc: [`../data-smoothing-and-alerts-plan.md`](../data-smoothing-and-alerts-plan.md)
 — **read that first**, these are per-repo task briefs derived from it.
 

@@ -1,5 +1,7 @@
 # Data Smoothing & Alerting Overhaul — System-Wide Plan
 
+> **SUPERSEDED (2026-10-01)** by [`signal-and-alerts/plan.md`](./signal-and-alerts/plan.md). Never implemented; kept for history.
+
 _Status: PROPOSAL — July 2026_
 _Authors: Hillel + Cascade (assessment session)_
 
