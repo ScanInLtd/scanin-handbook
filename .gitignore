@@ -2,3 +2,6 @@ repo-data/
 repo-summaries.md
 repo-analysis.md
 scripts/
+
+# firebase CLI debug output
+firebase-debug*.log
