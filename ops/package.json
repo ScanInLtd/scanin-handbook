@@ -1,0 +1,21 @@
+{
+  "name": "scanin-ops",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Operations toolkit: read-only investigations and guarded maintenance against the ScanIn Firebase project (dataloggerdev)",
+  "scripts": {
+    "q": "tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "firebase-admin": "13.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.9",
+    "tsx": "4.23.15",
+    "typescript": "5.7.3"
+  }
+}

@@ -1,0 +1,28 @@
+[debug] [2026-10-01T13:23:26.237Z] ----------------------------------------------------------------------
+[debug] [2026-10-01T13:23:26.239Z] Command:       /Users/hillelvidal/.nvm/versions/node/v20.19.6/bin/node /Users/hillelvidal/.nvm/versions/node/v20.19.6/bin/firebase projects:list
+[debug] [2026-10-01T13:23:26.239Z] CLI Version:   14.26.0
+[debug] [2026-10-01T13:23:26.239Z] Platform:      darwin
+[debug] [2026-10-01T13:23:26.239Z] Node Version:  v20.19.6
+[debug] [2026-10-01T13:23:26.239Z] Time:          Thu Oct 01 2026 16:23:26 GMT+0300 (Eastern European Summer Time)
+[debug] [2026-10-01T13:23:26.239Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-01T13:23:26.241Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-10-01T13:23:26.241Z] > authorizing via signed-in user (scanin.link@gmail.com)
+[debug] [2026-10-01T13:23:26.242Z] Checked if tokens are valid: true, expires at: 1790864421191
+[debug] [2026-10-01T13:23:26.242Z] Checked if tokens are valid: true, expires at: 1790864421191
+[debug] [2026-10-01T13:23:26.243Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-10-01T13:23:27.053Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-10-01T13:23:27.053Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] ┌──────────────────────┬────────────────────────┬────────────────┬──────────────────────┐
+│ Project Display Name │ Project ID             │ Project Number │ Resource Location ID │
+├──────────────────────┼────────────────────────┼────────────────┼──────────────────────┤
+│ ScanInMonitoring     │ dataloggerdev          │ 568942189829   │ europe-west          │
+├──────────────────────┼────────────────────────┼────────────────┼──────────────────────┤
+│ isre-website         │ isre-website           │ 65714883437    │ [Not specified]      │
+├──────────────────────┼────────────────────────┼────────────────┼──────────────────────┤
+│ ISRE Website Test    │ isre-website-test-2025 │ 29493070995    │ [Not specified]      │
+├──────────────────────┼────────────────────────┼────────────────┼──────────────────────┤
+│ Targets              │ targets-995f2          │ 939879076774   │ europe-west          │
+└──────────────────────┴────────────────────────┴────────────────┴──────────────────────┘
+[info] 
+[info] 4 project(s) total.
