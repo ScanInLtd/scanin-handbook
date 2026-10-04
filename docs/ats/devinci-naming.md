@@ -1,6 +1,6 @@
 # DeVinci ATS — point naming issue & plan
 
-_Status: 2026-10-04. Site: מגדל דה וינצי דרום (`hmPh7Hg2fjTc9GyNRDYO`), ATS station 5, PC site `DeVinci-1`._
+_Status: 2026-10-04. Sections 1–2 are findings. **Section 3 is a draft for discussion, not a decided plan.** Site: מגדל דה וינצי דרום (`hmPh7Hg2fjTc9GyNRDYO`), ATS station 5, PC site `DeVinci-1`._
 
 ## 1. The issue
 
@@ -53,12 +53,16 @@ I10 f10p12 I11 f11p12
 ```
 `?` = waiting for Nathan's confirmation.
 
-## 3. Plan (simple version)
+## 3. Plan — DRAFT, to be discussed
 
-Goal: **one name per prism, the physical name `fXpY`, in the UI**, with every PC point feeding exactly one visible sensor.
+Requirements (Hillel, 2026-10-04):
+- **Simple flow by default:** one name per prism, the same on the ATS PC and in the UI, and every PC point feeding exactly one visible sensor.
+- **A rename option is required** (on the PC), but renaming must not break the flow or lose history.
+
+Draft steps (open for discussion):
 
 1. **Finalize the list** with Nathan (the 4 open rows above).
-2. **Don't rename points on the ATS PC.** Renaming changes the MQTT device ID, and the data would go to new hidden sensors again. PC names stay `A1`…; the list above is the permanent PC → physical conversion. Renaming on the PC only becomes safe after the ATS app separates identity from name (`point-rename-task.md`, later and optional).
+2. **Renaming on the ATS PC: wanted, but not safe yet.** Today a rename changes the MQTT device ID, and the data would go to new hidden sensors again. Until the ATS app supports a safe rename (identity separate from name, rename recorded; see `point-rename-task.md`, to be simplified), the list above is the PC → physical conversion. _Open: how simple the rename flow can be (e.g. rename on the PC only, with the cloud following automatically)._
 3. **Fix the cloud mapping** (ops script in the handbook, dry-run first, then apply with Hillel's approval). For each PC point:
    - pick its target UI sensor: the existing sensor that holds this prism's history, matched by coordinates;
    - point `ats-device-map/ATS-5-<point>` at it;
