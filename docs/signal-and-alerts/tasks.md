@@ -89,6 +89,7 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 - **FN-0.2** Early-return (log at info) when: `isReplay === true` || `source === 'replay'` || `suspect === true` || `source === 'derived:daily'` || `time < Date.now() − 48h` || `time < sensor.alert_state.last_sample_time` (out-of-order / backfill; strict `<` because some devices write each axis as a separate doc with the same `time`). Store `alert_state.last_sample_time` on each evaluation.
 - **FN-0.3** Wrap the read-evaluate-write of `status.axes` + `alert_state` + alert creation in `db.runTransaction` so concurrent samples of one sensor can't double-alert.
 - **FN-0.4** Add `sampleTime` (the sample's `time`) to alert docs (`createNewAlertObject`) — currently only creation time is stored, which hides backfill storms.
+- **FN-0.6** `cleanUnconfirmedSensors`: skip sensors that are a target in `ats-device-map` or have `dataSource: 'ats_live'`. Today it deletes the sensor doc only, so the map entry keeps routing data into a deleted sensor's `data-log` (findings §4). **Deadline: before 2026-10-11** (11 `ATS-5-f*` sensors auto-created on 10-04).
 - **FN-0.5** Throttle per **level**, not per axis: `canSendAlert` today uses one `last_alert_at` per axis, so a warn alert suppresses an alarm alert within 24h (status changes to alarm, nobody is notified). Store `last_alert_at` per level; an escalation always alerts.
 - **Acceptance:** run a test replay on a test sensor (`בדיקות משרד` project) → 0 alerts. Handbook `alert-landscape.ts --since=7d` shows ≈0 "throttle-violating bursts".
 
@@ -176,18 +177,47 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 
 ## 4. `scanin-svc-mqtt-bridge` (incl. ATS live routing)
 
-**Context:** On **2026-09-23**, 25 prisms in 4 JTCS sites (SAVYON_LIVING ×7, SAVYON_OFFICE ×3, NAVON_HOUSE ×11, NEVIIM_61 ×4) stepped by 0.1–1.2 m on the same day; some prisms (e.g. SAVYON_LIVING prism 3, NAVON 23/24) flip between levels ~8.9 m apart over months. That pattern means readings are written to the wrong sensor doc (mapping/ID), not building movement. Recent commits touched ATS routing (`ats-device-map routing with fallback`, carry-over for reassigned DeVinci-1 prisms, deterministic ATS sample IDs). Evidence: handbook `ops/src/analysis/level-shifts.ts`.
+**Context:** Phase 0 findings: [`findings-2026-09-23.md`](./findings-2026-09-23.md). Three separate causes:
+- **A, station frame error.** ATS-6 publishes whole cycles in a rigidly wrong frame: 09-08 → 09-15, and from 09-23 06:00Z on, **still ongoing**. 40 sensors in 6 projects are affected. This is not routing.
+- **B, point name ↔ physical prism mismatch at the station.** These are the ~8.9 m flip-flops. Ingestion routes faithfully by name.
+- **C, `ats-device-map` errors.** The 08-27 manual edits left swapped and crossed entries and two devices writing into one sensor. Some entries point at sensors that `cleanUnconfirmedSensors` deleted, so their data is invisible.
+
+The fallback routing was not involved.
 
 ### Phase 0
-- **BR-0.1** Investigate the 09-23 event: which deploy/config/`ats-device-map` change happened on 09-22/23; for 2–3 affected prisms compare the incoming payload's prism ID/name vs the target `work-sensors` doc. Write findings to `docs/` and the handbook (`docs/signal-and-alerts/findings-2026-09-23.md`).
-- **BR-0.2** Investigate the ~8.9 m flip-flops (SAVYON_LIVING `3`, NAVON `23`, `24`): name collisions across stations/ATS devices? fallback routing picking the wrong prism?
+- **BR-0.1 / BR-0.2** ✅ done, see findings.
 
 ### Phase 1
-- **BR-1.1** Make prism → sensor mapping deterministic on a stable key (station/device + prism ID); no fuzzy/fallback match that can cross stations. Unmatched prism → write to `ats_raw_payloads` + internal notice, never to a guessed sensor.
-- **BR-1.2** When the device map changes for a prism (reassignment), create a `baseline-events` doc `{ reason: 'mapping-fix' | 'ats-setup' }` for the target sensor (or call `setBaseline`).
-- **BR-1.3** ATS run QA at ingestion: for each run, per prism deviation from its own last-3-days median; run common-mode = median deviation across prisms. If |common-mode| > max(3 mm, 4 × within-run spread) **and** ≥ 60% of the run's prisms deviate in the same direction → mark all run samples `suspect: true, suspect_reason: 'run-common-mode'` and log/notify internally (one notice per run). Port from handbook `ops/src/analysis/common-mode.ts`.
-- **BR-1.4** Plausibility at ingestion for ATS: a prism moving > 100 mm vs its last sample → `suspect: true, suspect_reason: 'implausible-jump'` (functions also checks, defence in depth).
-- **Acceptance:** replaying the 09-23 payloads in a test project routes every prism to its own sensor; a synthetic shifted run is marked suspect.
+- **BR-1.1** Deterministic routing:
+  - Map key `{stationId}:{pointId}` (read legacy `{deviceId}` docs during migration).
+  - Store `atsSiteId` + `projectId` on the map doc and require `payload.siteId === map.atsSiteId`.
+  - **Remove** the `findAtsSensor` fallback and `createAtsSensorAndMap` auto-create.
+  - Unmatched point, site mismatch, or a map entry pointing at a missing / `active: false` sensor → `storeRawPayload(…, 'unrouted-sample')` + one internal `integrity` notice per device per day. Never write to a guessed or new sensor.
+  - New points are mapped explicitly in the UI, which sets `confirmed: true`.
+- **BR-1.2** Map edits create a `baseline-events` doc (`mapping-fix` | `ats-setup`). One sensor ↔ at most one device: enforce in the UI, check in the bridge at startup and notify on duplicates.
+- **BR-1.3** Identity guard per sample. Store `refPos {e,n,u}` on the map entry (median position when mapped). If |pos − refPos| > 0.5 m, don't write to the sensor: store raw + `identity-mismatch` notice. Catches B and C, and A when the error is large.
+- **BR-1.4** Run QA for frame errors < 0.5 m. Group by station + 45 min cycle window. If most points shift coherently (rigid-fit residual < 5 mm, large translation or rotation) → mark all samples of the cycle `suspect_reason: 'run-common-mode'`, one notice per cycle. Reference implementation: handbook `ats-frame.ts`.
+- **BR-1.5** Plausibility at ingestion: jump > 50 mm vs the point's last-3-days median → `suspect: true, suspect_reason: 'implausible-jump'` (functions FN-1.1 also checks, defence in depth).
+- **Acceptance:** replay the `ATS-6` payloads from 09-22 21:00Z → 09-24 03:30Z into a test project:
+  - every point lands on its own sensor;
+  - the swapped and crossed points land correctly;
+  - the bad cycles from 09-23 06:02Z on are marked `run-common-mode`;
+  - points with dangling map entries go to `ats_raw_payloads` with a notice.
+
+### Repair (oneoff scripts in handbook `ops/src/oneoff/`, dry-run → user `--apply`; after A is stopped at the station)
+- **BR-R.1** Mark `ats_live` samples of the 40 sensors in the bad cycles `suspect: true, suspect_reason: 'station-frame'`. No value correction.
+- **BR-R.2** Fix the map entries (findings §7.3), copy samples from the swapped / orphaned sensors to the correct ones (original doc IDs), and mark the wrong copies `suspect_reason: 'mapping-fix'` (not deleted).
+- **BR-R.3** Hexagon-era identity flips: mark samples > 0.5 m from the sensor's reference position `suspect_reason: 'identity-mismatch'`. Then review the masking `initial-value`s with Nathan.
+- **BR-R.4** Re-run prism-daily `rerunRange` for the affected days. Re-run `level-shifts.ts` and `ats-crossmap.ts` to verify.
+
+---
+
+## 4b. `scanin-fw-ats-monitoring` (station PC software)
+
+- **ATS-0.1** (ops, now) ATS-6 resection: pull RMS / references / residuals for 09-08 ~11:00Z and 09-23 03:00–06:00Z, fix the station frame, and confirm with `ats-frame.ts` that new cycles are good. Also check DeVinci ATS-5 (RMS 23.4 mm on cycle 214, 10-04).
+- **ATS-1.1** Station-side frame check: if, after resection, the monitored points show a coherent common-mode shift, hold the cycle as suspect and don't publish it as good.
+- **ATS-1.2** Add `cycleId`, `resectionRms`, `refsUsed` and per-reference residuals to each sample's `metadata` (input for BR-1.4).
+- **ATS-1.3** Fix duplicate and wrongly taught points in the ATS-6 point list (findings §3). The real prism for SAVYON_LIVING 12 and NAVON 23 / 2 needs field verification.
 
 ---
 
