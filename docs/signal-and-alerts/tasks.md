@@ -164,7 +164,7 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 **Context:** The sensor page has four different "smoothing" mechanisms, none of which matches what alerts use: a client-side 24h trimmed MA in `default-chart`, a client-side 48h MA in `prism-chart`, a sample-count "Moving Avg." in the legacy `new-line-chart`, an EMA overlay from `ema-log`, plus curved-line tension in the prism chart. From Phase 2 every sample carries a server-computed `smooth` field (see "Shared contract"); the UI must show that one series, honestly labelled.
 
 ### Phase 1
-- **UI-1.1** "Set new baseline" action on the sensor page (installer/admin): reason (replaced / moved / rebaseline / mapping-fix / ats-setup), optional time, note → calls `setBaseline` callable. Replaces direct editing of `initial-value` in sensor settings (keep the field read-only, showing the current baseline).
+- **UI-1.1** "Set new baseline" action on the sensor page (admin only — there is no installer role): reason (replaced / moved / rebaseline / mapping-fix / ats-setup), optional time, note → calls `setBaseline` callable. Replaces direct editing of `initial-value` in sensor settings (keep the field read-only, showing the current baseline).
 - **UI-1.2** Baseline-event markers (vertical line + tooltip with reason, who, when) on all sensor charts.
 - **UI-1.3** (later) Admin page over `data-integrity` (open first; implausible jumps, level shifts, late data, bad ATS runs) with link to the sensor, a "set new baseline" shortcut and a "release (real movement)" action.
 - **UI-1.4** Threshold settings: per axis add `suspect.jump` / `suspect.abs` (placeholder shows the per-type default); validate the ladder order `warn < alarm ≤ instant < suspect.jump`.
