@@ -30,7 +30,9 @@ Regression tool for every phase (handbook): `./go.sh run src/analysis/backtest.t
   "suspect": true,                   // optional: failed plausibility / run QA
   "suspect_reason": "run-common-mode", // optional
   // written back by functions in ONE update per sample, never by clients:
-  "smooth": { "<axis>": 0.121, "n": 23, "replayN": 0, "v": 1 },   // Phase 2
+  // n = samples used; replayN = replay docs in the window (EXCLUDED from the
+  // computation); q = six-hour window quarters covered (3–4, diurnal coverage)
+  "smooth": { "<axis>": 0.121, "n": 23, "replayN": 0, "q": 4, "v": 1 },   // Phase 2
   "eval":   { "<axis>": "ok | warn | alarm | suspect" }             // Phase 2 (shadow), authoritative from Phase 4
 }
 ```
@@ -48,7 +50,8 @@ Adjusted value of a sample = raw − `initial` of the **latest event with `time 
 2. Reject values with |v − median| > 3 × MAD (MAD = median absolute deviation; skip rejection if MAD = 0).
 3. Trimmed mean of the remaining values, dropping 20% from each end.
 4. Require n ≥ max(3, ¼ × expected samples/day); else no `smooth` value for that axis.
-5. Store **adjusted** smoothed value (raw − baseline) in `smooth.<axis>`, plus `n`, `replayN` (replay samples used), `v: 1`.
+5. Diurnal coverage: the kept samples must cover ≥ 3 of the 4 six-hour quarters of the window (bucketed by offset from window start); else no `smooth` for that axis.
+6. Store **adjusted** smoothed value (raw − baseline) in `smooth.<axis>`, plus `n`, `replayN` (replay docs in the window, excluded from the computation), `q` (quarters covered), `v: 1`.
 
 **Alert doc** — `alerts/{id}` gains:
 ```jsonc

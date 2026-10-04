@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions) (+ one rules edit in `scanin-web-platform`)
-**Status:** implemented, build + lint pass, emulator acceptance **33/33 green**, migration dry-run done (read-only). **Not deployed, not committed, nothing applied** — pending review.
+**Status:** ✅ reviewed & approved (with changes — see §9), committed **`26c99a5`**, **deployed to prod 2026-10-04 15:24 UTC** (indexes READY first), emulator acceptance **35/35 green**. Pending: migration `--apply` (Hillel), 1h log review (§10).
 
 ---
 
@@ -123,7 +123,7 @@ Oddities found:
 
 ---
 
-## 8. Open questions
+## 8. Open questions (answered — see "Handbook review" below)
 
 1. **Rules drift (§5):** open a separate task to reconcile the deployed mobile-app rules into git and narrow the catch-all? That's also the only way to actually protect `data-integrity` and fix the world-writable `projects`.
 2. **Installer role:** I guessed `installer === true || role === 'installer'` on the users doc — what's the real field?
@@ -150,3 +150,23 @@ Answers:
 Notes:
 - Prisms measure a median of 4 samples/day, so a 24h window often has ≤ 4 points. Decision §8.1 pending (48h for prisms).
 - Deploy order as proposed: indexes via gcloud → the three functions → Hillel runs the migration `--apply`.
+
+---
+
+## 9. Review changes implemented (2026-10-04, post-review)
+
+1. **`setBaseline` = admin only**: `caller.admin === true || caller.isAdmin === true` (same fields as the web UI's `auth.service.ts`); installer check removed.
+2. **Diurnal coverage in `computeSmooth`** (new rule 5 in the contract): per axis, the MAD-kept samples must cover **≥ 3 of the 4 six-hour quarters** of the window, bucketed by offset from window start (`t − (t_sample − 24h)`), not clock time; otherwise no `smooth` for that axis (shadow `eval` still written). `smooth.q` = quarters covered. Window stays 24h for all types incl. prisms.
+3. **Contract updated** in `tasks.md`: `smooth` shape now documents `q` and the `replayN` = *excluded replay docs* semantics.
+4. **Emulator coverage cases added** (suite now **35/35 green**): 10 samples bunched within 8h → n passes the minimum but only 2 quarters → **no smooth**, eval written; the same 10 samples spread over ~23h → smooth written with `q = 4`. (Existing seeds in cases 1–3 re-spread to satisfy coverage.)
+
+## 10. Delivery report
+
+- **Indexes**: both `data-integrity` composites created additively via `gcloud firestore indexes composite create` — `(dedupeKey, status)` and `(sensorId, status)`, state **READY** before the functions deploy.
+- **Deploy**: 2026-10-04 **15:24 UTC**, `firebase deploy --only functions:checkThresholds,functions:setBaseline,functions:detectLevelShifts` as scanin.link@gmail.com — `checkThresholds` updated, `setBaseline` + `detectLevelShifts` created, 0 errors.
+- **Commit**: **`26c99a5`** (Phase 1 in one commit, incl. migration + test scripts and the functions-repo indexes file), pushed to `master`. The `scanin-web-platform/firestore.rules` edit (data-integrity block + catch-all warning) is **left uncommitted** — handed to the web-platform team with the rules-drift task.
+- **First-10-min sanity check**: executions `ok` (350ms–2.6s), zero errors; only the pre-existing DIN missing-frequency warning.
+- **Pending**:
+  - [ ] Migration: Hillel runs `node scripts/migrate-baseline-events.js --apply` (728 events).
+  - [ ] **1h log review** (due ~16:25 UTC, will be appended here): errors / transaction failures; `[perf]` windowReads + computeMs stats; % of evaluated samples with/without `smooth` per sensor type (incl. how often diurnal coverage drops prisms); `data-integrity` docs created by kind.
+  - [ ] `detectLevelShifts` first scheduled run: tonight 02:00 Asia/Jerusalem — check reads/duration/notices tomorrow.
