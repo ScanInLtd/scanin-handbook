@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
-**Status:** implemented, all acceptance cases pass on the emulator, **not deployed**, changes uncommitted pending review.
+**Status:** ✅ **DONE** — reviewed & approved by Hillel, committed (`f75b52b`, `93fc7bb`), **deployed to prod 2026-10-04 13:41 UTC**, emulator acceptance 13/13 + prod live test passed. 24h log review pending (§6).
 
 ---
 
@@ -67,13 +67,12 @@ Verified in logs: all five skip reasons appear as `SKIP: Sensor <id> | sample ti
 
 ## 4. Deploy status & rollback
 
-- **Not deployed.** Deploy (after approval): `npm run deploy` as `scanin.link@gmail.com` (predeploy runs lint + build).
-- **Rollback:** redeploy the previous commit — the trigger reverts cleanly (onCreate↔onWrite). The new `alert_state` fields are additive; old code treats the per-level object as "never alerted", so a rollback briefly restores the old per-axis throttle semantics but nothing breaks.
-- Changes are **uncommitted** in the repo pending review.
+- **Deployed 2026-10-04 13:41:37 UTC** via `firebase deploy --only functions:checkThresholds` as `scanin.link@gmail.com` (versionId 42; trigger confirmed `document.create`). Commits: **`f75b52b`** (Phase 0), **`93fc7bb`** (tsconfig housekeeping), pushed to `master`.
+- **Rollback:** redeploy the previous commit (`13aa318`) — the trigger reverts cleanly (onCreate↔onWrite). The new `alert_state` fields are additive; old code treats the per-level object as "never alerted", so a rollback briefly restores the old per-axis throttle semantics but nothing breaks.
 
 ---
 
-## 5. Open questions
+## 5. Open questions (answered — see "Handbook review" below)
 
 1. **ATS late arrivals:** the 48h cutoff + out-of-order guard also suppress alerts from late-ingested ATS runs. <48h late is fine; a station offline >2 days will produce silent samples until a fresh one arrives. Acceptable?
 2. **Type sync:** push the `shared-status-types` changes (`PerLevelAlertTimes`, `last_sample_time`, `sampleTime`) to web-platform and reports now, or defer to FN-6.4 as planned?
@@ -92,3 +91,44 @@ Code read in `src/checkThresholds.ts`: matches spec. Answers, backed by `ops/src
 2. **Defer type sync** to FN-6.4 (no live reader).
 3. **Keep the write on every sample.** Phase 2 needs per-sample evaluator state anyway (`alert_state.axes.<axis>.ref`).
 4. **Yes, a short live test** on a "בדיקות משרד" sensor with no client subscribers: one `isReplay` doc + one real-shaped doc crossing warn. Then watch the logs for 24h and run `alert-landscape.ts --since=7d` after a week.
+
+---
+
+## 6. Delivery report (2026-10-04, post-deploy)
+
+### Live test — prod, sensor `waqCy5uIXlK04SqVYzOQ` ("קראק 35 מ"מ", cracktemp, בדיקות משרד `j7prfbs8Mord8g4cgNb5`)
+
+Subscribers verified first: the project's 4 users are **all internal, no clients** — natan.g@scanin.co.il, hillelvidal@gmail.com, scanin3@gmail.com, shalom.bl@scanin.co.il (all subscribed to `threshold`, so they likely received the one test warn notification).
+
+| Case | Result |
+|---|---|
+| a) new doc, `isReplay: true`, alarm-crossing | **0 alerts**; SKIP log `isReplay=true (replayed/filled data)` ✅ |
+| b) new real doc crossing warn (adjusted +4, gaps 3/5) | **1 alert** (`alerts/EkwAkivdrqDeyrT91rnm`), severity `warn`, `sampleTime` == the sample's `time` ✅. `alert_state.axes.x` migrated in place to the per-level shape, **preserving** the legacy alarm timestamp: `{ warn: <now>, alarm: 1770238889688 }` ✅ |
+| c) update of doc (b) to alarm-crossing value | **0 new alerts**, status unchanged ✅ |
+| cleanup | one extra settle doc restored `status.axes.x` to `ok`; then all created docs deleted |
+
+Data-log docs created **and deleted** (sensor otherwise dormant since 2026-02-08, so no interference with live data):
+```
+work-sensors/waqCy5uIXlK04SqVYzOQ/data-log/JSNDGzzkZwu9HGsQ045l   (isReplay, from an aborted first run*)
+work-sensors/waqCy5uIXlK04SqVYzOQ/data-log/QPOlkvrWjHc9G5tFizea   (isReplay — case a)
+work-sensors/waqCy5uIXlK04SqVYzOQ/data-log/cpJOuoMcK58NoJ0LcPx9   (real warn doc — cases b+c)
+work-sensors/waqCy5uIXlK04SqVYzOQ/data-log/MBwjPQurqwgZnKjEln9j   (settle doc)
+```
+\* the abort was a missing Firestore index on my *verification query* (`sensorDocId ==` + `time >=`), not the function; rewritten client-side, no index created. The system-created alert doc `alerts/EkwAkivdrqDeyrT91rnm` was left in place.
+
+### Log watch (first ~20 min after deploy; 24h review pending)
+
+- **SKIP counts:** out-of-order **12**, isReplay **2** (both mine), stale(>48h) / suspect / derived:daily **0**
+- **Errors / transaction failures: 0**
+- **Prod proof of FN-0.3:** an ATS batch at 13:44 caused real contention — sensor `y25VvYinODz3kK9K2r6H` logged the same `ok→warn` evaluation **twice** (transaction retry) but exactly **one** alert doc was created. The pre-Phase-0 code would have double-alerted here.
+
+### Findings from the first live batch
+
+1. **ATS batches are written non-chronologically** — all 12 out-of-order skips came from one 13:44 batch where newer samples committed before older ones, so the older samples of the same batch were skipped. The latest state still evaluates; within-batch crossings that recovered by the newest sample won't alert. Consistent with the design; volume should be checked in the 24h review.
+2. The same batch produced ~20 **legitimate** prism alerts (real ok→warn/alarm transitions on fresh samples) — normal operation, not storms.
+
+### Pending follow-ups
+
+- [ ] **24h log review** (due ~2026-10-05 13:40 UTC): `gcloud logging read 'resource.type="cloud_function" AND resource.labels.function_name="checkThresholds" AND timestamp>="2026-10-04T13:41:40Z" AND textPayload:"SKIP:"' --project=dataloggerdev --limit=1000 --format="value(textPayload)"` → count per reason; also `severity>=ERROR` (expect 0).
+- [ ] **`alert-landscape.ts --since=7d`** after a week (expect ≈0 throttle-violating bursts).
+- [ ] **FN-1.6** (Phase 1, new): internal "sensor N days behind" notice for slow-draining buffers.

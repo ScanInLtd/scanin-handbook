@@ -47,7 +47,7 @@ ATS PC point "C1"  ──►  MQTT scanin/ATS-5-C1/uplink/samples  ──►  br
 
 Detailed draft of option A: [`point-rename-task.md`](./point-rename-task.md) (too heavy as written; to be simplified).
 
-## 5. Open questions
+## 5. Open questions (see also §6)
 
 1. Who **owns** the name: the PC (and the UI follows), or the UI (and the PC follows)?
 2. Should the UI sensor name follow the PC name **automatically** after a rename, or only on request?
@@ -57,3 +57,20 @@ Detailed draft of option A: [`point-rename-task.md`](./point-rename-task.md) (to
 6. **Station identity** when an ATS moves between sites: does `ATS-5` stay `ATS-5`? How is the station bound to a project?
 7. Should email-ingested ATS (Hexagon, `PRISM%ATS…`) and live ATS converge on the same naming?
 8. Who may **delete** samples on ATS sensors (see the DeVinci manual deletions)?
+
+## 6. Input from the bridge investigation (2026-10-04)
+
+[`../signal-and-alerts/findings-2026-09-23.md`](../signal-and-alerts/findings-2026-09-23.md) found the same problems on station ATS-6 (JTCS sites), plus two more. Parked for now; the raw data is kept on the ATS PCs.
+
+- **Mapping errors from the 08-27 manual edits:** swapped pairs (`h5p2a` ↔ `h5p3a`), a point written into a sensor 22 m away (`h3p2b`), two points into one sensor (`h2p5b` + `h2p5d`), and entries pointing at deleted sensors (`h0p11b`, `h2p5a`, `h3p1a`, DeVinci `A5`).
+- **Names taught on the wrong prism at the station:** two names on one prism, or a name aimed at the neighbour ~9 m away (SAVYON_LIVING 3, NAVON 23 / 24).
+- **Station frame error:** ATS-6 published whole cycles in a wrong frame (09-08 → 09-15, and from 09-23). That is a resection issue, not naming.
+- **Auto-delete:** `cleanUnconfirmedSensors` deletes auto-created sensors after 7 days but leaves the map entry, so data keeps flowing into a deleted sensor. The 11 `ATS-5-f*` sensors created on 10-04 are next.
+
+Proposed design pieces (from the bridge team, to fold into the options in §4):
+- **Stable key** `station:point`, and the payload `siteId` must match the map entry.
+- **No auto-create.** An unknown point goes to an "unassigned" list plus a notice to us. This is the answer to question 4 in §5.
+- **Position guard:** store each point's reference position when it is mapped. If a sample is more than 0.5 m away, don't write it to the sensor; send a notice instead. This catches wrong-prism and wrong-mapping errors automatically.
+- **One sensor ↔ one point**, enforced in the UI. Every map change creates a baseline event.
+
+Tasks: `../signal-and-alerts/tasks.md` §4 (BR-1.x, repair BR-R.x), §4b (station), FN-0.6.
