@@ -1,6 +1,6 @@
-# DeVinci ATS — point naming issue & plan
+# DeVinci ATS — naming findings (case study)
 
-_Status: 2026-10-04. Sections 1–2 are findings. **Section 3 is a draft for discussion, not a decided plan.** Site: מגדל דה וינצי דרום (`hmPh7Hg2fjTc9GyNRDYO`), ATS station 5, PC site `DeVinci-1`._
+_Status: 2026-10-04. Findings for one site: מגדל דה וינצי דרום (`hmPh7Hg2fjTc9GyNRDYO`), ATS station 5, PC site `DeVinci-1`. The general discussion on ATS IDs, naming and rename is in [`ids-and-naming.md`](./ids-and-naming.md). Section 3 here is a draft._
 
 ## 1. The issue
 
@@ -16,7 +16,7 @@ The PC→UI link is the cloud table `ats-device-map/ATS-5-<point>` → `work-sen
 
 - **16 points** (C1, C6–C10, D1–D9) write into auto-created, **inactive** (hidden) sensors `ATS.DeVinci-1.*`. The UI sensors Nathan watches (C4, C9, C10, C12–C14, D5–D7, D9, D11–D13) have been empty since **2026-08-16**. The data isn't lost; it's in the hidden sensors.
 - **C3 and C4** both write into UI sensor `C6` (two prisms mixed in one chart).
-- **A5** writes into a deleted sensor. **A2** writes into UI `A8`, but it is on floor 5 (see §3), so A2/A5 are effectively swapped.
+- **A5** writes into a deleted sensor. **A2** writes into UI `A8`, but it is on floor 5 (see §2), so A2/A5 are effectively swapped.
 
 Also found:
 - **A1, A3, A6** fail to measure in every cycle (GeoCom GRC 8710). **C10** fails most cycles. Reference **R4** has a ~46 mm residual (others 11–15 mm). These are on-site issues.
@@ -53,26 +53,19 @@ I10 f10p12 I11 f11p12
 ```
 `?` = waiting for Nathan's confirmation.
 
-## 3. Plan — DRAFT, to be discussed
+## 3. DeVinci next steps — DRAFT
 
-Requirements (Hillel, 2026-10-04):
-- **Simple flow by default:** one name per prism, the same on the ATS PC and in the UI, and every PC point feeding exactly one visible sensor.
-- **A rename option is required** (on the PC), but renaming must not break the flow or lose history.
-
-Draft steps (open for discussion):
+The general rename/ID design is open (see [`ids-and-naming.md`](./ids-and-naming.md)). Until it's decided, **don't rename points on the DeVinci PC**: today a rename changes the MQTT device ID, and the data would go to new hidden sensors again. The list above is the PC → physical conversion for now.
 
 1. **Finalize the list** with Nathan (the 4 open rows above).
-2. **Renaming on the ATS PC: wanted, but not safe yet.** Today a rename changes the MQTT device ID, and the data would go to new hidden sensors again. Until the ATS app supports a safe rename (identity separate from name, rename recorded; see `point-rename-task.md`, to be simplified), the list above is the PC → physical conversion. _Open: how simple the rename flow can be (e.g. rename on the PC only, with the cloud following automatically)._
-3. **Fix the cloud mapping** (ops script in the handbook, dry-run first, then apply with Hillel's approval). For each PC point:
+2. **Fix the cloud mapping** (ops script in the handbook, dry-run first, then apply with Hillel's approval). For each PC point:
    - pick its target UI sensor: the existing sensor that holds this prism's history, matched by coordinates;
    - point `ats-device-map/ATS-5-<point>` at it;
    - move the samples written since 2026-08-16 from the hidden `ATS.DeVinci-1.*` sensor into it (copy, then archive the hidden sensor; never delete);
-   - rename the UI sensor to `fXpY` and store the PC point name on it (`atsPointName: "C1"`) so both are visible;
+   - UI sensor naming (e.g. `fXpY`) follows the outcome of the general discussion;
    - resolve C3/C4 (split the shared `C6` by height: C3 = f6p6, C4 = f7p6) and A2/A5 (A2 = f5p1, A5 = f8p1).
-4. **Bridge (small change):** unknown ATS device → no silent hidden sensor; log an internal notice so we see new or renamed points immediately.
-5. **Verify** with a fresh ATS log export: `ats-points-report.ts` → every row OK.
-6. **On site** (Nathan): A1/A3/A6 not measurable, C10 flaky, reference R4.
-7. **Process:** agree who may use "Delete Point" on ATS sensors. Prefer marking suspect over deleting.
+3. **Verify** with a fresh ATS log export: `ats-points-report.ts` → every row OK.
+4. **On site** (Nathan): A1/A3/A6 not measurable, C10 flaky, reference R4.
 
 ## 4. Tools (read-only, `./go.sh run …`)
 
@@ -84,4 +77,4 @@ Draft steps (open for discussion):
 | `ops/src/analysis/ats-coverage.ts` / `ats-match.ts` | Routing table health; device ↔ sensor coordinate matching |
 | `ops/src/analysis/written-between.ts`, `doc-meta.ts` | Firestore write/create times (overwrites, deletions) |
 
-Related: `point-rename-task.md` (proper rename in the ATS app, later); `point-nickname-task.md` (cancelled, since Nathan keeps a manual list).
+Related: [`ids-and-naming.md`](./ids-and-naming.md) (general discussion); `point-rename-task.md` (draft of rename option A); `point-nickname-task.md` (cancelled, since Nathan keeps a manual list).

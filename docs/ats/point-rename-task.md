@@ -1,6 +1,6 @@
 # ATS app — "Rename point" feature (with stable identity & rename history)
 
-> **Status: draft, needs simplification.** A rename option is required, but the default flow must stay simple. Discussion is in [`devinci-naming.md`](./devinci-naming.md) §3.
+> **Status: draft of option A, needs simplification.** A rename option is required, but the default flow must stay simple. Discussion: [`ids-and-naming.md`](./ids-and-naming.md).
 
 _To: ATS app team (`scanin-fw-ats-monitoring`). CC: bridge (`scanin-svc-mqtt-bridge`), web-platform._
 _From: Hillel — 2026-10-04. Evidence: handbook `ops/src/analysis/ats-points-report.ts` (DeVinci report)._
