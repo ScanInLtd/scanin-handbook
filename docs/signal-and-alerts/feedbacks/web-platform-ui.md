@@ -142,12 +142,25 @@ Removed direct writes:
 - `grep -ri "movingAverage|ema-log|maWindowHours|smoothingLevel" src` → **zero hits**.
   No intentionally-kept hits remain.
 - Production build (Node 12) passes; only pre-existing budget warnings.
-- **Not yet verified on the preview** (needs backfill + deployed callable):
-  - pilot chart line equals stored `smooth` values / raw toggle (tilt + crack on
-    צייטלין 12, prism on מגדל דה וינצי דרום);
-  - `setBaseline` round-trip on a test sensor in בדיקות משרד (`j7prfbs8Mord8g4cgNb5`) —
-    not invoked against production from this task.
-- No screenshots yet — pending real `smooth` data on the pilot sites.
+- **setBaseline round-trip — PASSED** (2026-10-04, on the preview):
+  - Sensor: `A085E3F365A0_1_j7pr` (loadcell, `lpKZ0eGsgnLC0d6j3oVB`, בדיקות משרד).
+  - Dialog → callable → `baseline-events/jLPDwgdjlLemDQgEd85b`:
+    `{reason: rebaseline, initial: {x: 633.0757, raw: -104} (server median of last 24h), by: natan.g@scanin.co.il}`.
+  - `initial-value` mirrored exactly; `status.axes` and `alert_state.axes` reset to `{}`.
+  - UI bugfix found by the test (commit `2954038`): the dialog now **omits `time`
+    when left at "now" (±5 min)** so the server medians the *last* 24h — with an
+    explicit time the window is the 24h *after* it, which is empty for "now".
+  - Verification script: handbook `ops/src/oneoff/2026-10-04-setbaseline-roundtrip.ts` (`--verify`).
+  - **Backend nits for FN**: (a) `raw` (a non-measurement field on loadcell samples)
+    got an auto-initial — add it to `NON_AXIS_FIELDS` or restrict auto-initial to
+    axes present in `thresholds.axes`/chart-axes; (b) consider falling back to the
+    *previous* 24h when the after-window is empty.
+- **Review fixes applied** (commit `118b994`): legend/tooltip window read from
+  `smooth.w` (24 | 48, fallback 24) — "ממוצע ‹w› שעות (ללא חריגים)"; compare page
+  stays raw but its series are labelled "(גולמי)".
+- **Not yet verified** (waiting for the pilot backfill): pilot chart line equals
+  stored `smooth` / raw toggle / suspect toggle / markers on צייטלין 12 (tilt+crack)
+  and מגדל דה וינצי דרום (prism). Screenshots per type pending the same.
 
 ## Blockers for production deploy
 
