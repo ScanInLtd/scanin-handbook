@@ -98,6 +98,7 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 - **FN-1.3** Migration script (`scripts/`, dry-run by default): for every sensor create one `baseline-events` doc `{ reason: 'migration', time: <first sample time>, initial: <current initial-value> }`.
 - **FN-1.4** Scheduled `detectLevelShifts` (daily 02:00 Asia/Jerusalem): per active sensor (project `isActive`), daily medians of the last 7 days; a step > 3 × warn gap that persists ≥ 2 days → `integrity` alert, `internalOnly`, message "possible device move / replacement / mapping change — set a new baseline". Port logic from handbook `ops/src/analysis/level-shifts.ts`.
 - **FN-1.5** `handleAlerts`: route `internalOnly` alerts to an ops recipient list (config doc `system-config/ops-recipients`, decision pending) and skip client users.
+- **FN-1.6** Late-data notice: when samples of a sensor arrive > 48h late (skipped by FN-0.2) → one `integrity` alert per episode, `internalOnly`, "‹sensor› is ‹N› days behind (buffered upload)". Evidence: handbook `ingest-lag.ts` (צייטלין 12 tilt 4/5 drained a backlog ~5 days behind for 2 weeks; every sample skipped).
 - **Acceptance:** 09-23-type prism jumps produce one internal notice per sensor, no client alerts; `setBaseline` round-trip tested on a test sensor.
 
 ### Phase 2 — smoothing in shadow
