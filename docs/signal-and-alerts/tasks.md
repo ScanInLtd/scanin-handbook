@@ -86,7 +86,7 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 
 ### Phase 0 — stop the bleeding
 - **FN-0.1** Change `checkThresholds` trigger from `.onWrite` to `.onCreate` (`functions.firestore.document("work-sensors/{sensorId}/data-log/{entryId}").onCreate`). Updates to existing samples must never evaluate.
-- **FN-0.2** Early-return (log at info) when: `isReplay === true` || `source === 'replay'` || `suspect === true` || `source === 'derived:daily'` || `time < Date.now() − 48h` || `time <= sensor.alert_state.last_sample_time` (out-of-order / backfill). Store `alert_state.last_sample_time` on each evaluation.
+- **FN-0.2** Early-return (log at info) when: `isReplay === true` || `source === 'replay'` || `suspect === true` || `source === 'derived:daily'` || `time < Date.now() − 48h` || `time < sensor.alert_state.last_sample_time` (out-of-order / backfill; strict `<` because some devices write each axis as a separate doc with the same `time`). Store `alert_state.last_sample_time` on each evaluation.
 - **FN-0.3** Wrap the read-evaluate-write of `status.axes` + `alert_state` + alert creation in `db.runTransaction` so concurrent samples of one sensor can't double-alert.
 - **FN-0.4** Add `sampleTime` (the sample's `time`) to alert docs (`createNewAlertObject`) — currently only creation time is stored, which hides backfill storms.
 - **FN-0.5** Throttle per **level**, not per axis: `canSendAlert` today uses one `last_alert_at` per axis, so a warn alert suppresses an alarm alert within 24h (status changes to alarm, nobody is notified). Store `last_alert_at` per level; an escalation always alerts.
