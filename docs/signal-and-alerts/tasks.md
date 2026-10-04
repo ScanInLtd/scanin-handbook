@@ -52,10 +52,29 @@ Adjusted value of a sample = raw − `initial` of the **latest event with `time 
 
 **Alert doc** — `alerts/{id}` gains:
 ```jsonc
-{ "tier": "instant | confirmed | rate | integrity", "smoothValue": 0.121, "baseline": 0.12,
-  "persistedHours": 6, "confirmations": 2, "internalOnly": false, "sampleTime": 1790859605752 }
+{ "tier": "instant | confirmed | rate", "smoothValue": 0.121, "baseline": 0.12,
+  "persistedHours": 6, "confirmations": 2, "sampleTime": 1790859605752 }
 ```
-`internalOnly: true` → `handleAlerts` sends to the ScanIn ops recipients only, never to client users.
+`alerts` is **client-facing only**. Internal notices never go there, because `handleAlerts` sends every new `alerts` doc to subscribed users.
+
+**Internal notice** — `data-integrity/{autoId}` (new collection; written by functions and the bridge, never sent to clients):
+```jsonc
+{ "kind": "implausible-jump | out-of-range | level-shift | late-data | run-common-mode | identity-mismatch | unrouted",
+  "severity": "warning | critical",
+  "status": "open | resolved",
+  "dedupeKey": "implausible-jump:<sensorId>:<axis>",   // one OPEN doc per key
+  "sensorId": "…", "projectId": "…", "axis": "y",       // projectId = sensor location.site
+  "message": "Prism 3 @ SAVYON: jump +8,866 mm vs last good value — mapping / device move?",
+  "details": { "value": 8866.1, "ref": 0.4, "limit": 100, "sampleTime": 1790859605752 },
+  "openedAt": <ts>, "lastSeenAt": <ts>, "count": 14,   // repeats increment count, no new doc
+  "resolvedAt": null, "resolvedBy": null,
+  "resolution": null,                                   // baseline | mapping-fix | released | ignored | auto
+  "notifiedAt": null }                                  // set by the later WhatsApp sender
+```
+- Writers use one helper `raiseIntegrity({kind, sensorId, axis, …})`: in a transaction, find the open doc by `dedupeKey`. If found, bump `count` and `lastSeenAt`; otherwise create one.
+- `resolveIntegrity(dedupeKey, resolution, by)` closes it: called by `setBaseline` (`baseline`), by the future UI (`released` / `ignored`), or automatically when the condition clears (`auto`, e.g. late-data caught up).
+- Needs a composite index on `dedupeKey` + `status`.
+- **Later (not Phase 1):** a WhatsApp sender on `data-integrity` onCreate, configured by `system-config/data-integrity` `{ enabled, whatsappGroup, minSeverity }`, plus a UI page (UI-1.3).
 
 **Sensor config** — `work-sensors/{id}.thresholds.axes.<axis>` (one ladder, plan §4.5) gains optional:
 ```jsonc
@@ -94,12 +113,12 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 - **Acceptance:** run a test replay on a test sensor (`בדיקות משרד` project) → 0 alerts. Handbook `alert-landscape.ts --since=7d` shows ≈0 "throttle-violating bursts".
 
 ### Phase 1 — data correctness & baseline events
-- **FN-1.1** Plausibility level (`thresholds.axes.<axis>.suspect`, fallback to per-type defaults). Evaluated first: |raw adjusted − `alert_state.axes.<axis>.ref`| > `suspect.jump`, or |raw adjusted| > `suspect.abs` → update the sample with `suspect: true, suspect_reason: 'implausible-jump' | 'out-of-range'` (allowed: alerts are onCreate only) and create an alert doc `{ tier: 'integrity', internalOnly: true }` — one per episode (`suspectSince`), sent immediately. `ref` is not updated from suspect samples, so a sensor stuck at a wrong level keeps being flagged until a baseline event / mapping fix / manual release.
+- **FN-1.1** Plausibility level (`thresholds.axes.<axis>.suspect`, fallback to per-type defaults). Evaluated first: |raw adjusted − `alert_state.axes.<axis>.ref`| > `suspect.jump`, or |raw adjusted| > `suspect.abs` → update the sample with `suspect: true, suspect_reason: 'implausible-jump' | 'out-of-range'` (allowed: alerts are onCreate only) and `raiseIntegrity({ kind: 'implausible-jump' | 'out-of-range', severity: 'critical' })`, one open doc per sensor+axis (`suspectSince`). `ref` is not updated from suspect samples, so a sensor stuck at a wrong level keeps being flagged until a baseline event / mapping fix / manual release.
 - **FN-1.2** Baseline events: implement adjusted-value lookup per the contract (cache latest events per sensor in the invocation). Callable `setBaseline({ sensorId, time?, reason, note, initial? })` (admin/installer only): if `initial` omitted, compute it as the median of raw values in the 24h after `time`; write the event, mirror into `initial-value`, reset `alert_state` and `status.axes` to `ok` for that sensor.
 - **FN-1.3** Migration script (`scripts/`, dry-run by default): for every sensor create one `baseline-events` doc `{ reason: 'migration', time: <first sample time>, initial: <current initial-value> }`.
-- **FN-1.4** Scheduled `detectLevelShifts` (daily 02:00 Asia/Jerusalem): per active sensor (project `isActive`), daily medians of the last 7 days; a step > 3 × warn gap that persists ≥ 2 days → `integrity` alert, `internalOnly`, message "possible device move / replacement / mapping change — set a new baseline". Port logic from handbook `ops/src/analysis/level-shifts.ts`.
-- **FN-1.5** `handleAlerts`: route `internalOnly` alerts to an ops recipient list (config doc `system-config/ops-recipients`, decision pending) and skip client users.
-- **FN-1.6** Late-data notice: when samples of a sensor arrive > 48h late (skipped by FN-0.2) → one `integrity` alert per episode, `internalOnly`, "‹sensor› is ‹N› days behind (buffered upload)". Evidence: handbook `ingest-lag.ts` (צייטלין 12 tilt 4/5 drained a backlog ~5 days behind for 2 weeks; every sample skipped).
+- **FN-1.4** Scheduled `detectLevelShifts` (daily 02:00 Asia/Jerusalem): per active sensor (project `isActive`), daily medians of the last 7 days; a step > 3 × warn gap that persists ≥ 2 days → `raiseIntegrity({ kind: 'level-shift', severity: 'warning' })`, message "possible device move / replacement / mapping change — set a new baseline". Port logic from handbook `ops/src/analysis/level-shifts.ts`.
+- **FN-1.5** `data-integrity` collection per the contract: `raiseIntegrity` / `resolveIntegrity` helpers (`src/integrity/`), composite index (`dedupeKey`, `status`), Firestore rules (admin read only, no client writes). No delivery yet: the collection is the inbox (read with handbook `./go.sh`, later the UI page and WhatsApp). `handleAlerts` is unchanged.
+- **FN-1.6** Late-data notice: when samples of a sensor arrive > 48h late (skipped by FN-0.2) → `raiseIntegrity({ kind: 'late-data', severity: 'warning' })`, "‹sensor› is ‹N› days behind (buffered upload)"; auto-resolve when a sample < 1h late arrives. Evidence: handbook `ingest-lag.ts` (צייטלין 12 tilt 4/5 drained a backlog ~5 days behind for 2 weeks; every sample skipped).
 - **Acceptance:** 09-23-type prism jumps produce one internal notice per sensor, no client alerts; `setBaseline` round-trip tested on a test sensor.
 
 ### Phase 2 — smoothing in shadow
@@ -117,7 +136,7 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 - **FN-4.5** Message templates (`alerts/emailTemplate.ts`, `alerts/whatsappService.ts`, `alerts/handleAlerts.ts`), Hebrew + numbers + chart link:
   - ⚡ instant: "‹sensor› ‹axis› קפץ ‹Δ› תוך ‹h› שעות (מ-‹baseline› ל-‹value›), אושר ע״י 2 קריאות"
   - 📈 confirmed: "הממוצע היומי של ‹sensor› ‹axis› מעל סף ‹level› כבר ‹h› שעות (כעת ‹smooth›)"
-  - 🔧 integrity (internal only)
+  - (internal notices are not alerts; see `data-integrity`)
 - **FN-4.6** `evaluateMultiSensorRules`: accept optional `tier` condition in `multi-sensor-rules` docs.
 - **Acceptance:** pilot site 2 weeks: alerts/day ↓ ≥ 70% vs the prior 2 weeks, every remaining alert explainable from the chart; no real event missed (review with Didi).
 
@@ -136,7 +155,7 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 ### Phase 1
 - **UI-1.1** "Set new baseline" action on the sensor page (installer/admin): reason (replaced / moved / rebaseline / mapping-fix / ats-setup), optional time, note → calls `setBaseline` callable. Replaces direct editing of `initial-value` in sensor settings (keep the field read-only, showing the current baseline).
 - **UI-1.2** Baseline-event markers (vertical line + tooltip with reason, who, when) on all sensor charts.
-- **UI-1.3** Admin page listing internal `integrity` alerts (implausible jumps, level shifts, bad ATS runs) with link to the sensor, a "set new baseline" shortcut and a "release (real movement)" action.
+- **UI-1.3** (later) Admin page over `data-integrity` (open first; implausible jumps, level shifts, late data, bad ATS runs) with link to the sensor, a "set new baseline" shortcut and a "release (real movement)" action.
 - **UI-1.4** Threshold settings: per axis add `suspect.jump` / `suspect.abs` (placeholder shows the per-type default); validate the ladder order `warn < alarm ≤ instant < suspect.jump`.
 
 ### Phase 3
@@ -192,7 +211,7 @@ The fallback routing was not involved.
   - Map key `{stationId}:{pointId}` (read legacy `{deviceId}` docs during migration).
   - Store `atsSiteId` + `projectId` on the map doc and require `payload.siteId === map.atsSiteId`.
   - **Remove** the `findAtsSensor` fallback and `createAtsSensorAndMap` auto-create.
-  - Unmatched point, site mismatch, or a map entry pointing at a missing / `active: false` sensor → `storeRawPayload(…, 'unrouted-sample')` + one internal `integrity` notice per device per day. Never write to a guessed or new sensor.
+  - Unmatched point, site mismatch, or a map entry pointing at a missing / `active: false` sensor → `storeRawPayload(…, 'unrouted-sample')` + one `data-integrity` notice (`kind: 'unrouted'`) per device. Never write to a guessed or new sensor.
   - New points are mapped explicitly in the UI, which sets `confirmed: true`.
 - **BR-1.2** Map edits create a `baseline-events` doc (`mapping-fix` | `ats-setup`). One sensor ↔ at most one device: enforce in the UI, check in the bridge at startup and notify on duplicates.
 - **BR-1.3** Identity guard per sample. Store `refPos {e,n,u}` on the map entry (median position when mapped). If |pos − refPos| > 0.5 m, don't write to the sensor: store raw + `identity-mismatch` notice. Catches B and C, and A when the error is large.
@@ -264,7 +283,7 @@ Phase 0 (FN-0.1/0.2) already stops replays from alerting. The items below follow
 **Context:** The watchdog already checks alert delivery. It should also guard the new pipeline. Not blocking any phase; until then, run handbook `alert-landscape.ts --since=7d` manually after each phase.
 
 - **WD-0.1** New check `alerts-storm`: in the last hour, any sensor+axis with > 3 alerts, or > 200 alerts fleet-wide → critical (WhatsApp to ops). Logic as handbook `ops/src/analysis/alert-landscape.ts` "throttle-violating bursts".
-- **WD-1.1** New check `integrity-backlog`: open internal `integrity` alerts older than 3 days → warning.
+- **WD-1.1** New check `integrity-backlog`: open `data-integrity` docs older than 3 days → warning.
 - **WD-2.1** New check `smoothing-coverage`: share of new samples (last 1h, active projects) without `smooth` > 5% → warning.
 
 ---

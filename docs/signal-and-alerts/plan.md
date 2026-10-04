@@ -126,7 +126,10 @@ work-sensors/{id}/data-log/{sample}     ← one doc per reading (as today)
 
 work-sensors/{id}/baseline-events/{autoId}   ← new (§4.2)
 
-alerts/{id}                             ← events, as today + tier, internalOnly, sampleTime, smoothValue
+alerts/{id}                             ← client-facing events, as today + tier, sampleTime, smoothValue
+
+data-integrity/{id}                     ← new: internal notices to ScanIn (never to clients),
+                                          one open doc per kind+sensor+axis, open → resolved
 ```
 
 - The evaluator does **one write-back per sample** (`suspect` + `smooth` + `eval` in a single `update`). It doubles writes on `data-log`; acceptable at current volume, measured in Phase 2.
@@ -184,7 +187,7 @@ alerts/{id}                             ← events, as today + tier, internalOnl
 1. Smoothing window for prisms: 24h vs 48h (decide on pilot data).
 2. Tier 2 persistence (3h proposed) and reminder cadence while a sensor stays in warn/alarm (none / daily / weekly).
 3. Tier 1 default = alarm gap? Or a per-type multiple?
-4. Who receives internal data-integrity notices (Hillel / Nathan / ops WhatsApp group)?
+4. ~~Who receives internal data-integrity notices?~~ **Decided 2026-10-04:** a Firestore collection `data-integrity` for now (separate from `alerts`, so it can never reach clients). Later: a configurable WhatsApp group and a UI page.
 5. Policy for demo/replayed data in client-facing reports (allowed with marking? never?).
 
 ## 9. Evidence & tooling (re-runnable, read-only)
