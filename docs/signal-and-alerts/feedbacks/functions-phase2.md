@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
-**Status:** implemented, build + lint pass, emulator **Phase 2: 16/16** + **Phase 1 regression: 35/35** green, TwoD comparison + both backfill dry-runs done (read-only). **Not deployed, not committed, nothing applied** — pending review (deploy approval hinges on §2).
+**Status:** ✅ reviewed & approved (with the 48h-prism-window change — §7), committed **`ec335e3`**, **deployed to prod 2026-10-04 16:55 UTC**, emulator **Phase 2: 22/22** + **Phase 1 regression: 35/35** green. Pending: backfill `--apply` (Hillel, pilot → all-active), post-backfill log check (§8).
 
 ---
 
@@ -87,12 +87,51 @@ Notes:
 
 ---
 
-## 6. Open questions
+## 6. Open questions (answered — review 2026-10-04)
 
-1. **H2_5D (SAVYON_LIVING "10") flips warn → alarm** under the correct math — on deploy its next sample may alert. OK to let it alert, or investigate the prism first (JTCS identity-error family)?
-2. The **37 legacy prisms** (no E/N initials): follow-up task to set E/N baselines (via `setBaseline`) so they join the correct math?
-3. Confirm deploy-before-backfill ordering (step 1 → 2).
-4. **Prism 73% smooth coverage** → take the 48h-prism-window decision (plan §8.1) in the next round?
+1. **H2_5D (SAVYON_LIVING "10") flips warn → alarm:** no action. Its last sample is 2026-08-29 (h2p5d writes into "12"), so it won't alert. The 11.42 mm comes from Hexagon-era initials applied to live-era values — the Hexagon→live cutover baseline problem, parked with the ATS repair work (BR-R.2).
+2. The **37 legacy prisms:** leave on old behavior — they'll be fixed with the ATS repair work. Do **not** call `setBaseline` on them (it would move their zero).
+3. Deploy-before-backfill ordering: confirmed.
+4. Prism window: **decided 48h** (plan §8.1) — implemented before deploy, see §7.
+
+---
+
+## 7. Review change implemented: 48h smoothing window for prisms
+
+- **Window length per type** via one constant map (`windowMsForType` in `smoothing.ts`): **prism = 48h, everything else = 24h**. Used consistently by the live window query, recompute's paging + sliding window, and min-n.
+- **min n** = max(3, ¼ × expected samples **per window**) — "expected/day" scaled to the window length.
+- **Diurnal coverage** stays "≥ 3 of 4 six-hour quarters of the *day*": offsets bucketed by `((t − windowStart) mod 24h) / 6h`, so both days of a 48h window fold onto the same 4 quarters.
+- **`smooth.w`** = window hours (24 | 48) stored on every sample (contract updated in `tasks.md` would be the next doc touch — flag if wanted).
+- **Bug found & fixed during re-testing:** the mod-24h fold initially mapped a sample at an *exact* day-boundary offset — which is always the triggering sample itself (offset = window length) — to quarter 0, donating a free quarter and weakening the coverage rule. Fixed: exact day-boundary offsets belong to the end of the day (quarter 3), matching the pre-fold behavior. Included in the deployed build and covered by tests.
+- **Emulator additions** (suite now **22/22**): prism at 4 samples/day over 2 days → `smooth.w = 48`, `smooth.n = 9` (a 24h window would hold only 4 — proves the window length), derived TwoD intact; non-prism asserts `smooth.w = 24`. Phase 1 regression re-run clean (35/35) on a fresh emulator.
+
+### Re-run dry-runs (90 days, read-only, with 48h prism window)
+
+| Run | Docs read | Would write | Would-be suspects | Prism smooth coverage |
+|---|---|---|---|---|
+| Pilot | 30,921 | 26,509 | 296 | **75.2%** (was 67.5% @24h) |
+| All active | 169,186 | 138,438 | 1,672 | **75.3%** (was 73.0% @24h) |
+
+Other types unchanged (crack 98.9%, tilt 96.5%, cracktemp 98.3%, OPKON ~97%, battery 99.3%, loadcell 92.7%). Cost unchanged (~$0.10 reads + $0.25 writes for all-active).
+
+**Why only +2.3pp overall:** the day-fold is intentional — prisms sampling in a narrow *clock* window (ATS working-hours cycles) fail diurnal coverage no matter how long the window, and near-dead prisms (1–6 samples/90d) fail min-n. The gain concentrates in healthy prisms (pilot: +7.7pp). If prisms shouldn't be held to day-coverage at ~4 samples/day, relaxing `MIN_QUARTERS` for prisms is a one-line follow-up decision.
+
+**Also noted:** all-active would-be suspects 1,662 → 1,672 (+10): the derived-TwoD adjusted values cross the 100mm jump default on a few more historical JTCS samples — consistent with §2.
+
+---
+
+## 8. Delivery report
+
+- **Commit:** **`ec335e3`** (Phase 2 in one commit: FN-2.2/2.5 + 48h window + scripts + tests), pushed to `master`.
+- **Deploy:** 2026-10-04 **16:55 UTC** — `firebase deploy --only functions:checkThresholds,functions:setBaseline,functions:recomputeSmoothing`: `checkThresholds`/`setBaseline` updated, `recomputeSmoothing` created, 0 errors. No new indexes needed.
+- **Pending:**
+  - [ ] Backfill (Hillel): `node scripts/recompute-smoothing.js --project=oBcqejjRiLRIFhG2UzPI,hmPh7Hg2fjTc9GyNRDYO --days=90 --apply` (pilot), then `--all-active --days=90 --apply`. Deploy-first ordering satisfied.
+  - [ ] Post-backfill sanity: spot-check a pilot prism's `smooth` series (w=48, TwoD = hypot of components) + confirm no `data-integrity` notices were raised by the backfill (it only counts).
+  - [ ] Watchdog idea for later (WD-2.1 exists): smoothing-coverage check should read `smooth.w`-aware expectations.
+- **Rollback:** redeploy `26c99a5` — TwoD reverts to the old math, window back to 24h, `recomputeSmoothing` callable deletable; backfilled `smooth`/`eval`/`w` fields are inert for old code; backfill-set suspect flags can be re-litigated by a later recompute run.
+
+### Process note
+During re-testing, a duplicated test invocation ran concurrently with a clean run and contaminated its results (the emulator suites aren't idempotent on a shared DB) — this produced transient false failures, cost ~15 minutes, and was re-run cleanly on a fresh emulator. The silver lining: chasing the "failures" exposed the real quarter-fold bug above before deploy.
 
 ---
 
@@ -103,3 +142,10 @@ Notes:
 - **37 legacy prisms** (TwoD initial, no E/N initials): leave them as they are. Fix them with the ATS repair work, after asking Nathan where their E/N zero is. Don't use `setBaseline` for this, because it would move their zero.
 - **Order:** deploy before backfill, confirmed.
 - **Prism window: decided 48h** (plan §8.1). It also cancels the diurnal cycle (two whole days). Coverage quarters are bucketed by `((t − windowStart) mod 24h) / 6h`. Other types stay at 24h. Implement it before the deploy, then re-run the dry-runs.
+
+---
+
+## Handbook review #2 (2026-10-04, after deploy `ec335e3`)
+
+- **Full-history backfill** (the addendum): `--days=all` isn't implemented, but `--days=1000` covers every sensor's history (data starts ≈ 20 months ago). Re-runs are idempotent because the script only writes fields that changed, so `--after` resumability isn't needed.
+- **Prism coverage 75% at 48h:** keep `MIN_QUARTERS = 3` for prisms for now. After the pilot backfill, look at which prisms lack smooth (dead/sparse vs narrow clock window) before relaxing it.

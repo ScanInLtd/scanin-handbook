@@ -31,8 +31,9 @@ Regression tool for every phase (handbook): `./go.sh run src/analysis/backtest.t
   "suspect_reason": "run-common-mode", // optional
   // written back by functions in ONE update per sample, never by clients:
   // n = samples used; replayN = replay docs in the window (EXCLUDED from the
-  // computation); q = six-hour window quarters covered (3–4, diurnal coverage)
-  "smooth": { "<axis>": 0.121, "n": 23, "replayN": 0, "q": 4, "v": 1 },   // Phase 2
+  // computation); q = six-hour DAY quarters covered (3–4, diurnal coverage,
+  // folded mod 24h); w = window hours (24, prisms 48 — plan §8.1)
+  "smooth": { "<axis>": 0.121, "n": 23, "replayN": 0, "q": 4, "w": 24, "v": 1 },   // Phase 2
   "eval":   { "<axis>": "ok | warn | alarm | suspect" }             // Phase 2 (shadow), authoritative from Phase 4
 }
 ```
@@ -46,12 +47,13 @@ Raw fields, `time`, `source`, `isReplay` are written once at ingestion and never
 Adjusted value of a sample = raw − `initial` of the **latest event with `time ≤ sample.time`**. `work-sensors/{id}.initial-value` mirrors the latest event during migration (read by legacy code only).
 
 **Smoothing (v1)** — for each new sample, per axis with thresholds:
-1. Window = samples with `time ∈ (t − 24h, t]`, after the latest baseline event, excluding `suspect: true`.
+1. Window = samples with `time ∈ (t − W, t]` where W = 24h (prisms: 48h, plan §8.1), after the latest baseline event, excluding `suspect: true`.
 2. Reject values with |v − median| > 3 × MAD (MAD = median absolute deviation; skip rejection if MAD = 0).
 3. Trimmed mean of the remaining values, dropping 20% from each end.
-4. Require n ≥ max(3, ¼ × expected samples/day); else no `smooth` value for that axis.
-5. Diurnal coverage: the kept samples must cover ≥ 3 of the 4 six-hour quarters of the window (bucketed by offset from window start); else no `smooth` for that axis.
-6. Store **adjusted** smoothed value (raw − baseline) in `smooth.<axis>`, plus `n`, `replayN` (replay docs in the window, excluded from the computation), `q` (quarters covered), `v: 1`.
+4. Require n ≥ max(3, ¼ × expected samples per window); else no `smooth` value for that axis.
+5. Diurnal coverage: the kept samples must cover ≥ 3 of the 4 six-hour quarters of the DAY — offsets from window start folded mod 24h (exact day-boundary offsets, incl. the trigger sample, belong to quarter 3); else no `smooth` for that axis.
+6. Store **adjusted** smoothed value (raw − baseline) in `smooth.<axis>`, plus `n`, `replayN` (replay docs in the window, excluded from the computation), `q` (quarters covered), `w` (window hours), `v: 1`.
+7. Prisms (FN-2.5): E/N are smoothed too and stored; `smooth.TwoDDisplacement = hypot(smooth.E, smooth.N)`; adjusted TwoD = `hypot(E − E0, N − N0)`. Prisms with a TwoD initial but no E/N initials keep the legacy raw − initial behavior until the ATS repair.
 
 **Alert doc** — `alerts/{id}` gains:
 ```jsonc
