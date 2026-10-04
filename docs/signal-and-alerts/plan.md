@@ -184,7 +184,7 @@ data-integrity/{id}                     ← new: internal notices to ScanIn (nev
 
 ## 8. Decisions needed
 
-1. Smoothing window for prisms: 24h vs 48h (decide on pilot data).
+1. ~~Smoothing window for prisms~~ **Decided 2026-10-04: 48h for prisms** (24h covered prisms only 73% of the time; 48h also cancels the diurnal cycle). Other types: 24h.
 2. Tier 2 persistence (3h proposed) and reminder cadence while a sensor stays in warn/alarm (none / daily / weekly).
 3. Tier 1 default = alarm gap? Or a per-type multiple?
 4. ~~Who receives internal data-integrity notices?~~ **Decided 2026-10-04:** a Firestore collection `data-integrity` for now (separate from `alerts`, so it can never reach clients). Later: a configurable WhatsApp group and a UI page.
