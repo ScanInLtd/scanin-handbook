@@ -29,10 +29,12 @@ Regression tool for every phase (handbook): `./go.sh run src/analysis/backtest.t
   "isReplay": true,                  // optional: synthetic/demo/gap-fill data
   "suspect": true,                   // optional: failed plausibility / run QA
   "suspect_reason": "run-common-mode", // optional
-  // written back by functions (Phase 2), never by clients:
-  "smooth": { "<axis>": 0.121, "n": 23, "replayN": 0, "v": 1 }
+  // written back by functions in ONE update per sample, never by clients:
+  "smooth": { "<axis>": 0.121, "n": 23, "replayN": 0, "v": 1 },   // Phase 2
+  "eval":   { "<axis>": "ok | warn | alarm | suspect" }             // Phase 2 (shadow), authoritative from Phase 4
 }
 ```
+Raw fields, `time`, `source`, `isReplay` are written once at ingestion and never modified. `suspect` / `suspect_reason` may be set by ingestion (ATS run QA) or by functions (plausibility).
 
 **Baseline event** — `work-sensors/{id}/baseline-events/{autoId}` (Phase 1):
 ```jsonc
@@ -55,11 +57,25 @@ Adjusted value of a sample = raw − `initial` of the **latest event with `time 
 ```
 `internalOnly: true` → `handleAlerts` sends to the ScanIn ops recipients only, never to client users.
 
-**Sensor config** — `work-sensors/{id}.thresholds.axes.<axis>` gains optional:
+**Sensor config** — `work-sensors/{id}.thresholds.axes.<axis>` (one ladder, plan §4.5) gains optional:
 ```jsonc
-{ "warn": {"gap": 0.08}, "alarm": {"gap": 0.1},
-  "instant": {"gap": 0.1},                 // Tier 1 jump from baseline; default = alarm.gap
-  "rate": {"gap": 0.03, "days": 7} }        // optional Tier-2 rate rule
+{ "warn": {"gap": 0.1}, "alarm": {"gap": 0.2},       // Tier 2, on smooth
+  "instant": {"gap": 1},                     // Tier 1, raw jump vs last good smooth; default = alarm.gap
+  "suspect": {"jump": 2, "abs": 15},         // QC: raw jump vs last good smooth / |raw adjusted|; default per type
+  "rate": {"gap": 0.03, "days": 7} }         // optional Tier-2 rate rule
+```
+Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults for `suspect.jump` (code constant, tune with `signal.ts`): tilt 1°, crack 5 mm, prism 100 mm.
+
+**Evaluator memory** — `work-sensors/{id}.alert_state` (functions only, updated in a transaction):
+```jsonc
+{ "last_sample_time": 1790859605752,
+  "axes": { "<axis>": {
+      "level": "warn",                                 // last alerted level (Tier 2)
+      "candidate": { "level": "alarm", "since": 1790850000000, "count": 2 },  // Tier 2 pending confirmation
+      "ref": 0.121,                                    // last good smoothed value (for instant / suspect jumps)
+      "instantPending": { "value": 1.3, "time": 1790859605752 },  // Tier 1 waiting for next sample
+      "suspectSince": null,                            // set while the axis sits at a suspect level
+      "last_alert_at": { "warn": 1790000000000, "alarm": null } } } }  // per level (Phase 0 throttle fix)
 ```
 
 ---
@@ -73,10 +89,11 @@ Adjusted value of a sample = raw − `initial` of the **latest event with `time 
 - **FN-0.2** Early-return (log at info) when: `isReplay === true` || `source === 'replay'` || `suspect === true` || `source === 'derived:daily'` || `time < Date.now() − 48h` || `time <= sensor.alert_state.last_sample_time` (out-of-order / backfill). Store `alert_state.last_sample_time` on each evaluation.
 - **FN-0.3** Wrap the read-evaluate-write of `status.axes` + `alert_state` + alert creation in `db.runTransaction` so concurrent samples of one sensor can't double-alert.
 - **FN-0.4** Add `sampleTime` (the sample's `time`) to alert docs (`createNewAlertObject`) — currently only creation time is stored, which hides backfill storms.
+- **FN-0.5** Throttle per **level**, not per axis: `canSendAlert` today uses one `last_alert_at` per axis, so a warn alert suppresses an alarm alert within 24h (status changes to alarm, nobody is notified). Store `last_alert_at` per level; an escalation always alerts.
 - **Acceptance:** run a test replay on a test sensor (`בדיקות משרד` project) → 0 alerts. Handbook `alert-landscape.ts --since=7d` shows ≈0 "throttle-violating bursts".
 
 ### Phase 1 — data correctness & baseline events
-- **FN-1.1** Plausibility cap per sensor type (config map in code, e.g. `prism: 100 mm` between consecutive samples, `tilt: 1°/h`, `crack: 5 mm/h`; tune with handbook `signal.ts`). Violation → update the sample with `suspect: true, suspect_reason: 'implausible-jump'` (allowed: alerts are onCreate only) and create an alert doc `{ tier: 'integrity', internalOnly: true }`.
+- **FN-1.1** Plausibility level (`thresholds.axes.<axis>.suspect`, fallback to per-type defaults). Evaluated first: |raw adjusted − `alert_state.axes.<axis>.ref`| > `suspect.jump`, or |raw adjusted| > `suspect.abs` → update the sample with `suspect: true, suspect_reason: 'implausible-jump' | 'out-of-range'` (allowed: alerts are onCreate only) and create an alert doc `{ tier: 'integrity', internalOnly: true }` — one per episode (`suspectSince`), sent immediately. `ref` is not updated from suspect samples, so a sensor stuck at a wrong level keeps being flagged until a baseline event / mapping fix / manual release.
 - **FN-1.2** Baseline events: implement adjusted-value lookup per the contract (cache latest events per sensor in the invocation). Callable `setBaseline({ sensorId, time?, reason, note, initial? })` (admin/installer only): if `initial` omitted, compute it as the median of raw values in the 24h after `time`; write the event, mirror into `initial-value`, reset `alert_state` and `status.axes` to `ok` for that sensor.
 - **FN-1.3** Migration script (`scripts/`, dry-run by default): for every sensor create one `baseline-events` doc `{ reason: 'migration', time: <first sample time>, initial: <current initial-value> }`.
 - **FN-1.4** Scheduled `detectLevelShifts` (daily 02:00 Asia/Jerusalem): per active sensor (project `isActive`), daily medians of the last 7 days; a step > 3 × warn gap that persists ≥ 2 days → `integrity` alert, `internalOnly`, message "possible device move / replacement / mapping change — set a new baseline". Port logic from handbook `ops/src/analysis/level-shifts.ts`.
@@ -84,7 +101,7 @@ Adjusted value of a sample = raw − `initial` of the **latest event with `time 
 - **Acceptance:** 09-23-type prism jumps produce one internal notice per sensor, no client alerts; `setBaseline` round-trip tested on a test sensor.
 
 ### Phase 2 — smoothing in shadow
-- **FN-2.1** In the onCreate evaluator compute `smooth` per the contract and write it back to the sample doc (`snapshot.ref.update({ smooth })`). Alerts unchanged in this phase.
+- **FN-2.1** In the onCreate evaluator compute `smooth` and the shadow `eval` per the contract and write them back with the QC flag in one update (`snapshot.ref.update({ smooth, eval, ... })`). Maintain `alert_state.axes.<axis>.ref`. Alerts unchanged in this phase.
 - **FN-2.2** Callable/HTTP `recomputeSmoothing({ sensorId, fromTime })` (admin): replays samples from `fromTime` in order, rewrites `smooth` fields in batches of 400. Never alerts, never touches raw fields. Called by: baseline events (FN-1.2), replay tool, adjustments worker.
 - **FN-2.3** Backfill 90 days for pilot sites, then all active projects.
 - **FN-2.4** Log per invocation: window read count, compute ms. Report daily read volume to `system-metrics/firebase-functions/daily/{date}.smoothingReads` (increment).
@@ -117,7 +134,8 @@ Adjusted value of a sample = raw − `initial` of the **latest event with `time 
 ### Phase 1
 - **UI-1.1** "Set new baseline" action on the sensor page (installer/admin): reason (replaced / moved / rebaseline / mapping-fix / ats-setup), optional time, note → calls `setBaseline` callable. Replaces direct editing of `initial-value` in sensor settings (keep the field read-only, showing the current baseline).
 - **UI-1.2** Baseline-event markers (vertical line + tooltip with reason, who, when) on all sensor charts.
-- **UI-1.3** Admin page listing internal `integrity` alerts (implausible jumps, level shifts, bad ATS runs) with link to the sensor and a "set new baseline" shortcut.
+- **UI-1.3** Admin page listing internal `integrity` alerts (implausible jumps, level shifts, bad ATS runs) with link to the sensor, a "set new baseline" shortcut and a "release (real movement)" action.
+- **UI-1.4** Threshold settings: per axis add `suspect.jump` / `suspect.abs` (placeholder shows the per-type default); validate the ladder order `warn < alarm ≤ instant < suspect.jump`.
 
 ### Phase 3
 - **UI-3.1** Default chart series = `smooth.<axis>`; raw as a toggle ("הצג נתונים גולמיים"), drawn faint. Legend wording: "ממוצע 24 שעות (ללא חריגים)" / "גולמי".
@@ -172,29 +190,24 @@ Adjusted value of a sample = raw − `initial` of the **latest event with `time 
 
 ---
 
-## 5. `scanin-svc-hexagon-ats-ingestion` (C#) and `scanin-fw-ats-monitoring`
+## 5. `scanin-svc-hexagon-ats-ingestion` (C#) — **deferred**
 
-**Context:** Same prism-identity and run-quality issues as section 4 apply to email-ingested ATS runs and the on-site ATS PC software. Whole runs can be shifted (e.g. DeVinci 2026-10-01 12:20: −13.6 mm across 23 prisms, within-run spread 1.3 mm) — a station/instrument issue, not structural movement.
-
-- **ATS-0.1** Confirm whether 09-22/24 changes (e.g. "Estimate timestamps for no-email runs") affected sample times or prism attribution; contribute to BR-0.1 findings.
-- **ATS-1.1** Same deterministic prism → sensor mapping rule as BR-1.1.
-- **ATS-1.2** Same run QA as BR-1.3 (mark `suspect`), or tag each run with a `runId` on every sample so functions can do run QA centrally — pick one place, document it.
-- **ATS-1.3** On station re-setup / instrument replacement, emit a baseline event for all prisms of that station (`reason: 'ats-setup'`).
+Deprecated, non-critical path; out of scope for this plan. If it stays alive, its samples still pass the functions-side checks (FN-0.2, FN-1.1). Revisit only if email-ingested runs cause problems.
 
 ---
 
-## 6. `scanin-worker-prism-daily`
+## 6. `scanin-worker-prism-daily` — **stop, no migration**
 
-**Context:** Nightly (00:05 Asia/Jerusalem) it writes `daily::{date}::{axis}` docs (`daily2Ddisplacement`, `dailySettlement`, `dailyEastingDisplacement`, `dailyNorthingDisplacement`) using MAD rejection + speed gate + trimmed mean. Today it is the only robust prism smoothing, and UI/reports depend on it. In the new design its logic moves into the shared per-sample smoothing (`smooth` field) and the plausibility cap; this worker is retired.
+No logic hand-off: the shared smoothing (FN-2.1) and plausibility cap (FN-1.1) are specified independently.
 
-- **PD-2.1** Keep running unchanged during Phases 2–4.
-- **PD-2.2** Provide its config (`worker/shared/config.js`: `kMAD`, `maxSpeed_mm_per_hr`, `trimmedMeanPercent`, `minSamples`) and validation notes to the functions team (FN-1.1, FN-2.1).
-- **PD-5.1** After REP-5.* and UI-3.6 are live: pause the Cloud Scheduler job `daily-prism-processing`; keep services deployed 2 weeks for rollback.
-- **PD-6.1** Delete scheduler + Cloud Run services (`daily-prism-orchestrator`, `daily-prism-worker`); archive the repo. Historical `daily::*` docs: delete via functions cleanup script (**destructive, needs approval**) or keep read-only.
+- **PD-5.1** Keep running unchanged until UI-3.6 **and** REP-5.2 are live (prism chart and reports read `daily::*` until then). Then stop the Cloud Scheduler job `daily-prism-processing`, delete the Cloud Run services (`daily-prism-orchestrator`, `daily-prism-worker`) and archive the repo.
+- Historical `daily::*` docs: keep read-only; deletion is a Phase 6 decision (**destructive, needs approval**).
 
 ---
 
-## 7. `scanin-tool-data-replay` (gap-fill / demo data)
+## 7. `scanin-tool-data-replay` (gap-fill / demo data) — **later**
+
+Phase 0 (FN-0.1/0.2) already stops replays from alerting. The items below follow once `recomputeSmoothing` exists; until then, avoid replay runs on pilot sites or re-run FN-2.3 backfill for the touched sensors manually.
 
 **Context:** Replay/gap-fill and ad-hoc data copies rewrote history and triggered thousands of alerts (09-02: 6,234). From Phase 0 alerts ignore replay and rewrites, but replayed data must stay clearly marked and the smoothed series must be recomputed.
 
@@ -215,9 +228,9 @@ Adjusted value of a sample = raw − `initial` of the **latest event with `time 
 
 ---
 
-## 9. `scanin-svc-watchdog`
+## 9. `scanin-svc-watchdog` — **later**
 
-**Context:** The watchdog already checks alert delivery. It should also guard the new pipeline.
+**Context:** The watchdog already checks alert delivery. It should also guard the new pipeline. Not blocking any phase; until then, run handbook `alert-landscape.ts --since=7d` manually after each phase.
 
 - **WD-0.1** New check `alerts-storm`: in the last hour, any sensor+axis with > 3 alerts, or > 200 alerts fleet-wide → critical (WhatsApp to ops). Logic as handbook `ops/src/analysis/alert-landscape.ts` "throttle-violating bursts".
 - **WD-1.1** New check `integrity-backlog`: open internal `integrity` alerts older than 3 days → warning.

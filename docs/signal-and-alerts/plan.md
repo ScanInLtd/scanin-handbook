@@ -41,7 +41,8 @@ Clients see charts that swing, get alerts when nothing happened, and receive PDF
 | Alerts evaluate **created** samples only (trigger `onCreate`, not `onWrite`). Rewrites, migrations and recalculations never alert. | functions |
 | Skip samples flagged `isReplay` / `source: 'replay'` / `suspect: true`, and samples whose `time` is older than the sensor's last evaluated sample or older than 48h. | functions |
 | `alert_state` updated in a Firestore **transaction** (fixes the throttle race). | functions |
-| **Plausibility cap** per sensor type (e.g. prism > 100 mm between consecutive runs, tilt > 1°/h): sample is marked `suspect`, excluded from smoothing/alerts, and an **internal data-integrity notice** is raised. | functions (+ bridge for ATS) |
+| Until Phase 4: the 24h throttle applies per **level**, not per axis (today a warn alert blocks the alarm alert that follows within 24h). | functions |
+| **Plausibility level** (`suspect`, §4.5): a configurable per-axis level with per-type defaults. A raw jump beyond it means the sample is marked `suspect`, excluded from smoothing/alerts, and an **immediate internal data-integrity notice** is raised. Never silent, never deleted. | functions (+ bridge for ATS) |
 | **ATS run QA**: per run, compute common-mode across the run's prisms (median deviation from each prism's recent level). Large common-mode with small spread → the run is `suspect` (station error). | ATS ingestion / bridge |
 | **Prism identity**: investigate the 09-23 event and the ~8.9 m flip-flops (device-map routing, carry-over, ATS reassignment). Mapping key must be stable; mapping changes must create a baseline event (§4.2). | bridge, ATS ingestion |
 | **Step detector** (daily job): persistent level shifts > 3× warn gap → internal notice "device moved / replaced / mapping changed? set a new baseline". | functions (scheduled) or watchdog |
@@ -89,6 +90,49 @@ Message wording (WhatsApp/email), always with numbers and a chart link:
 
 Excluded: `vibration-din` (DIN 4150-3 event logic stays as is). Multi-sensor rules keep reading `status.axes` and become tier-aware (rule can require "Tier 2 on ≥ N sensors").
 
+### 4.5 One ladder of levels per axis
+
+Every axis has one ordered set of levels, configured in the same place (`thresholds.axes.<axis>`):
+
+| Level | Compared | Example (tilt) | Result |
+|---|---|---|---|
+| `warn` / `alarm` | **smoothed** value vs baseline | 0.1° / 0.2° | Tier 2 alert to client (after confirmation) |
+| `instant` | **raw** jump vs last good smoothed value | 1° (default = `alarm`) | Tier 1 alert to client (after next sample agrees) |
+| `suspect.jump` | **raw** jump vs last good smoothed value | 2° | Sample `suspect`; internal notice only |
+| `suspect.abs` (optional) | **raw** adjusted value | ±15° (sensor range) | Sample `suspect`; internal notice only |
+
+- Order is enforced in the UI: `warn < alarm ≤ instant < suspect.jump`.
+- **Per-type defaults** in code, so most axes need no config: tilt `suspect.jump` 1°, crack 5 mm, prism 100 mm (tune with `signal.ts`). `instant` defaults to `alarm`.
+- "Last good smoothed value", not "previous sample": otherwise a sensor that stays at a wrong level is only caught once. It stays `suspect` until someone decides: new baseline (§4.2), mapping fix, or "real — release to client".
+- Evaluation order per sample: `suspect` → `instant` → `warn/alarm`.
+- This follows the usual split between data QC and alerting: QC flags (`pass / suspect / fail`, gross-range + spike tests, as in NOAA QARTOD) run before the trigger levels (Alert/Alarm/Action, TARP, ISO 18674). Flagged data is kept and only marked, never removed.
+
+### 4.6 Data model (where everything lives)
+
+No new collections for the series; one new subcollection for baselines.
+
+```
+work-sensors/{id}                       ← sensor doc
+  thresholds.axes.<axis>   { warn, alarm, instant, suspect, rate }   config (UI)
+  status.axes.<axis>       'ok' | 'warn' | 'alarm'                   current verdict (functions; as today)
+  alert_state              per-axis memory for the evaluator          (functions)
+  initial-value            mirror of latest baseline (legacy readers)
+
+work-sensors/{id}/data-log/{sample}     ← one doc per reading (as today)
+  time, <axis>…, source, isReplay       written once by ingestion, never changed
+  suspect, suspect_reason               QC flag (ingestion or functions)
+  smooth  { <axis>, n, replayN, v }     smoothed adjusted value at this time  (functions)
+  eval    { <axis>: 'ok'|'warn'|'alarm'|'suspect' }  per-sample verdict  (functions)
+
+work-sensors/{id}/baseline-events/{autoId}   ← new (§4.2)
+
+alerts/{id}                             ← events, as today + tier, internalOnly, sampleTime, smoothValue
+```
+
+- The evaluator does **one write-back per sample** (`suspect` + `smooth` + `eval` in a single `update`). It doubles writes on `data-log`; acceptable at current volume, measured in Phase 2.
+- `eval` makes the chart self-explaining (points coloured by verdict) and lets the backtest compare stored verdicts with simulated ones. `status.axes` stays the single "now" verdict that UI, multi-sensor rules and reports read.
+- `ema` / `ema-log` disappear (Phase 6). `daily::` docs stay read-only until prism-daily is stopped (Phase 5).
+
 ## 5. Existing mechanisms — decision for each
 
 | # | Mechanism (where) | What it does today | Decision | Replacement / action |
@@ -99,12 +143,12 @@ Excluded: `vibration-din` (DIN 4150-3 event logic stays as is). Multi-sensor rul
 | 4 | **UI moving average — prism chart** (`prism-chart.component.ts`) | Client-side trailing 48h with outlier %, on raw TwoD/Settlement | **Remove** | Same stored series |
 | 5 | **UI "Moving Avg." button — legacy line chart** (`new-line-chart.component.ts`, `DefaultChart.ts`) | Sample-count average, no time window, no outlier handling | **Remove** | — (check whether the component is still routed; remove if dead) |
 | 6 | **UI line "smoothing" (curve tension 0.4)** — prism chart | Cosmetic Bézier curves between points; can draw overshoots that aren't in the data | **Remove (tension 0)** | Straight lines; honesty |
-| 7 | **Prism daily worker** — `scanin-worker-prism-daily` (`daily::{date}::{axis}` docs: `daily2Ddisplacement`, `dailySettlement`, `dailyEasting/Northing…`; MAD + speed gate + trimmed mean; nightly 00:05) | The only robust prism smoothing; once a day; separate axis names; skipped by alerts; drives prism charts (daily shown by default) and reports ("Processed") | **Retire after migration** | Its MAD rejection and min-samples logic move into §4.3; speed gate becomes the plausibility cap (§4.1). Keep producing during transition (read-only for UI/reports); stop the scheduler after reports switch; keep historical `daily::` docs until cleanup. Long-range report views use a daily downsample of the `smooth` series, computed at read time |
+| 7 | **Prism daily worker** — `scanin-worker-prism-daily` (`daily::{date}::{axis}` docs: `daily2Ddisplacement`, `dailySettlement`, `dailyEasting/Northing…`; MAD + speed gate + trimmed mean; nightly 00:05) | The only robust prism smoothing; once a day; separate axis names; skipped by alerts; drives prism charts (daily shown by default) and reports ("Processed") | **Stop & delete** | No migration of its code (§4.3 and §4.1 cover the same ideas). Keeps running untouched until UI and reports both read `smooth`, then stop scheduler + delete services (Phase 5); keep historical `daily::` docs read-only. Long-range views use a daily downsample of `smooth`, computed at read time |
 | 8 | **Thresholds on daily axes** (`thresholds.axes.daily*` on prisms) | Never evaluated (daily docs skip alerts); used only for chart lines / report health status | **Migrate & remove** | Tier 2 thresholds live on the raw axis names; migrate values (if different) then drop the `daily*` keys |
 | 9 | **Reports** — `scanin-svc-reports` (`prepareReportData`, `sensorTypeAxes.js`, downsampling) | Raw `data-log` downsampled (min-max); prisms plot daily "Processed" + optional raw; health report uses `status.axes` | **Switch** | Plot stored `smooth` as the main line, raw optional & faint; mark baseline events and replayed periods; threshold lines = Tier 2 levels; health report reads the new statuses |
 | 10 | **Alert throttle** (`alert_state`, 24h `min_hours_between_same_level_alerts`) | Throttles re-alerts; bypassed by races | **Replace** | Episode logic (§4.4) + transaction; the 24h constant goes away |
 | 11 | **`initial-value`** on sensor doc | Single offset applied to all history | **Replace** | Baseline events (§4.2); field kept as "current baseline" for compatibility during migration |
-| 12 | **Data replay / gap-fill / demo copies** — `scanin-tool-data-replay`, ad-hoc copy scripts | Writes `isReplay` docs and rewrites history → triggers alerts | **Keep, constrain** | Never alerts (§4.1); after a run call `recomputeSmoothing`; UI/reports render replayed segments distinctly (dashed/grey + legend). Decide policy for demo data in client-facing reports |
+| 12 | **Data replay / gap-fill / demo copies** — `scanin-tool-data-replay`, ad-hoc copy scripts | Writes `isReplay` docs and rewrites history → triggers alerts | **Keep, constrain** | Never alerts (§4.1, Phase 0); *later:* after a run call `recomputeSmoothing`; UI/reports render replayed segments distinctly (dashed/grey + legend). Decide policy for demo data in client-facing reports |
 | 13 | **Data adjustments** — `scanin-worker-firestore-adjustments`, UI `data-handling-tools` | Modify samples in place | **Keep, hook** | Must call `recomputeSmoothing`; if adjustment = re-baseline, create a baseline event instead |
 | 14 | **Calculated sensors** — `calcSensors` (every 30 min, Pub/Sub) | Write derived samples into their own `data-log` | **Keep** | They flow through the same pipeline (smoothed + tiers) automatically; verify their inputs use raw, not smoothed |
 | 15 | **ATS `suspect` flag** (`source: 'ats_live'` samples) | Exists, rarely set | **Extend** | Set by run QA (§4.1); `suspect` samples excluded everywhere except a "show suspect" debug toggle |
@@ -118,10 +162,10 @@ Excluded: `vibration-din` (DIN 4150-3 event logic stays as is). Multi-sensor rul
 | `scanin-svc-firebase-functions` | New `onCreate` evaluator (data rules, smoothing, two tiers, transaction, episode logic, tier field on alert docs); `recomputeSmoothing`; step-detector job; internal data-integrity notices; message templates; remove EMA (`recalcEma`, `ema-log` writes) |
 | `scanin-web-platform` | Default chart = stored `smooth` + raw toggle; remove 3 client MAs, EMA overlay, curve tension; "Set new baseline" action + markers; replayed/suspect styling; threshold settings: instant gap + noise-floor hint, optional rate rule; alert list shows tier |
 | `scanin-svc-reports` | Plot `smooth` + optional raw; baseline/replay markers; Tier 2 threshold lines; switch prisms off `daily*` axes |
-| `scanin-svc-mqtt-bridge` / `scanin-svc-hexagon-ats-ingestion` | Prism identity investigation & fix; ATS run QA → `suspect`; plausibility cap at ingestion for ATS |
-| `scanin-worker-prism-daily` | Keep running during transition → stop scheduler → archive repo |
-| `scanin-tool-data-replay`, adjustments worker | Call `recomputeSmoothing` after writes; keep `isReplay` tagging |
-| `scanin-handbook` | This plan; `ops/` backtests as the regression tool; review list for stuck sensors |
+| `scanin-svc-mqtt-bridge` | Prism identity investigation & fix; ATS run QA → `suspect`; plausibility cap at ingestion for ATS |
+| `scanin-worker-prism-daily` | Untouched until Phase 5, then stop scheduler + delete services; archive repo |
+| `scanin-handbook` | This plan; `ops/` backtests as the regression tool (also replaces watchdog checks for now); review list for stuck sensors |
+| *Deferred* | `scanin-svc-hexagon-ats-ingestion` (deprecated path). *Later:* `scanin-tool-data-replay` / adjustments worker (`recomputeSmoothing` hook), `scanin-svc-watchdog` (storm / integrity / coverage checks) |
 
 ## 7. Rollout
 
@@ -132,7 +176,7 @@ Excluded: `vibration-din` (DIN 4150-3 event logic stays as is). Multi-sensor rul
 | **2 — Smoothing in shadow** | Compute + store `smooth` on new samples; backfill 90 days via `recomputeSmoothing`; no alert change yet. | Backtest on stored series matches §2 numbers; Didi approves charts on pilot sites. |
 | **3 — UI** | Smoothed default, raw toggle, remove client MAs/EMA/tension, baseline action + markers, replay styling. | One smoothed definition on every screen. |
 | **4 — Alerts switch** | Two tiers per site. Pilot: צייטלין 12 (tilts/cracks) + one ATS site (DeVinci or SAVYON). Then all active sites. | Alerts/day down ≥ 70% vs baseline with no missed real event in pilot review. |
-| **5 — Reports** | Switch to `smooth` + markers; stop prism-daily scheduler. | Reports match UI. |
+| **5 — Reports** | Switch to `smooth` + markers; stop & delete prism-daily. | Reports match UI. |
 | **6 — Cleanup** | Remove EMA code, `daily*` thresholds; archive prism-daily; delete `ema-log` / old `daily::` docs (**destructive — separate approval**). | Single pipeline in code. |
 
 ## 8. Decisions needed
