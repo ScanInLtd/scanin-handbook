@@ -167,6 +167,6 @@ Notes:
 - **Commit**: **`26c99a5`** (Phase 1 in one commit, incl. migration + test scripts and the functions-repo indexes file), pushed to `master`. The `scanin-web-platform/firestore.rules` edit (data-integrity block + catch-all warning) is **left uncommitted** — handed to the web-platform team with the rules-drift task.
 - **First-10-min sanity check**: executions `ok` (350ms–2.6s), zero errors; only the pre-existing DIN missing-frequency warning.
 - **Pending**:
-  - [ ] Migration: Hillel runs `node scripts/migrate-baseline-events.js --apply` (728 events).
-  - [ ] **1h log review** (due ~16:25 UTC, will be appended here): errors / transaction failures; `[perf]` windowReads + computeMs stats; % of evaluated samples with/without `smooth` per sensor type (incl. how often diurnal coverage drops prisms); `data-integrity` docs created by kind.
+  - [x] Migration applied 2026-10-04 ~15:50 UTC (approved by Hillel): **728 events written**; verification dry-run shows 0 to create / 728 already migrated / 83 no-initial-value untouched. Idempotent — re-running is a no-op.
+  - [ ] **1h log review** (will be appended here): errors / transaction failures; `[perf]` windowReads + computeMs stats; % of evaluated samples with/without `smooth` per sensor type (incl. how often diurnal coverage drops prisms); `data-integrity` docs created by kind.
   - [ ] `detectLevelShifts` first scheduled run: tonight 02:00 Asia/Jerusalem — check reads/duration/notices tomorrow.

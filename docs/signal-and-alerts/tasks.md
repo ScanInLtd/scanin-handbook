@@ -131,6 +131,11 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
   - `ref` is missing on a sensor's first evaluation, so seed it from the `smooth` computed on that sample's window. History already exists in `data-log`, so no backfill is needed for this.
 - **FN-2.2** Callable/HTTP `recomputeSmoothing({ sensorId, fromTime })` (admin): replays samples from `fromTime` in order, rewrites `smooth` fields in batches of 400. Never alerts, never touches raw fields. Called by: baseline events (FN-1.2), replay tool, adjustments worker.
 - **FN-2.3** Backfill 90 days for pilot sites, then all active projects.
+- **FN-2.5** Prism `TwoDDisplacement` is a magnitude (bridge: √(de² + dn²)), so "raw − initial" is wrong for it, and averaging magnitudes is biased upward. Derive it instead:
+  - adjusted TwoD = hypot(E − E₀, N − N₀);
+  - smoothed TwoD = hypot(smooth.E, smooth.N), so smooth E and N even when they have no thresholds;
+  - E₀ and N₀ come from the baseline `EastingDisplacement` / `NorthingDisplacement`.
+  This changes live raw-rule alerts for prisms with non-zero initials (e.g. NAVON 24: initial TwoD 9,232 mm). Produce a before/after comparison of the latest sample per prism before deploying.
 - **FN-2.4** Log per invocation: window read count, compute ms. Report daily read volume to `system-metrics/firebase-functions/daily/{date}.smoothingReads` (increment).
 - **Acceptance:** handbook backtest re-run on stored `smooth` ≈ simulated numbers; read volume acceptable to Didi.
 
