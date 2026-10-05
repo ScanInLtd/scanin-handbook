@@ -489,6 +489,70 @@ Review round 2 was approved. Commit `e4b6440` (web-platform). Built on Node 12,
        was still unchanged.
      - (3) deleted 5,149 temporary docs; the temporary copy and its parent are gone.
 
+### Axis registry X2: the sensor page reads the registry (2026-10-05)
+
+Commit `80bf2f4` (web-platform). Built on Node 12 (clean, no new warnings), `index.html`
+checked before deploying, redeployed to channel `signal-ui` only (bundle
+`main-es2015.9e2963be…`). Live not touched. Spec: `axes.md` §4, §4.5, §5.
+
+**One module, used everywhere:** `src/app/shared/axis-registry.ts` (framework-free). It
+turns the type doc plus the sensor doc into the axis list: label (Hebrew), unit, order,
+chart, alertable, `suspectJump`, and whether this sensor has thresholds on the axis.
+Types without `axes` (today only `inclinometer-robot`) fall back to `chart-axes`, with the
+key as the label and every axis alertable (the old behaviour).
+
+| Area | Now |
+|---|---|
+| **Chart tabs** (timeseries only) | Axes with `chart: true` + **any axis with thresholds on this sensor** (invariant 2), in registry `order`, labelled "label (unit)". A chip is hidden when the axis has no data in range **and** no thresholds; that's for sensors that write one axis per doc, e.g. the cracktemp `celsius` probe vs `x`/`y`. **Prism `daily*` axes are gone.** |
+| **Prism chart** | The hardcoded label map and `AXIS_ORDER` are removed; labels and order come from the registry. Default tab still Height, then 2D. The context menu now reads the axis key from the dataset (it used to parse the display label). |
+| **Labels / units** | Registry "label (unit)" in: y-axis title, legend, tooltips, threshold lines ("שקיעה (mm) — סף אזעקה"), alert/suspect marker tooltips, "אין ממוצע" note, sidebar status per axis, initial value, axis meanings (new `axisLabel` pipe). |
+| **Threshold editor + panel** | Lists the **alertable** axes, each marked **מתריע** (gap set) / **לא מתריע**, following the toggle. A **non-alertable axis that still has thresholds** is listed **read-only** with **"עדיין מתריע — יוסר בהמשך"** and its current gaps (prism TwoD on ~165 sensors, until X4). It can't get new thresholds. **Saving now keeps every threshold the editor doesn't edit** (TwoD, legacy `daily*`). Before, the save replaced the whole `thresholds.axes` map with the editable axes only, which would have silently deleted them. |
+| **Suspect placeholder** | Per axis from the registry `suspectJump` (prism 100, tilt 1, crack/cracktemp/OPKON 5). `SUSPECT_JUMP_DEFAULTS` / `getSuspectJumpDefault` are removed from the UI. The functions/reports copies of `shared-types` never had them, so there's no drift. The sensor-group bulk dialog reads the registry too. |
+| **Layout per type** (§4.5) | The chart component is chosen by **`chartLayout`**: `timeseries` → prism-chart (type prism) / default-chart; `din4150` → vibration-din-chart (type vibration-din) / vibration-chart; `vibration-vf` → vibration-vf-chart. The type name only picks the variant inside a layout. The thresholds panel shows only for **`alertRule: "thresholds"`**: hidden for vibration + vibration-din (DIN 4150-3 evaluation; before, it was hidden only for vibration-din, by type name), and velocity only for vibration_vf. Missing fields → timeseries / thresholds. |
+| **Vibration components** | Unchanged. They keep getting the legacy `chart-axes` data keys (`velocity`, `freqeuncy`, `type`, `axis`), with registry labels/units overlaid where the key matches (velocity, frequency). No alias for the misspelling in the new code. |
+
+**Verified with production data, read-only.** `ops/src/queries/axis-ui-preview.ts` runs
+the UI's own `axis-registry.ts` against Firestore:
+- **A11** (prism): tabs שקיעה / תזוזה מזרח / תזוזה צפון / תזוזה אופקית (mm); editor
+  Height, East, North = מתריע; **תזוזה אופקית = "עדיין מתריע — יוסר בהמשך" (read-only)**;
+  suspect default 100. The four `daily*` thresholds are kept on save, not shown.
+- **סדק דירה 13** (cracktemp): tabs פתיחת סדק (mm) / טמפרטורה (°C); editor פתיחת סדק =
+  מתריע (temperature isn't alertable and has no thresholds since X1).
+- **נטייה 7** (tilt): הטיה X / הטיה Y (°), both מתריע, suspect default 1.
+- **gev yam** (vibration_vf): vibration-vf chart unchanged; editor מהירות (mm/s) only.
+- **vib 1** (vibration-din), **VIB-H21-0** (vibration): DIN charts unchanged, data keys as
+  before; threshold editor hidden.
+
+**Misspelled `freqeuncy`: still written.** Checked with read-only
+`ops/src/queries/vibration-frequency-field.ts`, the latest 200 docs per sensor:
+- vibration-din (32 sensors, data up to 13 h ago): every doc with a frequency carries
+  **both** `frequency` and `freqeuncy` (2,700 docs). No doc has only one of them.
+- vibration_vf: both, on all 200.
+- Legacy `vibration` (5 sensors): **only `freqeuncy`**, newest 2024-10-07.
+
+So live writers still duplicate the misspelled field, and the old `vibration` history has
+nothing else. `vibration-din-chart` reads only `freqeuncy` (13 places); `vibration-chart`
+reads it in 4 places and falls back to it once. Suggested cleanup (not done): charts read
+`frequency` (fallback only for legacy `vibration`) → the bridge stops writing `freqeuncy`
+→ `chart-axes` regenerated from the registry.
+
+**Screenshots for Didi (pending, Hillel on the preview):**
+- prism tabs: A11 `/sites/hmPh7Hg2fjTc9GyNRDYO/sec-9/iG8STFDXZWbHy4ZYC2o3`
+- cracktemp x + temperature tabs: סדק דירה 13 `/sites/HrZkKNt2ztXUui81Biue/sec-3/ChnGmWGqzR1FZlY6xC0z`
+- threshold editor on a prism: A11 → Thresholds panel → edit (shows the read-only
+  תזוזה אופקית row).
+
+**For review:**
+- **Prism East / North show "מתריע", but they don't alert yet.** The functions' hidden
+  prism filter (Height + TwoD only) stays until X3/X4, so a prism with E/N gaps (166
+  sensors) is labelled "מתריע" on an axis that doesn't alert today, while TwoD (which
+  does alert) is labelled "עדיין מתריע — יוסר בהמשך". It follows the spec (gap set ⇒
+  מתריע), but until X3 drops the filter the screen isn't fully truthful. Option: for
+  prism E/N, show "יתריע לאחר המעבר" until the functions flag flips (read the flag from
+  the registry/type doc).
+- Other screens still on `chart-axes`: sensor groups, data-handling tools, calc sensors,
+  legacy line chart. Out of this round's scope (sensor page only).
+
 ## Blockers for production deploy
 
 1. ~~**90-day smooth backfill** applied to all active projects~~: done (pilot + all active
