@@ -151,6 +151,22 @@ The backtest's instant on סדק 1 שירותים was alternating glitches (raw 
 
 `checkThresholds` redeployed **2026-10-05 07:38 UTC**, 0 errors (the only function whose bundle changed). The **6h `[v2-shadow]` summary clock restarts from this deploy — due ~13:40 UTC**; will be appended here (per project: v1 fired vs v2 would-fire + instant-off axes). v2 flag still not set — Hillel flips it after reviewing the re-run backtest above.
 
-### 10.4 Heads-up acknowledged
+### 10.4 Flip-moment report — צייטלין 12 (snapshot 2026-10-05 08:00 UTC)
+
+Read-only, re-runnable: `node scripts/flip-report.js --project=oBcqejjRiLRIFhG2UzPI` (simulates the FIRST v2 evaluation per axis with prevStatus = current v1 status, the persisted ref/clocks/pending state and the latest stored smooth). **Re-run it at the actual flip moment** — the state moves hourly; I'll refresh it together with the 13:40 shadow summary.
+
+**Outcome at this snapshot: safe to flip — 0 escalation-alerts, 0 silent de-escalations.** 16 axes NO-CHANGE, 3 NO-SMOOTH (Tier 2 holds the current status until a smooth arrives). Non-trivial axes:
+
+| Sensor / axis | v1 status | smooth | first v2 eval | Note |
+|---|---|---|---|---|
+| נטייה 7 y | warn | 0.1315 | **no change (warn)** | alarm clock already ticking (1×) — if smooth stays beyond the alarm gap, a **legitimate confirmed-alarm alert** will go to clients within ~3h after flip. Expected behavior, flagging for awareness. |
+| נטייה 6 y | alarm | −0.1447 | no change (alarm) | smooth confirms the alarm |
+| נטייה 4 x | alarm | 0.1337 | no change (alarm) | |
+| נטייה 5 x+y | alarm | — (latest samples suspect) | **held at alarm** (NO-SMOOTH) | hold-list sensor (85% suspects); stays alarm until good samples produce smooth — i.e. until its baseline-event review. No silent drop. |
+| סדק 4 כניסה x | ok | — | held at ok | sparse sensor |
+
+**No seeding script needed** at this snapshot: nothing would alert or silently drop at the flip. If the re-run at flip time shows SILENT-DEESCALATION or ESCALATION+ALERT rows, the mitigation is the one proposed: a small oneoff that seeds `status.axes` from the v2-held level at flip time (no alert docs created), run together with setting the flag — I'll prepare it then.
+
+### 10.5 Heads-up acknowledged
 
 `axes.md` (decisions A–C, X0–X7 rollout) read — no work done. Noted for the next round: X3 (registry loader in functions replacing `shouldEvaluateAxis` / suspect defaults / level-shift axes / message labels) touches exactly the files from this phase; the prism E/N unhide (X4) interacts with the v2 backtests per project.

@@ -442,6 +442,53 @@ thresholds and baseline). 8 done (above). 9 no archive toggle for now.
 it instead of `chart-axes` (and the prism label map / `AXIS_ORDER` in
 `prism-chart.component.ts`).
 
+### Q10 fixed: install-sensor save path (2026-10-05)
+
+Review round 2 was approved. Commit `e4b6440` (web-platform). Built on Node 12,
+`index.html` checked before deploying, redeployed to channel `signal-ui` only (bundle
+`main-es2015.3d8b7b71…`). Live not touched.
+
+1. **Existing sensor: thresholds and `date-installed` are never written.** The
+   `defaultThreshold` merge and the `date-installed = now` reset now happen only when the
+   sensor is **created**. The save of an existing sensor drops `thresholds` and
+   `date-installed`, along with the server-owned `initial-value` / `status` /
+   `alert_state` from round 2. Thresholds change only via the thresholds editor. A
+   **renamed** doc takes all five fields unchanged from the current doc.
+2. **Rename: chunked, safe copy** (`src/app/pages/install-sensor/copy-sensor-subcollections.ts`).
+   - `data-log`, then `baseline-events`, copied in **sequential batches of ≤ 400**
+     (paginated by document id). Progress is shown under Submit: "Copying data-log: N
+     docs…".
+   - **Same doc ids** in the new doc, so a retry after a failure overwrites instead of
+     duplicating. The old code created random ids.
+   - **The old doc is deleted only after every chunk committed.** On failure the copy
+     stops, the old doc is kept, and the form plus a snackbar show "Rename stopped —
+     copied X samples and Y baseline events to <new>. The old sensor doc <old> was kept.
+     Retrying is safe." The form isn't reset.
+   - Behaviour change: the old code deleted the old doc only when its data-log was
+     non-empty, so renaming a sensor with no samples left both docs. Now the old doc is
+     deleted after a successful copy, even an empty one.
+   - Unchanged (out of scope): deleting the old doc still leaves its subcollections
+     orphaned. Firestore client deletes don't cascade (see the Hebrew comment in the code).
+   - The function is framework-free, so the ops test runs **the same file** with
+     firebase-admin.
+3. **Test on בדיקות משרד** (`ops/src/oneoff/2026-10-05-test-rename-copy.ts`). It never
+   touches the real sensor. It copies to a temporary doc `<id>__rename-test-20261005`,
+   verifies, then deletes the temporary doc.
+   - Sensor: `lpKZ0eGsgnLC0d6j3oVB` (A085E3F365A0_1_j7pr), **5,148 samples + 1 baseline
+     event** → 13 chunks.
+   - Steps: (1) simulated failure on the 2nd commit: expect a stop with 400 reported
+     copied, the target holding exactly 400, and the source unchanged. (2) Retry → full
+     copy: reported counts == source, target counts == source (no duplicates from the
+     retry), 3 docs spot-checked identical with the same ids. (3) Delete the temporary copy
+     and verify it's gone.
+   - **Result: PASSED** (run by Hillel, 2026-10-05):
+     - (1) the failure stopped the copy and reported 400 data-log docs copied; the target
+       held exactly 400; the source was unchanged.
+     - (2) the retry copied `{"data-log":5148,"baseline-events":1}` in 13.1s; target
+       counts == source (no duplicates); 3 docs identical with the same ids; the source
+       was still unchanged.
+     - (3) deleted 5,149 temporary docs; the temporary copy and its parent are gone.
+
 ## Blockers for production deploy
 
 1. ~~**90-day smooth backfill** applied to all active projects~~: done (pilot + all active
@@ -471,9 +518,8 @@ it instead of `chart-axes` (and the prism label map / `AXIS_ORDER` in
    baseline).
 8. ~~Chart shows only tiered alerts until Phase 4?~~ **Yes → done** (`611be8b`).
 9. ~~Archive toggle?~~ **No, not for now.**
-10. Install-sensor save path (found in the Q5 audit): re-saving an existing sensor writes
-    the type's `defaultThreshold` (merge) and resets `date-installed`, and the rename path
-    copies the data-log in one batch (fails above 500 docs). Fix in a later round?
+10. ~~Install-sensor save path (defaultThreshold merge, date-installed reset, single-batch
+    rename copy)~~: **fixed** (`e4b6440`, see "Q10 fixed").
 
 ---
 
