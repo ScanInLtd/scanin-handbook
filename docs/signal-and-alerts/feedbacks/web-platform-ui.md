@@ -383,6 +383,65 @@ six UI screens (chart, sensor sidebar, section page, alerts center, log, timelin
    should go through `setBaseline` so `baseline-events` is complete (see UI open
    question 5).
 
+### Review round 2 implemented (2026-10-05): Q5 + Q8 + sensorDocId alert query
+
+Commit `611be8b` (web-platform). Built on Node 12, `dist/new-scanin-ui/index.html` checked
+before deploying, redeployed to channel `signal-ui` only (bundle
+`main-es2015.d7cc5036…`, expires 2026-10-19). Live not touched.
+
+**Q5: every initial-value write goes through setBaseline.** I audited every file that
+references `initial-value` (17 in `src/`) and every whole-document write to
+`work-sensors`.
+
+Changed:
+
+| Writer | Before | Now |
+|---|---|---|
+| Technical info → **"Auto Fix View"** (admin) | One `update()` writing `initial-value` (latest values) + `uiScale` + `thresholds.axes` | `uiScale` + `thresholds.axes` written directly first, then the baseline via **`setBaseline`** (`reason: rebaseline`, explicit `initial`, note "Auto Fix View (latest values)"). That creates an event and resets status for the new threshold axes. |
+| **Storage page** → save work sensor | `update(newWorkSensor)`: the whole doc loaded earlier, including a possibly stale `initial-value` | Drops the server-owned fields **`initial-value`, `status`, `alert_state`** (`withoutServerOwnedFields`, `baseline.service.ts`). Saving an unrelated field can no longer revert a newer baseline or the evaluator state. |
+| **Install sensor** → save an **existing** sensor | `set({...form}, {merge:true})` wrote the form copy of `initial-value`. After a type change the form resets it to zeros. | Initial values are written **only when the sensor is created** (that first write stays, as agreed). For an existing sensor the inputs are read-only with the hint "use Set New Baseline", and the save drops `initial-value` / `status` / `alert_state`. |
+| Install sensor → **rename** (new scanin-id ⇒ new doc id; data-log copied, old doc deleted) | The new doc got the form's initial values, and **`baseline-events` were not copied** (history lost) | The new doc takes the current doc's `initial-value` / `status` / `alert_state` unchanged, and **`baseline-events` are copied** with the same event ids. |
+
+Already routed or read-only since round 1 (verified, no change): context menu "Set New
+Baseline" (dialog → callable); sensor-group bulk dialog (baseline shown read-only);
+legacy amCharts `line-chart` (initial-value edit removed); `sensor-data.service`
+`updateInitialValue(s)` (removed); sidebar Initial Value panel (read-only + dialog).
+
+Read-only uses, no write: `sensor-cmp`, `section-cmp`, `sensor-group-view`,
+`settings-sensor-status`, `day-report`, `latest-read`, `manual-sample-dialog`,
+`edit-thresholds` (keys only), `sensor-details` (its form never includes
+`initial-value`). Creation-only writes, allowed: install-sensor new sensor, storage
+`newWorkSensor` template, `sensor.service.createSensor`.
+
+Out of scope: other repos (e.g. `scanin-tool-sensor-clone`, maintenance scripts) and the
+functions' own writers (`setBaseline`, migration).
+
+**Found during the audit, not fixed (install-sensor save path), for a later round:**
+- Re-saving an existing sensor also writes `thresholds = sensorType.defaultThreshold`
+  (merge), which may add or overwrite threshold keys, and resets `date-installed` to now.
+- The rename path copies the whole data-log in **one batch**. Above 500 docs the commit
+  fails, and the old doc then isn't deleted (both docs remain).
+
+**Q8: chart markers show only tiered alerts until Phase 4.** `sensor-chart-main` filters
+the loaded alerts to `alert.tier` present. The sidebar Recent Alerts and the alert
+lists still show all alerts. The button tooltip now says old alerts appear in the alert
+list only. Effect today: no markers anywhere, because no tiered alerts exist yet.
+
+**Alert-marker query by `sensorDocId`.** Primary `sensorDocId == id` + time range, with
+the fallback `sensor in [scanin-id, docId]` for old docs. Both run in parallel and are
+merged by alert id. If either fails (e.g. an index still building), the other's results
+are kept. Read-only check: the `sensorDocId ASC, time DESC` range query already works in
+production.
+
+**Answers recorded (handbook review round 2):** 5 done (above). 6 facade rotation is out
+of scope, left as is. 7 later, after v2: dim markers from an old config (v2 alerts carry
+thresholds and baseline). 8 done (above). 9 no archive toggle for now.
+
+**Heads-up, next round (no work yet):** the axis registry
+`docs/signal-and-alerts/axes.md`. The axis chips will read labels, units and order from
+it instead of `chart-axes` (and the prism label map / `AXIS_ORDER` in
+`prism-chart.component.ts`).
+
 ## Blockers for production deploy
 
 1. ~~**90-day smooth backfill** applied to all active projects~~: done (pilot + all active
@@ -391,7 +450,8 @@ six UI screens (chart, sensor sidebar, section page, alerts center, log, timelin
 2. ~~**`setBaseline` callable deployed** (FN-1.2)~~: done (Phase 1, 2026-10-04); the
    round trip was verified.
 3. **Didi's approval** of the preview, now including round 2 (one axis at a time + event
-   markers, commit `1149c38`). Screenshots pending (see above).
+   markers, commit `1149c38`; setBaseline-only baselines + tiered-only markers, commit
+   `611be8b`). Screenshots pending (see above).
 
 ## Open questions
 
@@ -404,20 +464,16 @@ six UI screens (chart, sensor sidebar, section page, alerts center, log, timelin
    which repo's rules copy is authoritative and commit/deploy it there.
 4. UI-3.8's optional Tier-1 band (±instant around smooth when raw is shown) was skipped —
    wanted for the pilot or leave for Phase 4 (UI-4.1)?
-5. **Remaining direct `initial-value` writers in the UI** (old initial-value editors,
-   context-menu "set as initial"): should they all be routed through `setBaseline` so every
-   baseline change gets a `baseline-events` record? This needs an audit of the writers.
-6. **Facade rotation for virtual tilts** (`applyRotationAdjustment`) does nothing today.
-   Should it be fixed or removed?
-7. Alert markers after Phase 4: if thresholds or baseline change after an alert, its
-   marker height is in the old frame again. Store the threshold and baseline on the alert
-   (already done on v2 alerts) and dim markers whose config differs from today's?
-8. Until Phase 4: should the chart show **only tiered alerts** (a one-line filter), so the
-   raw-based legacy alerts that keep arriving don't clutter it? The sidebar and alert
-   lists would still show them, since they're what users receive.
-9. Should admins be able to see archived (pre-2026-10-05) alerts in the UI, e.g. an
-   "archive" toggle on the sensor page reading `alerts-archive`? Today that history needs
-   an ops query.
+5. ~~Route every direct `initial-value` writer through `setBaseline`?~~ **Yes → done**
+   (`611be8b`, see "Review round 2 implemented").
+6. ~~Facade rotation for virtual tilts~~: **out of scope this round**, left as is.
+7. ~~Dim markers from an old config?~~ **Later, after v2** (v2 alerts carry thresholds and
+   baseline).
+8. ~~Chart shows only tiered alerts until Phase 4?~~ **Yes → done** (`611be8b`).
+9. ~~Archive toggle?~~ **No, not for now.**
+10. Install-sensor save path (found in the Q5 audit): re-saving an existing sensor writes
+    the type's `defaultThreshold` (merge) and resets `date-installed`, and the rename path
+    copies the data-log in one batch (fails above 500 docs). Fix in a later round?
 
 ---
 

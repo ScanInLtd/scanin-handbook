@@ -128,4 +128,29 @@ Totals: **v1 = 227 → v2 = 9** (8 confirmed + 1 instant), **−96%**.
 | נטייה 6 | y | confirmed | alarm | 2026-08-20 03:00Z | −0.1007 | −0.1090 | 4.0h, 5 evals |
 | נטייה 4 (`nG4q9Y0zYV6W2SgfWFB3`) | x | confirmed | alarm | 2026-08-17 01:00Z | 0.1456 | 0.1430 | 3.0h, 4 evals |
 
-Chart links: `https://new-scanin-ui.web.app/s/<sensorId>`. Note the instant alert on סדק 1 is dated 2026-10-05 02:46 — a fresh real jump last night, worth a look regardless of the rollout. Re-runnable: `node scripts/backtest-v2-zeitlin.js --days=60 --details`.
+Chart links: `https://new-scanin-ui.web.app/s/<sensorId>`. Note the instant alert on סדק 1 is dated 2026-10-05 02:46 — a fresh real jump last night, worth a look regardless of the rollout. Re-runnable: `node scripts/backtest-v2-zeitlin.js --days=60 --details`. *(Superseded by §10 — the סדק 1 "instant" was alternating glitches; the fixed rule removes it.)*
+
+---
+
+## 10. Review #2 fixes (2026-10-05, commit `fff8937`, deployed 07:38 UTC)
+
+### 10.1 BLOCKING fix — Tier 1 confirmation requires direction + level agreement
+
+The backtest's instant on סדק 1 שירותים was alternating glitches (raw 8.80 → 9.81 → **6.21** → **11.48** → 8.79, stable ~8.8): the −2.6 and +2.7 glitches "confirmed" each other. New rule in `tiers.ts`: a pending jump is confirmed only if the next sample jumps in the **same direction** (sign of `adj − ref`) **and** sits at the **same level** (`|adj − pending| ≤ ½ × instant.gap`); otherwise the pending is dropped and the new sample becomes a fresh candidate.
+
+- **Emulator** (suite now **26 checks, all green**): alternating +5/−5/+5 glitches → 0 instants (old rule alerted on the 2nd); same-direction but different level (5 → 9.5) → still 0; a real step held over two agreeing samples → exactly 1 instant.
+- **Backtest re-run (60d):** **v1 = 228 → v2 = 8** (8 confirmed, **0 instant**) — still **−96%**; the 8 confirmed alerts are identical to §9's list (the false instant is gone, nothing else moved).
+
+### 10.2 Alert-doc fixes (UI census)
+
+- **siteName/sectionName:** alert docs carried "Unknown Site/Section" — `location` on sensors holds only ids. `resolveLocationNames` now resolves `projects/{site}.name` + `sections/{section}.name` at alert creation, cached per instance (1h TTL); applied to v1/v2 threshold alerts and the DIN path. **WhatsApp/email were never wrong** — `handleAlerts` already resolved names from Firestore at send time; only the stored docs had Unknowns.
+- **sensorDocId + sampleTime on every alert:** threshold v1/v2 already carried both; **DIN alerts now carry `sampleTime`** too. `evaluateMultiSensorRules` writes no alert docs (WhatsApp only), so the guarantee covers all alert-doc writers.
+- **Index `alerts (sensorDocId ASC, time DESC)`:** already exists in prod (READY) — recorded in the repo's `firestore.indexes.json`; nothing was created.
+
+### 10.3 Deploy
+
+`checkThresholds` redeployed **2026-10-05 07:38 UTC**, 0 errors (the only function whose bundle changed). The **6h `[v2-shadow]` summary clock restarts from this deploy — due ~13:40 UTC**; will be appended here (per project: v1 fired vs v2 would-fire + instant-off axes). v2 flag still not set — Hillel flips it after reviewing the re-run backtest above.
+
+### 10.4 Heads-up acknowledged
+
+`axes.md` (decisions A–C, X0–X7 rollout) read — no work done. Noted for the next round: X3 (registry loader in functions replacing `shouldEvaluateAxis` / suspect defaults / level-shift axes / message labels) touches exactly the files from this phase; the prism E/N unhide (X4) interacts with the v2 backtests per project.
