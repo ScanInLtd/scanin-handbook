@@ -168,5 +168,5 @@ Notes:
 - **First-10-min sanity check**: executions `ok` (350ms–2.6s), zero errors; only the pre-existing DIN missing-frequency warning.
 - **Pending**:
   - [x] Migration applied 2026-10-04 ~15:50 UTC (approved by Hillel): **728 events written**; verification dry-run shows 0 to create / 728 already migrated / 83 no-initial-value untouched. Idempotent — re-running is a no-op.
-  - [ ] **1h log review** (will be appended here): errors / transaction failures; `[perf]` windowReads + computeMs stats; % of evaluated samples with/without `smooth` per sensor type (incl. how often diurnal coverage drops prisms); `data-integrity` docs created by kind.
-  - [ ] `detectLevelShifts` first scheduled run: tonight 02:00 Asia/Jerusalem — check reads/duration/notices tomorrow.
+  - [x] **Log reviews done** (see functions-phase2.md §9.4 + §9.6 for the full numbers): 0 errors in every window since the 15:24 deploy; 71 samples evaluated in the first 1.5h, 100% with smooth; overnight 829 samples, per-type smooth 83–100% (loadcell 53%, min-n); `data-integrity` = 6 open `late-data` notices only (FN-1.6 working — two sensors draining ~2-month backlogs).
+  - [x] `detectLevelShifts` first run 02:00 Asia/Jerusalem: 22 projects, 257 sensors, 13,308 reads, 0 steps, 61.6s — clean.

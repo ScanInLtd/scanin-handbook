@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
-**Status:** ✅ reviewed & approved (with the 48h-prism-window change — §7), committed **`ec335e3`**, **deployed to prod 2026-10-04 16:55 UTC**, emulator **Phase 2: 22/22** + **Phase 1 regression: 35/35** green. Pending: backfill `--apply` (Hillel, pilot → all-active), post-backfill log check (§8).
+**Status:** ✅ reviewed & approved (with the 48h-prism-window change — §7), committed **`ec335e3`** + **`96e9737`** + **`8d3cc99`**, **deployed to prod 2026-10-04 16:55 UTC**, emulator **Phase 2: 22/22** + **Phase 1 regression: 35/35** + **batch tooling: 9/9** green. **90-day backfill APPLIED** (pilot + all-active, §9). Pending: full-history fill (scheduled by Hillel, §9.3), detectLevelShifts first-run report (§9.4).
 
 ---
 
@@ -125,8 +125,8 @@ Other types unchanged (crack 98.9%, tilt 96.5%, cracktemp 98.3%, OPKON ~97%, bat
 - **Commit:** **`ec335e3`** (Phase 2 in one commit: FN-2.2/2.5 + 48h window + scripts + tests), pushed to `master`.
 - **Deploy:** 2026-10-04 **16:55 UTC** — `firebase deploy --only functions:checkThresholds,functions:setBaseline,functions:recomputeSmoothing`: `checkThresholds`/`setBaseline` updated, `recomputeSmoothing` created, 0 errors. No new indexes needed.
 - **Pending:**
-  - [ ] Backfill (Hillel): `node scripts/recompute-smoothing.js --project=oBcqejjRiLRIFhG2UzPI,hmPh7Hg2fjTc9GyNRDYO --days=90 --apply` (pilot), then `--all-active --days=90 --apply`. Deploy-first ordering satisfied.
-  - [ ] Post-backfill sanity: spot-check a pilot prism's `smooth` series (w=48, TwoD = hypot of components) + confirm no `data-integrity` notices were raised by the backfill (it only counts).
+  - [x] Backfill applied 2026-10-04 (approved; run by the agent) — see §9.
+  - [x] Post-backfill sanity passed — see §9.
   - [ ] Watchdog idea for later (WD-2.1 exists): smoothing-coverage check should read `smooth.w`-aware expectations.
 - **Rollback:** redeploy `26c99a5` — TwoD reverts to the old math, window back to 24h, `recomputeSmoothing` callable deletable; backfilled `smooth`/`eval`/`w` fields are inert for old code; backfill-set suspect flags can be re-litigated by a later recompute run.
 
@@ -147,5 +147,68 @@ During re-testing, a duplicated test invocation ran concurrently with a clean ru
 
 ## Handbook review #2 (2026-10-04, after deploy `ec335e3`)
 
-- **Full-history backfill** (the addendum): `--days=all` isn't implemented, but `--days=1000` covers every sensor's history (data starts ≈ 20 months ago). Re-runs are idempotent because the script only writes fields that changed, so `--after` resumability isn't needed.
+- **Full-history backfill** (the addendum): `--days=all` isn't implemented, but `--days=1000` covers every sensor's history (data starts ≈ 20 months ago). Re-runs are idempotent because the script only writes fields that changed, so `--after` resumability isn't needed. *(Superseded: `--days=all` + checkpoint/resume were implemented in §9 — and resumability turned out to be essential for the million-doc sensors.)*
 - **Prism coverage 75% at 48h:** keep `MIN_QUARTERS = 3` for prisms for now. After the pilot backfill, look at which prisms lack smooth (dead/sparse vs narrow clock window) before relaxing it.
+
+---
+
+## 9. 90-day backfill run + batchable full-history tooling (2026-10-04/05)
+
+### 9.1 Backfill — APPLIED (approved scope: smooth / eval / evaluator-suspect fields only)
+
+| Run | Docs read | Written | Suspects flagged | Duration | Errors |
+|---|---|---|---|---|---|
+| Pilot (צייטלין + דה וינצי) | 30,923 | **26,509** | 296 | ~3.5 min | 0 |
+| All active (272 sensors) | 169,202 | **111,890** | 1,672 | ~65 min | 0 |
+
+(All-active wrote less than the dry-run's 138k because the pilot docs were already identical; a post-apply prism dry-run returned `wouldChange = 0` — direct idempotence proof.)
+
+**Pilot sanity (all passed):** prism A11 @ דה וינצי — 118 smoothed docs, `w=48` everywhere, 0 violations of `TwoD == hypot(E,N)`, series 0.03–7.56mm; tilt @ צייטלין `w=24` x 0.005–0.009°; crack "סדק 2 חדר שינה" `w=24` x −0.585…−0.565mm; **0 data-integrity docs** created by the backfill; **checkThresholds not triggered** (executions during the window at/below baseline, zero log lines referencing backfilled sensors).
+
+### 9.2 Coverage + prism "why missing" (90d, post-backfill)
+
+Per type: crack 98.9% · battery 99.3% · OPKON 96.8–97.4% · cracktemp 98.3% · tilt 96.5% · loadcell 92.7% · **prism 75.2%**.
+Prism misses (4,740 / 19,147 samples): **suspect 1,380 (29%) · min-n 2,644 (56%) · diurnal coverage 716 (15%)**. Worst 10 dominated by JTCS identity-error prisms (H0_12B 0% — all 225 samples suspect; H0_12A 7%; "6"@e2Nemfi 29%) and near-dead prisms (D8: 12 samples/90d).
+**Implication:** relaxing `MIN_QUARTERS` would recover only ~15% of missing prism smooths — the real levers are the ATS repair (suspects) and sensor health (min-n). Recommendation: leave `MIN_QUARTERS = 3` (consistent with review #2).
+
+### 9.3 Batchable full-history tooling — commits `96e9737` + `8d3cc99`
+
+New script options: `--days=all` (fromTime = first sample), `--until=<ISO>` (slice fills, later samples untouched), checkpoint per finished sensor (`scripts/.recompute-checkpoint-<runId>.jsonl`, gitignored) + `--resume=<runId>`, `--max-minutes` (default 20, finishes in-flight sensors then exits with a resume hint), `--max-sensors`, `--concurrency` (default 3; per-sensor stays sequential), `--type=` filter, 10k-doc progress prints, miss-reason stats (min-n vs coverage), worst-10 coverage report. **Emulator: 9/9** (incl. interrupted+resumed ≡ uninterrupted).
+
+**Hardening (`8d3cc99`), found the hard way:** the fleet holds **7.36M docs**, but **4 office test-rig sensors hold ~5.4M** (`di-crack-un3` 1.67M, `TILT_UN_02` 1.59M, `TILT-UN-01` 1.26M, prism `NEVIM61_1B` 923k). Million-doc sensors killed gRPC streams (ECONNRESET → poisoned channel → silent process exit mid-run). Fixes: **REST transport** for script runs + 3× per-sensor retry; checkpoint/resume recovered each aborted run. 121/272 sensors are already checkpointed in dry-run `fullhist-dryrun`.
+
+**Full-history estimates (for the scheduled run):** ~7.36M reads ≈ $4.40; ~6.5–7M writes ≈ $12–13; wall ≈ 3h for the normal 268 sensors at concurrency 3 **plus ~2–4h just for the 4 monsters**. **Recommendation: exclude/defer the 4 test rigs** (~70% of cost/time, ≈0 monitoring value). Also: tilt `Ci5mmC7CTZ9TU0AFKRwG` "8" would receive **16,422** historical suspect flags (stuck eras) — expect large suspect counts in full history.
+
+### 9.4 Log reviews (Phase 0/1/2 pending checks)
+
+- **13:41→15:24 (Phase 0 era):** SKIPs — out-of-order 12 (one ATS batch), isReplay 2 (live-test docs), stale/suspect/derived 0. Errors 0. *(Full elapsed was ~4h, not 24h — deploys superseded each other same-day.)*
+- **15:24→16:55 (Phase 1 code):** 71 evaluated samples, **100% received smooth** on every type seen; windowReads med 24 (tilt 48, OPKON-100 72); computeMs med 0.8–1.5s, max 5.2s. Errors 0.
+- **16:55→ (Phase 2 code):** 39 samples, same profile (computeMs max 6.9s on the 72-doc OPKON). Errors 0.
+- **data-integrity:** still empty — zero docs since the Phase 1 deploy (no live suspects/late-data yet; backfill never raises).
+- ⚠️ **No prism samples live-evaluated since 15:24** — plausibly ATS cycle timing, re-check with the next report. *(Resolved — see §9.6: 100 prism samples evaluated overnight.)*
+- **detectLevelShifts:** scheduler job ENABLED, first run 02:00 Asia/Jerusalem — results to be appended. *(Done — §9.6.)*
+
+### 9.6 Morning-after review (2026-10-05, overnight 18:00 UTC → morning)
+
+- **detectLevelShifts first run** (23:00 UTC = 02:00 Israel): **22 projects, 257 sensors scanned, 13,308 doc reads, 0 steps → 0 notices, 61.6s**. Clean. (0 steps is plausible: 7-day window, and the backfill-flagged suspect samples are excluded from the medians.) Note: v2 scheduled functions log under `resource.type="cloud_run_revision", service_name="detectlevelshifts"`, not `cloud_function`.
+- **checkThresholds overnight:** **0 errors.** 829 evaluated samples. SKIPs: stale>48h **607** (buffered-upload drains — see below), derived:daily 176 (prism-daily worker, expected), out-of-order 27, isReplay/suspect 0.
+- **Prisms are evaluated again** (yesterday's ⚠️ was ATS timing): 100 prism samples, **83% got smooth** live (w=48), reads med 20; tilt 99% (reads med 46 — the 48h… no, tilt reads med 46 reflects 2 axes/doc devices), crack/cracktemp/battery/OPKON-100 100%, OPKON-60 93%, loadcell 53% (2 sparse sensors, min-n). computeMs med 0.7–2s, max 6.5s.
+- **FN-1.6 live and useful:** `data-integrity` now holds exactly **6 open `late-data` notices** (no other kinds, no noise): two sensors ~4.1d behind, two ~31.4d, two **~61.8d** — including `Ci5mmC7CTZ9TU0AFKRwG` (the 16.4k-suspect sensor) and `ViuNudIcb3TJpdbDTyXT`, both draining 2-month backlogs (counts 164/172 and climbing). This is precisely the "sensor N days behind" visibility the phase was built for — these six are a ready-made review list for Nathan.
+- **No live `implausible-jump`/`out-of-range` notices yet** — refs exist fleet-wide since the backfill; no overnight jumps crossed the limits.
+
+### 9.5 Open questions
+
+1. Full-history run: exclude/defer the **4 test-rig monsters**?
+2. `Ci5mmC7CTZ9TU0AFKRwG` (16.4k would-be historical suspects): let the full fill flag them, or baseline-review first?
+3. `MIN_QUARTERS` for prisms: data says keep 3 — confirm final.
+4. Zero live prism evaluations since 15:24 — check ATS liveness together with the detectLevelShifts report?
+
+---
+
+## Handbook review #3 (2026-10-05)
+
+1. **Full history:** exclude the 4 office test rigs. For the rest, first run a dry-run that lists sensors where would-be suspects are > 5% of their samples. Apply only the others; hold the listed ones for review.
+2. **`Ci5mmC7CTZ9TU0AFKRwG` and similar heavy-suspect sensors:** don't flag yet. Long "stuck eras" most likely mean historical `initial-value` re-zeros that were never recorded as events, because the migration created a single event per sensor. Flagging them would hide real data. Review them with Nathan first: add baseline events at the historical change points, then fill.
+3. **`MIN_QUARTERS = 3` for prisms:** confirmed, final.
+4. **Prism liveness:** resolved (100 prism samples overnight).
+5. **The 6 `late-data` notices** are a review list for Nathan.
