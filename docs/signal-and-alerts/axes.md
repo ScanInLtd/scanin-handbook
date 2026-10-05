@@ -86,8 +86,8 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 
 Vibration isn't time series per axis. It's a DIN 4150-3 scatter (velocity vs frequency, short / long term) plus velocity over time, and it has its own evaluation (`evaluateDinSensor`, not `thresholds.axes`). The **layout** stays in code: the UI's `vibration-chart` / `vibration-vf-chart` components, the reports' `charts` config and the functions' DIN logic. That's fine as long as it's declared, not hidden:
 - The registry still lists the fields (velocity, frequency) with labels and units, so names and units come from one place.
-- Add `chartLayout: "din4150"` and `alertRule: "din4150"` on the vibration and vibration-din types (`vibration_vf` keeps `thresholds` on velocity). The UI, reports and audit then read "this type uses the DIN layout and rule", instead of guessing from the type name.
-- The one-axis tabs and the threshold editor don't apply to `chartLayout: "din4150"` types.
+- Every type with a registry declares `chartLayout` (`timeseries` | `din4150` | `vibration-vf`) and `alertRule` (`thresholds` | `din4150`): vibration + vibration-din = `din4150` / `din4150`, vibration_vf = `vibration-vf` / `thresholds` (velocity threshold), all others `timeseries` / `thresholds`. The UI, reports and audit branch on these fields instead of guessing from the type name. Written by `ops/src/oneoff/2026-10-05-axis-registry-layout.ts`.
+- The one-axis tabs apply only to `chartLayout: "timeseries"`; the threshold editor only to `alertRule: "thresholds"`.
 
 ## 5. Proposed registry content (to agree with Didi / Nathan)
 
