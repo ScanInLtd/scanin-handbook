@@ -274,19 +274,124 @@ and vibration charts untouched)
 
 **Screenshots for Didi (pending: Hillel on the preview, admin login).** Charts:
 - cracktemp, axis switch: סדק דירה 13 `/sites/HrZkKNt2ztXUui81Biue/sec-3/ChnGmWGqzR1FZlY6xC0z`
-  (also has 2 alarm alerts on x)
-- tilt with alerts: נטייה 6 `/sites/oBcqejjRiLRIFhG2UzPI/sec-3/iu1fbCeEi6sBW9UGdJTR`
-  (25 alerts in 30d, warn+alarm on x/y) or נטייה 7 (24)
 - prism A11: `/sites/hmPh7Hg2fjTc9GyNRDYO/sec-9/iG8STFDXZWbHy4ZYC2o3`
 - suspect-rich prism "12" as admin: `/sites/pUeJ6MlE8HwJPV57kETZ/sec-1/sen-prism-prism9`
-- Alert lookup for picking more: handbook `ops/src/queries/alert-fields.ts --days=30`.
+- **Tilt with alerts: not possible right now.** The legacy alerts were archived (below), so
+  no threshold alert exists until a new one fires (legacy evaluator, still live) or
+  Phase 4 drives tiered alerts. Take this screenshot then; pick a sensor with
+  `ops/src/queries/alert-fields.ts --days=7`. Before the archive, נטייה 6 was the example
+  (screenshot from Hillel: a row of orange ● warn markers at ≈ −0.09°, all raw-dip alerts
+  below an unaffected smooth line).
+
+#### Old alerts don't match today's thresholds → legacy alerts archived (2026-10-05)
+
+**Finding** (Hillel, on the preview). The markers on סדק דירה 13 sat far from the line and
+didn't match the drawn thresholds. Read-only `ops/src/queries/sensor-alerts-vs-config.ts
+--sensor=ChnGmWGqzR1FZlY6xC0z` showed three causes:
+- **Thresholds changed 5× since February**: warn gap 0.5 → 1 → 1.4 → 0.4 → 1.3 → 3 today.
+  Every marker was right under the thresholds of its day.
+- **The initial value used by the alerts changed 5× too** (12.44 / −13.69 / −15.73 /
+  15.72 / −41.62; −13.34 today, equal to the January migration value). None of these is
+  in `baseline-events`, which holds only the migration: they were direct old-UI writes
+  from before setBaseline existed. The marker heights are in each day's baseline frame.
+  They can't be re-projected onto today's frame either, because the February raw
+  (+11.64) vs today's (≈ −13.4) suggests a reinstall or sign change.
+- **Legacy alerts were evaluated on raw samples.** The three 03-04 alerts were created in
+  the same second (a burst of bad readings), and the smooth line ignores those. Several
+  later "alerts" were garbage readings (raw 4,150,198; 47.46; −41.62).
+
+On נטייה 6 the same pattern was visible as a row of warn markers from raw dips.
+
+**Decision (Hillel):** move all legacy threshold alerts out of `alerts`, keeping them, so
+no screen shows them. This was chosen over tagging, which would have needed a filter in
+six UI screens (chart, sensor sidebar, section page, alerts center, log, timeline).
+
+**Applied 2026-10-05 10:13 (Asia/Jerusalem)** by Hillel with
+`ops/src/oneoff/2026-10-05-archive-pre-smoothing-alerts.ts --apply`.
+- Scope: `type == "threshold"`, no `subType`, no `tier`, `time` < 2026-10-05 10:13:37.
+- Moved **13,947** alerts (2025-12-12 → 2026-10-05 10:00) to `alerts-archive/{same id}`,
+  with `archivedAt`, `archiveReason: "pre-smoothing-raw"` and `archivedBy` added. That was
+  27,894 writes: copy first, then delete.
+- Stayed in `alerts`: **2,651** = 2,650 DIN vibration alerts (correctly evaluated on peak
+  velocity) + 1 `subType: test`.
+- Busiest sites: `ge8lO1KCbxU4RnpgL7xs` 8,165, `pUeJ6MlE8HwJPV57kETZ` 2,528,
+  `EZFDysHMoQQTQDeH5G25` 1,175, דה וינצי דרום 662, `e7nciGjF3DwsQkLEOFKn` 462,
+  צייטלין 12 352.
+- Backup: `ops/out/alerts-archive-backup-2026-10-05T07-13-48-600Z.json` (gitignored, local
+  only). Undo: the same script with `--undo --apply`.
+- **Verified** with read-only `ops/src/queries/alerts-archive-verify.ts`:
+  - `alerts` 2,651, `alerts-archive` 13,947 (all `pre-smoothing-raw`).
+  - 13,947/13,947 backed-up ids are in the archive, and 0 remain in `alerts`.
+  - 0 legacy threshold alerts are left before the cutoff.
+- No triggers: handleAlerts and evaluateMultiSensorRules run on alerts *onCreate* only,
+  and nothing listens on `alerts-archive`. No reader of `alerts` was found in
+  functions, reports or watchdog. The UI readers simply stop seeing these docs.
+
+**Not changed by the archive:**
+- **New legacy alerts keep coming.** The raw-based `checkThresholds` path is still live
+  until Phase 4 drives tiered alerts. These are the alerts users receive on WhatsApp,
+  so they show normally. (Re-running the script after Phase 4 was the original idea;
+  see the follow-up below — current decision is to let them accumulate.)
+- **Sensor status is untouched.** E.g. נטייה 6 is red because of
+  `work-sensors/{id}.status.axes`, not because of alert docs.
+
+**Follow-up the same day: were real alerts archived too? Decision: keep the archive.**
+- On נטייה 6 the y **smooth** line itself crosses warn (−0.08) and then alarm (−0.1), and
+  the sensor status is ALARM on y. So the archive also removed some real exceedances, not
+  just raw noise. (A tooltip that looked like a surviving alert was the alarm **threshold
+  line's** tooltip, "alarm −0.100". No alert markers are left on that chart.)
+- Considered: undo the archive and classify markers in the UI instead (smooth-confirmed →
+  normal, raw-only → faded/hidden, with thresholds and baseline at alert time in the
+  tooltip). A read-only measurement for this,
+  `ops/src/queries/archived-alerts-vs-smooth.ts`, was written but stopped before it
+  finished, so there are no numbers yet.
+- **Decision (Hillel): keep the archive and let alerts accumulate from now on.**
+  - From the cutoff on, every alert in `alerts` comes from the current thresholds and
+    baseline, so the markers match the drawn lines. After Phase 4 they're smooth-based
+    and land on the line.
+  - The current state isn't lost: sensor status (e.g. נטייה 6 y ALARM) lives on the sensor
+    doc. Legacy alerts fire only on level transitions, so a sensor that stays in alarm
+    produces no new alert.
+- **Consequences to keep in mind:**
+  - **Alert history before 2026-10-05 10:13:37 (Asia/Jerusalem) is not in any UI screen**
+    (alerts center, log, timeline, sensor sidebar, chart). It lives in
+    **`alerts-archive`** (`archiveReason: "pre-smoothing-raw"`, same doc ids and fields
+    as the originals) and in the local backup
+    `ops/out/alerts-archive-backup-2026-10-05T07-13-48-600Z.json`. Questions like "what
+    was sent in August?" need an ops query on `alerts-archive`.
+  - Until Phase 4 the raw-based evaluator keeps producing alerts, so raw-dip markers
+    (נטייה 6 had 25 in 30 days) will gradually come back on the chart, at least under the
+    current thresholds. Option, not done: show only tiered alerts on the chart until
+    Phase 4 (open question 8).
+  - Do **not** re-run the archive script casually. A second run moves everything created
+    since the cutoff. `--undo` restores all 13,947 if the decision changes.
+
+**Findings for FN (functions) from the alert census** (`ops/src/queries/alert-fields.ts`,
+`alerts-census.ts`):
+1. **`siteName` / `sectionName` are "Unknown Site" / "Unknown Section" on every alert.**
+   `createAlertObject` reads `location.siteName`, which isn't on the location object. The
+   names should be resolved from `projects` / `sections` when the alert is built. This
+   matters for the alerts center, log and message texts.
+2. **`alert.sensor` is the scanin-id, or the doc id when the sensor has none** (375/816 in
+   30 days). Consumers must query both. Suggestion: always also write `sensorDocId`
+   (already present) and query by it. Needs an index `sensorDocId ASC, time DESC`, which
+   the sidebar list already uses.
+3. **Only 60/816 recent alerts had `sampleTime`.** Alerts without it are placed at their
+   creation time. This is fine for live data and wrong for backfills/replays.
+4. **Initial-value changes made outside `setBaseline` leave no trace.** Old UI paths
+   still write `initial-value` directly, or did until recently. Every baseline change
+   should go through `setBaseline` so `baseline-events` is complete (see UI open
+   question 5).
 
 ## Blockers for production deploy
 
-1. **90-day smooth backfill** applied to all active projects (until then most ranges show
-   the raw-fallback note instead of a smooth line).
-2. **`setBaseline` callable deployed** (FN-1.2) — the dialog fails without it.
-3. **Didi's approval** of the pilot sites on the preview.
+1. ~~**90-day smooth backfill** applied to all active projects~~: done (pilot + all active
+   projects). The full-history fill is still to come, so ranges older than ~90 days show raw
+   plus "אין ממוצע לתקופה זו".
+2. ~~**`setBaseline` callable deployed** (FN-1.2)~~: done (Phase 1, 2026-10-04); the
+   round trip was verified.
+3. **Didi's approval** of the preview, now including round 2 (one axis at a time + event
+   markers, commit `1149c38`). Screenshots pending (see above).
 
 ## Open questions
 
@@ -299,6 +404,20 @@ and vibration charts untouched)
    which repo's rules copy is authoritative and commit/deploy it there.
 4. UI-3.8's optional Tier-1 band (±instant around smooth when raw is shown) was skipped —
    wanted for the pilot or leave for Phase 4 (UI-4.1)?
+5. **Remaining direct `initial-value` writers in the UI** (old initial-value editors,
+   context-menu "set as initial"): should they all be routed through `setBaseline` so every
+   baseline change gets a `baseline-events` record? This needs an audit of the writers.
+6. **Facade rotation for virtual tilts** (`applyRotationAdjustment`) does nothing today.
+   Should it be fixed or removed?
+7. Alert markers after Phase 4: if thresholds or baseline change after an alert, its
+   marker height is in the old frame again. Store the threshold and baseline on the alert
+   (already done on v2 alerts) and dim markers whose config differs from today's?
+8. Until Phase 4: should the chart show **only tiered alerts** (a one-line filter), so the
+   raw-based legacy alerts that keep arriving don't clutter it? The sidebar and alert
+   lists would still show them, since they're what users receive.
+9. Should admins be able to see archived (pre-2026-10-05) alerts in the UI, e.g. an
+   "archive" toggle on the sensor page reading `alerts-archive`? Today that history needs
+   an ops query.
 
 ---
 
