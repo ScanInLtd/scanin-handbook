@@ -9,7 +9,8 @@
  * status.axes.TwoDDisplacement and alert_state.axes.TwoDDisplacement (backed up).
  *
  * Usage:
- *   npx tsx src/oneoff/2026-10-05-project-flags.ts --project=<id> [--alerting=v2] [--prismAxes=registry]   # dry run
+ *   npx tsx src/oneoff/2026-10-05-project-flags.ts --project=<id>[,<id>…] [--alerting=v2] [--prismAxes=registry]   # dry run
+ *   npx tsx src/oneoff/2026-10-05-project-flags.ts --all-active [--except=<id>,…] --alerting=v2
  *   … --apply                                                                                                # write
  *   npx tsx src/oneoff/2026-10-05-project-flags.ts --undo=out/project-flags-backup-<ts>.json --apply
  *
@@ -43,31 +44,36 @@ run(async () => {
     return;
   }
 
-  const projectId = str(args.project);
-  if (!projectId) throw new Error("--project=<id> required");
   const alerting = str(args.alerting);
   const prismAxes = str(args.prismAxes);
   if (alerting && alerting !== "v2") throw new Error("--alerting must be v2");
   if (prismAxes && prismAxes !== "registry") throw new Error("--prismAxes must be registry");
   if (!alerting && !prismAxes) throw new Error("nothing to set: pass --alerting=v2 and/or --prismAxes=registry");
 
+  // --project=<id>[,<id>…] or --all-active [--except=<id>,…]
+  const except = new Set((str(args.except) ?? "").split(",").filter(Boolean));
+  const ids = args["all-active"]
+    ? (await db.collection("projects").where("isActive", "==", true).get()).docs.map((d) => d.id).filter((id) => !except.has(id))
+    : (str(args.project) ?? "").split(",").filter(Boolean);
+  if (!ids.length) throw new Error("--project=<id>[,<id>…] or --all-active required");
+
+  const plan: { ref: DocumentReference; data: Record<string, unknown>; backup: Backup; note: string }[] = [];
+  for (const projectId of ids) {
   const pref = db.collection("projects").doc(projectId);
   const p = await pref.get();
   if (!p.exists) throw new Error(`project ${projectId} not found`);
   const pd = p.data()!;
-  console.log(`Project: ${projectName(pd)} (${projectId})  current alerting=${pd.alerting ?? "-"} prismAxes=${pd.prismAxes ?? "-"}`);
-
-  const plan: { ref: DocumentReference; data: Record<string, unknown>; backup: Backup; note: string }[] = [];
   const pdata: Record<string, unknown> = {};
-  if (alerting) pdata.alerting = alerting;
-  if (prismAxes) pdata.prismAxes = prismAxes;
+  if (alerting && pd.alerting !== alerting) pdata.alerting = alerting;
+  if (prismAxes && pd.prismAxes !== prismAxes) pdata.prismAxes = prismAxes;
+  if (!Object.keys(pdata).length) { console.log(`  = ${projectName(pd)} (${projectId}): already set`); continue; }
   plan.push({
     ref: pref, data: pdata,
     backup: { path: pref.path, fields: Object.fromEntries(Object.keys(pdata).map((k) => [k, pd[k] ?? null])) },
-    note: `project: set ${JSON.stringify(pdata)}`,
+    note: `project ${projectName(pd)} (${projectId}): set ${JSON.stringify(pdata)}`,
   });
 
-  if (prismAxes) {
+  if (pdata.prismAxes) {
     const prisms = await db.collection("work-sensors").where("location.site", "==", projectId).where("type", "==", "prism").get();
     for (const d of prisms.docs) {
       const x = d.data();
@@ -81,13 +87,15 @@ run(async () => {
       });
     }
   }
+  }
 
   console.log(`\nPlanned writes: ${plan.length}`);
   plan.forEach((x) => console.log(`  • ${x.note}`));
-  if (!(await confirmApply(args, `${projectName(pd)}: ${JSON.stringify(pdata)} (+${plan.length - 1} TwoD status clears)`))) return;
+  const nProjects = plan.filter((x) => x.ref.parent.id === "projects").length;
+  if (!plan.length || !(await confirmApply(args, `${nProjects} projects: alerting=${alerting ?? "-"} prismAxes=${prismAxes ?? "-"} (+${plan.length - nProjects} TwoD status clears)`))) return;
 
   fs.mkdirSync(outDir, { recursive: true });
-  const backupFile = path.join(outDir, `project-flags-backup-${projectId}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
+  const backupFile = path.join(outDir, `project-flags-backup-${ids.length === 1 ? ids[0] : `${ids.length}-projects`}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
   fs.writeFileSync(backupFile, JSON.stringify(plan.map((x) => x.backup), null, 2));
   console.log(`Backup: ${backupFile}`);
   const w = new BatchWriter();
