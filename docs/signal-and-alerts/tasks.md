@@ -193,6 +193,8 @@ Order must hold: `warn < alarm ≤ instant < suspect.jump`. Per-type defaults fo
 
 ## 3. `scanin-svc-reports`
 
+> **Superseded by [`phase5-reports.md`](./phase5-reports.md) (2026-10-05)**: registry axes, piecewise baselines, alerts from the top-level collection, rollout + stopping prism-daily. The items below are kept for history.
+
 **Context:** Reports fetch raw `data-log` (downsampled) and, for prisms, plot the daily worker's `daily*` axes as "Processed" (`scripts/utils/sensorTypeAxes.js`). From Phase 2 every sample carries `smooth` (see "Shared contract"); reports must show the same series the UI and alerts use.
 
 ### Phase 5
