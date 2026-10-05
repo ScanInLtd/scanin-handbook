@@ -116,7 +116,7 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 | Step | Repo | Content | Depends on |
 |---|---|---|---|
 | X0 | handbook | This doc + `axis-audit.ts`; decisions A–C | — |
-| X1 | handbook | Oneoff: write `axes` to the devices-types docs (incl. new OPKON_100, inclinometer docs; `chart-axes` regenerated). Dry-run → Hillel applies. | X0 |
+| X1 | handbook | `ops/src/oneoff/2026-10-05-axis-registry.ts`: writes `axes` + `smoothingWindowHours` to 15 devices-types docs (creates OPKON_100_Potentiometer + inclinometer). Leaves the existing `chart-axes` untouched, because the live UI reads it; it's regenerated after the new UI is live. Clears cracktemp `y` thresholds/status/alert_state (31 sensors). Retypes the temperature probe to cracktemp. Backup + `--undo`. Dry-run ✅ → Hillel applies. | X0 |
 | X2 | web-platform | UI reads the registry: one-axis tabs (`chart: true` + any alerting axis), labels/units, threshold editor "מתריע / לא מתריע", suspect placeholders. **Fits the current preview round** (axis tabs already requested). | X1 |
 | X3 | functions | Registry loader; replace #2–#5 and #8; alert texts use labels and units. Keep the prism filter behind a flag until decision A is applied per project. Shadow-log what would alert without the filter. | X1 |
 | X4 | handbook + Nathan | Prisms: E / N / H become alertable and TwoD stops alerting. Backtest v1 vs v2 per project with E / N on and TwoD off, review with Nathan, then oneoff: clear TwoD gaps (keep as chart lines?) and drop the prism filter. Also clear the cracktemp `y` and temperature-probe thresholds. | X3, decisions A–C |
