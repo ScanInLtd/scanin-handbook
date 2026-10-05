@@ -543,15 +543,51 @@ reads it in 4 places and falls back to it once. Suggested cleanup (not done): ch
   תזוזה אופקית row).
 
 **For review:**
-- **Prism East / North show "מתריע", but they don't alert yet.** The functions' hidden
-  prism filter (Height + TwoD only) stays until X3/X4, so a prism with E/N gaps (166
-  sensors) is labelled "מתריע" on an axis that doesn't alert today, while TwoD (which
-  does alert) is labelled "עדיין מתריע — יוסר בהמשך". It follows the spec (gap set ⇒
-  מתריע), but until X3 drops the filter the screen isn't fully truthful. Option: for
-  prism E/N, show "יתריע לאחר המעבר" until the functions flag flips (read the flag from
-  the registry/type doc).
-- Other screens still on `chart-axes`: sensor groups, data-handling tools, calc sensors,
-  legacy line chart. Out of this round's scope (sensor page only).
+- ~~Prism East / North show "מתריע", but they don't alert yet~~: **resolved** with the
+  per-project prism rule (next section).
+- Other screens still on `chart-axes` (sensor groups, data-handling tools, calc sensors,
+  legacy line chart) and the `freqeuncy` cleanup are logged as **X8** in `axes.md`. Not
+  this round.
+
+### X2 review: prism labels follow the project's `prismAxes` (2026-10-05)
+
+X2 was approved. Commit `f116a70` (web-platform). Built on Node 12, `index.html` checked
+before deploying, redeployed to channel `signal-ui` only (bundle
+`main-es2015.b726b3bd…`). Live not touched.
+
+The functions switch prism axes per project: `projects/{id}.prismAxes = 'registry'`
+(E/N/H alert, TwoD doesn't), or missing (today: Height + TwoD alert, E/N don't). The
+threshold panel and editor read the same field, so each label says what is actually
+evaluated:
+
+| Prism axis (gap set) | `prismAxes` missing (today) | `prismAxes: 'registry'` |
+|---|---|---|
+| Height | **מתריע** | **מתריע** |
+| East / North | **יתריע לאחר המעבר** (editable; not alerting yet) | **מתריע** |
+| TwoD (non-alertable in the registry) | **מתריע**, read-only: "לא ניתן להוסיף ספים חדשים לציר זה. הספים הקיימים עדיין פעילים." | **ספים ישנים — לא מתריע**, read-only: "ספים ישנים שאינם בשימוש — הציר אינו מתריע ולא ניתן לערוך אותם." |
+| any axis without a gap | לא מתריע | לא מתריע |
+
+- In the editor the state follows the toggle: enabling East in a pre-switch project shows
+  "יתריע לאחר המעבר", not "מתריע".
+- **Non-prism types unchanged.** A non-alertable axis that still has thresholds keeps
+  "עדיין מתריע — יוסר בהמשך".
+- One function decides it: `axisAlertState(axis, { prismAxes }, hasGap)` in
+  `src/app/shared/axis-registry.ts`. The pre-switch prism rule is the explicit list
+  `PRISM_LEGACY_ALERTING_AXES = [Height, TwoD]`, mirroring the functions' current filter.
+- **Project doc:** for prism sensors the sensor page subscribes to `projects/{site}`
+  live, so a per-project flip updates the labels without a reload. It reads the doc
+  directly because the data-manager project cache only holds the user's own projects
+  (`users array-contains uid`), which an admin viewing another project would miss.
+  Until the doc arrives, it assumes today's rule.
+- **Verified** with the UI's own function:
+  - Production (`ops/src/queries/axis-ui-preview.ts`, now applies the project rule):
+    A11 and prism "12" (no project has `prismAxes` yet) → Height מתריע · East/North
+    יתריע לאחר המעבר · TwoD מתריע (read-only). cracktemp unchanged.
+  - The `'registry'` branch, exercised offline on A11's axes → Height/East/North מתריע ·
+    TwoD ספים ישנים — לא מתריע (read-only); East toggled off → לא מתריע.
+
+Screenshot for Didi (pending): A11 → Thresholds panel + editor (today's rule; shows the
+blue "יתריע לאחר המעבר" and the read-only TwoD row).
 
 ## Blockers for production deploy
 

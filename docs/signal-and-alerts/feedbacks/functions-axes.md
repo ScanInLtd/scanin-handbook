@@ -3,7 +3,7 @@
 **Date:** 2026-10-05
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
 **Spec:** handbook `axes.md` §4, §6 (X3–X4)
-**Status:** implemented & committed (**`ffe3501`**), emulator **X3 12/12** + Phase 1/2/4 regression suites all green, X4 backtest done. **NOT deployed — pending approval. Prism flag not set.**
+**Status:** ✅ approved with changes (§6), committed **`ffe3501`** + **`675d76d`**, **deployed 2026-10-05 08:46 UTC** (checkThresholds, recomputeSmoothing, setBaseline, detectLevelShifts, handleAlerts), emulator **X3 14/14** + Phase 1/2/4 regressions green, X4 backtest done. Prism switch is **per project** (`projects/{id}.prismAxes`) — none switched yet (Hillel: דה וינצי first; NAVON/JAFFA after threshold review).
 
 ---
 
@@ -56,8 +56,26 @@ Phase 1 (35), Phase 2 (22) and Phase 4 (26) suites re-run on the same build — 
 3. **Not included / not set:** `system-config/axes.prismRegistryAlerting` (X4 — after the threshold review above), the cracktemp/`y` gap-clearing oneoff (X4), and the צייטלין v2 flag (previous round, still Hillel's).
 4. **Rollback:** redeploy `605d537`; or delete the `axes` map from a type's doc to revert that type to hardcoded behavior instantly (loader falls back) — no redeploy needed per-type.
 
-## 5. Open questions
+## 5. Open questions (answered — review 2026-10-05)
 
-1. cracktemp `y` stops alerting at deploy (3 sensors) — confirm that's intended *now*, or should it wait for the X4 oneoff that also clears the gaps?
-2. NAVON 4/6 + JAFFA 3/5 E/N gaps (§3) — widen before the prism flag, per project with Nathan?
-3. `battery.voltage` is `alertable: true` in the registry sketch (axes.md §5) but the live registry wasn't checked for battery/loadcell/inclinometer docs — loader falls back safely for missing ones; flag if you want those verified before deploy.
+1. cracktemp `y`/`celsius`: thresholds already cleared by the X1 oneoff (08:10Z, 31 sensors + the probe retyped) — nothing pending. ✔
+2. NAVON 4/6 + JAFFA 3/5 E/N gaps: wait for a threshold review; דה וינצי switches first. ✔
+3. battery/loadcell/inclinometer registry docs exist (verified by Hillel). ✔
+
+---
+
+## 6. Review changes implemented (`675d76d`, deployed 08:46 UTC)
+
+1. **Per-project prism switch:** `projects/{id}.prismAxes = 'registry'` → E/N/H alertable, TwoD off; missing → today's H+TwoD. `system-config/axes.forceLegacyPrismAxes` kept as a **global kill-switch** that forces the old rule everywhere. `[axes-shadow]` keeps logging for unswitched projects. One project-doc read per evaluation inside the transaction (it also serves the Phase 4 `alerting` flag); `recomputeSmoothing` mirrors the same rules.
+2. **DIN routing via `alertRule`:** `registry.alertRule === 'din4150'` routes to the DIN path; the type-name check remains only as the registry-less fallback. `chartLayout`/`alertRule` added to the loader types (chartLayout is for UI/reports — unused in functions).
+3. **Emulator:** Case D flips `projects/{id}.prismAxes`; new Case E proves the kill-switch overrides a switched project. **X3 suite 14/14**, Phase 4 regression green.
+
+## 7. `[v2-shadow]` summary (07:38 → 08:50 UTC, v2 logic unchanged across deploys) + flip report
+
+⚠️ Window covered so far: **~1.2h** (not 6h — morning traffic only). Numbers will grow with the day; re-run anytime: the summary script reads `[v2-shadow]`/`[axes-shadow]` since 07:38.
+
+- **131 shadow evaluations** across 62 sensors in 10 projects; **v2 would have alerted: 0**.
+- **v1 alerts actually fired in the same window: 2** — both prisms in an 08:41 ATS batch (`TCwyOvD2FfcXCRbp8r6J` TwoD ok→warn 4.09 vs ±4; `vhIDZp2MmZ0LJ9jOJ2b3` Height ok→warn 5.58 vs ±4). v2 would have alerted on neither (no 3h persistence) — the raw-rule noise pattern, exactly what the tiers suppress.
+- **instant-off axes observed:** `crack:x` and `cracktemp:x` (sensors whose alarm gap ≥ 2.5mm makes the default instant gap ≥ the 5mm suspect jump) — at וויסקי בר, גוט לווין, בית האום. As designed; explicit `instant.gap` config can re-enable per axis.
+- **`[axes-shadow]` lines: 0** — no prism of an unswitched project evaluated with E/N thresholds differing from today's rule yet (prism traffic since 07:38 was in the 08:41 batch whose E/N axes aren't thresholded... will accumulate).
+- **Flip report re-run (08:47):** unchanged from the 08:00 snapshot — 16 NO-CHANGE / 3 NO-SMOOTH / **0 silent de-escalations / 0 escalation-alerts**; נטייה 7 y warn+alarm clocks now at 2× since 07:00 (the legit confirmed-alarm after flip remains likely); נטייה 5 held at alarm (suspect samples). **Still safe to flip; no seeding script needed.**
