@@ -79,3 +79,31 @@ Phase 1 (35), Phase 2 (22) and Phase 4 (26) suites re-run on the same build — 
 - **instant-off axes observed:** `crack:x` and `cracktemp:x` (sensors whose alarm gap ≥ 2.5mm makes the default instant gap ≥ the 5mm suspect jump) — at וויסקי בר, גוט לווין, בית האום. As designed; explicit `instant.gap` config can re-enable per axis.
 - **`[axes-shadow]` lines: 0** — no prism of an unswitched project evaluated with E/N thresholds differing from today's rule yet (prism traffic since 07:38 was in the 08:41 batch whose E/N axes aren't thresholded... will accumulate).
 - **Flip report re-run (08:47):** unchanged from the 08:00 snapshot — 16 NO-CHANGE / 3 NO-SMOOTH / **0 silent de-escalations / 0 escalation-alerts**; נטייה 7 y warn+alarm clocks now at 2× since 07:00 (the legit confirmed-alarm after flip remains likely); נטייה 5 held at alarm (suspect samples). **Still safe to flip; no seeding script needed.**
+
+---
+
+## 8. Post-rollout (2026-10-05 10:02Z: `alerting='v2'` on all 22 projects; `prismAxes='registry'` on דה וינצי + SAVYON LIVING + SAVYON OFFICE)
+
+### 8.1 Fleet watch — first hours (full 24h report pending, due ~2026-10-06 10:00Z)
+
+Since the rollout: **0 errors**, **0 v2 alerts**, **0 v1-style alerts** in `checkThresholds` — the fleet is quiet (expected: the tiers need 3h persistence or confirmed jumps; the 08:41-style raw-rule noise alerts are gone by design). The 24h collection (alerts by project/tier/level + explainability check against the smooth line) will be appended here.
+
+### 8.2 Prism-axes backtest for the next switch candidates (60d, v2 tiers)
+
+| Project | Prisms (thresholded, active) | With data 60d | Legacy | A (H+TwoD) | B (E/N/H) |
+|---|---|---|---|---|---|
+| JTCS_RKL_R2 | 12 | 7 | **5** | 0 | 0 |
+| JTCS_MERCANTIL_A-03 | 5 | 2 | 0 | 0 | 0 |
+| מכבי יפו מגרש 101 | 19 | 5 | 0 | 0 | 0 |
+| JTSC_NEVIIM 61_A-09 | 6 | 6 | 0 | 0 | 0 |
+| JTCS_jaffa_44_B-07 | 4 | 2 | 0 | 0 | 0 |
+| JTCS_SHTRAUS 4_B-01 | 9 | 9 | 0 | 0 | 0 |
+
+**All six can switch — zero alerts under either axis set in 60 days**, and no suspicious E/N thresholds. Notes:
+- **RKL legacy count is 5, not 33**: of the earlier 33-prism legacy census at RKL, only 12 prisms are still active with thresholds, 5 of them legacy (`R2_B2/B4/C4/D4/D7`-family). Legacy prisms degrade gracefully after a switch — the per-sensor legacy fallback keeps their TwoD on raw−initial and their E/N adjusted values are unalerted only if un-thresholded; **at RKL the E/N axes produced 0 alerts in the backtest either way**, so switching is safe even before their E/N baselines exist (ATS repair).
+- Much of the fleet here is sparse/dormant (מכבי יפו: 5 of 19 with data) — switching those is a no-op until data resumes.
+- Re-runnable: `node scripts/backtest-prism-axes.js --days=60 --project=<ids>` (now supports `--project` + legacy/no-data counts, commit `514ee06`).
+
+### 8.3 Next
+
+Phase 5 (reports consume `smooth`) — awaiting the spec.

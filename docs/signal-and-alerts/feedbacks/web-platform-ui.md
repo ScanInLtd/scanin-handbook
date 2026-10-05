@@ -2,7 +2,8 @@
 
 _Date: 2026-10-04_
 _Tasks: UI-1.1, UI-1.2, UI-1.4, UI-3.1 … UI-3.8 (per [`tasks.md`](../tasks.md) §2)_
-_Commit: `f01dcf7` on `main` (local, not pushed yet) — 44 files, +1,517 / −3,448_
+_Commit: `f01dcf7` on `main` — 44 files, +1,517 / −3,448_
+_**LIVE since 2026-10-05 10:03Z** (`f116a70`, bundle `main-es2015.b726b3bd`) — see [Go-live](#go-live-2026-10-05)_
 
 ## Preview channel
 
@@ -589,16 +590,50 @@ evaluated:
 Screenshot for Didi (pending): A11 → Thresholds panel + editor (today's rule; shows the
 blue "יתריע לאחר המעבר" and the read-only TwoD row).
 
+## Go-live (2026-10-05)
+
+- **Live since 2026-10-05 10:03Z.** Didi approved, and the preview channel `signal-ui`
+  (`f116a70`, bundle `main-es2015.b726b3bd`) was cloned to live (`new-scanin-ui.web.app`)
+  by Hillel. One minute earlier (10:02Z) all 22 active projects were flipped to
+  `alerting: v2`, so tiered alerts now start arriving on the charts.
+- **Rollback:** clone the previous live version **`070ffaf9eb5e1013`** (the 2026-09-24
+  release) back to live.
+- **`main` pushed** to `origin` (`067df98..f116a70`, the 5 commits `1149c38`,
+  `611be8b`, `e4b6440`, `80bf2f4`, `f116a70`). The local `firestore.rules` change is
+  still uncommitted and was not pushed; it belongs to `docs/security/firestore-rules-task.md`.
+- **What went live, in short:**
+  - the smooth line by default, with a raw toggle
+  - baseline events (setBaseline only, with markers on the chart)
+  - suspect samples as ✕ markers (admins only)
+  - one axis at a time, with tabs read from the axis registry
+  - tiered-only alert markers
+  - the threshold editor showing "מתריע" / "לא מתריע", following each project's
+    `prismAxes` rule
+  - safer install-sensor save and rename
+- **After go-live, worth watching:**
+  - The first tiered (⚡/📈) alert markers on the charts. There are none so far: the old
+    alerts were archived, and v2 started at 10:02Z.
+  - The prism threshold labels on the projects already on `prismAxes: registry`
+    (דה וינצי דרום, SAVYON LIVING + OFFICE) vs those still on H + TwoD.
+
+**Next rounds (heads-up, no work yet):**
+1. **Phase 4 UI**:
+   - UI-4.1: an instant-gap field per axis in the threshold editor, plus a noise-floor hint.
+   - UI-4.2: tier icons and values in the alert lists and the sensor sidebar.
+2. **X8**: the `freqeuncy` cleanup (charts read `frequency` → the bridge stops writing
+   the misspelling), the remaining `chart-axes` screens (sensor groups, data tools, calc
+   sensors, legacy line chart), and regenerating `chart-axes` from the registry.
+
 ## Blockers for production deploy
+
+_All cleared — live since 2026-10-05 10:03Z (see Go-live above)._
 
 1. ~~**90-day smooth backfill** applied to all active projects~~: done (pilot + all active
    projects). The full-history fill is still to come, so ranges older than ~90 days show raw
    plus "אין ממוצע לתקופה זו".
 2. ~~**`setBaseline` callable deployed** (FN-1.2)~~: done (Phase 1, 2026-10-04); the
    round trip was verified.
-3. **Didi's approval** of the preview, now including round 2 (one axis at a time + event
-   markers, commit `1149c38`; setBaseline-only baselines + tiered-only markers, commit
-   `611be8b`). Screenshots pending (see above).
+3. ~~**Didi's approval** of the preview~~: approved 2026-10-05; cloned to live 10:03Z.
 
 ## Open questions
 
