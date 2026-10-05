@@ -307,3 +307,16 @@ Phase 0 (FN-0.1/0.2) already stops replays from alerting. The items below follow
 - **HB-1.1** Produce the review list of "stuck" sensor-axes (smoothed beyond warn > 90% of the time) per site from `ops/out/backtest-*.json` for Nathan; track outcome (new baseline / threshold change / real movement).
 - **HB-1.2** Update `docs/ops/runbook-index.md` and `AGENTS.md` when `setBaseline` / `recomputeSmoothing` exist.
 - **HB-4.1** Client-facing explanation (Hebrew, 1 page): what the smoothed line means, the two alert types, what "confirmed by 2 readings" means.
+
+---
+
+## 11. `scanin-fw-datalogger` (ESP32 firmware) — later
+
+**Context:** plan §4.7. Today bad readings are only flagged in the cloud after they're stored. The datalogger can re-measure, and that would likely recover most of them.
+
+- **DL-0.1** (handbook, first) Estimate the gain: from stored `suspect` flags + raw data, per sensor family, the share of bad readings that were isolated spikes (recoverable by re-measuring) vs persistent faults.
+- **DL-1.1** Burst + median per measurement (N reads, default 5); report the median and the spread.
+- **DL-1.2** Plausibility vs the last good value per channel; on a jump beyond the limit, re-measure after a short delay (up to K times) before reporting. Limits and N/K come via settings sync, with defaults from the axis registry `suspectJump`.
+- **DL-1.3** Electrical sanity (out-of-range ADC, open or short circuit, saturation, bad excitation) → retry, then report a channel fault, not a value.
+- **DL-1.4** Payload gains `qc { n, spread, retries, flag }`. The bridge stores it on the sample; functions treats `flag` as an extra input to `suspect` (a single definition stays in the cloud).
+- **DL-1.5** Protocol docs: `PROTOCOL.md` (device) + bridge `docs/esp_server_protocol.md`.

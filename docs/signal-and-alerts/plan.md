@@ -136,6 +136,19 @@ data-integrity/{id}                     ← new: internal notices to ScanIn (nev
 - `eval` makes the chart self-explaining (points coloured by verdict) and lets the backtest compare stored verdicts with simulated ones. `status.axes` stays the single "now" verdict that UI, multi-sensor rules and reports read.
 - `ema` / `ema-log` disappear (Phase 6). `daily::` docs stay read-only until prism-daily is stopped (Phase 5).
 
+### 4.7 Edge QC: fix bad readings in the datalogger (later)
+
+Today every check runs in the cloud, after the bad reading has already been stored. The cloud can only flag it (`suspect`) and lose the sample. The datalogger still has the sensor in hand, so it can **measure again**. Hillel's estimate is that most bad data (≈ 90%: crack glitches like סדק 1 שירותים 8.8 → 6.2 / 11.5, single-sample spikes, transient electrical noise) can be recovered at the edge.
+
+`scanin-fw-datalogger` (ESP32), per measurement:
+1. **Burst + median**: take N quick reads (e.g. 5) and report the median plus the spread. One read is never trusted alone.
+2. **Plausibility vs the last good value**: if the new value jumps beyond a per-channel limit (same idea as `suspect.jump`, pushed down in the settings sync), re-measure after a short delay, up to K times. Report only once it's stable, or report it flagged.
+3. **Electrical sanity**: out-of-range ADC (open or short circuit, saturation, excitation voltage off) → retry, then report a channel fault instead of a value.
+4. **Report the QC, don't hide it**: add `qc { n, spread, retries, flag }` to the payload. The cloud keeps a single definition of `suspect`, and uses the edge flag as an extra input, so the evidence chain is complete.
+5. **Settings**: limits and N/K come down with the existing settings-sync protocol (`docs/settings_synchronization_protocol.md`), per channel, defaults from the axis registry.
+
+Measure first, then build. Use the stored `suspect` flags and the raw data to estimate, per sensor family, how many bad readings were isolated spikes (recoverable by re-measuring) vs persistent faults. The ATS station has the same idea at cycle level (tasks §4b ATS-1.1).
+
 ## 5. Existing mechanisms — decision for each
 
 | # | Mechanism (where) | What it does today | Decision | Replacement / action |
@@ -168,6 +181,7 @@ data-integrity/{id}                     ← new: internal notices to ScanIn (nev
 | `scanin-svc-mqtt-bridge` | Prism identity investigation & fix; ATS run QA → `suspect`; plausibility cap at ingestion for ATS |
 | `scanin-worker-prism-daily` | Untouched until Phase 5, then stop scheduler + delete services; archive repo |
 | `scanin-handbook` | This plan; `ops/` backtests as the regression tool (also replaces watchdog checks for now); review list for stuck sensors |
+| `scanin-fw-datalogger` (later) | Edge QC (§4.7): burst + median, re-measure on implausible jumps, electrical sanity, `qc` block in the payload, limits via settings sync |
 | *Deferred* | `scanin-svc-hexagon-ats-ingestion` (deprecated path). *Later:* `scanin-tool-data-replay` / adjustments worker (`recomputeSmoothing` hook), `scanin-svc-watchdog` (storm / integrity / coverage checks) |
 
 ## 7. Rollout
