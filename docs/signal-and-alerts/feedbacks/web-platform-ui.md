@@ -158,9 +158,43 @@ Removed direct writes:
 - **Review fixes applied** (commit `118b994`): legend/tooltip window read from
   `smooth.w` (24 | 48, fallback 24) — "ממוצע ‹w› שעות (ללא חריגים)"; compare page
   stays raw but its series are labelled "(גולמי)".
-- **Not yet verified** (waiting for the pilot backfill): pilot chart line equals
-  stored `smooth` / raw toggle / suspect toggle / markers on צייטלין 12 (tilt+crack)
-  and מגדל דה וינצי דרום (prism). Screenshots per type pending the same.
+- **Pilot data verification after the 90-day backfill — PASSED (data side, 2026-10-05)**
+  via read-only `ops/src/queries/smooth-ui-verify.ts`. The charts plot the stored
+  `smooth_<axis>` values verbatim, so stored-data checks ≡ chart-line checks:
+  - **Tilt** נטייה 7 (צייטלין 12, `2bFvKSdK5P34K6IoV7xS`): `smooth {w:24, n≈24, q:4}`
+    on every sample, 310/310 of the last 14d covered, 0 suspect; latest
+    `smooth.y = 0.1311` — cross-checkable against the chart tooltip. One
+    `migration` baseline event (hidden on the chart, listed dimmed in the sidebar).
+  - **Crack** סדק 2 חדר שינה (`AdQzZMedF1RMtB4Hf2g4`): w=24, 330/330 covered,
+    latest `smooth.x = −0.5801`.
+  - **Prism** A11 (דה וינצי דרום, `iG8STFDXZWbHy4ZYC2o3`): **w=48** → legend reads
+    "ממוצע 48 שעות"; `smooth.TwoDDisplacement` continuous (~1.39–1.45 mm) and
+    robust — a 17 mm Height / 7.55 mm TwoD raw outlier on 10-04 15:43 left the
+    smooth line unmoved. 45/49 of last 14d covered (4 gated by min-n/quarters).
+  - **Suspect-rich prism**: prism "12" (`sen-prism-prism9`, JCTS_SAVYON) —
+    19/27 recent samples `suspect: implausible-jump`, none smoothed; chart
+    `/sites/pUeJ6MlE8HwJPV57kETZ/sec-1/sen-prism-prism9` for the
+    hidden-by-default / debug-toggle demo. (`sen-prism-PRISM_JTCS_H0_12B` isn't a
+    scanin-id, and no דה וינצי sensor matches "JTCS".)
+  - **>90d ranges**: samples older than ~95d have no `smooth` on all checked
+    sensors → the chart correctly shows raw + "אין ממוצע לתקופה זו" there until
+    the full-history fill.
+  - **Bug found & fixed by this verification** (commit `067df98`): adjusted raw
+    TwoD was computed as `raw − initial.TwoD` (usually missing → raw magnitude
+    ~6 mm drawn against smooth ~1.4 mm). Now derived as `hypot(E−E₀, N−N₀)`,
+    exactly like server-side `smooth.TwoDDisplacement` (FN-2.5). Preview redeployed.
+  - **Preview redeploy incident (fixed 2026-10-05 08:50):** the 08:45 channel deploy
+    went out from a `dist/` with no `index.html` (Angular wrote it after the deploy
+    started), so the preview returned a 404 on every route. Rebuilt with Node 12 (same
+    bundle hash `main-es2015.4b4dd2dd…`) and redeployed to channel `signal-ui` only;
+    preview returns 200 again. Live was not touched (still the 2026-09-24 release).
+- **Visual verification + screenshots (tilt / crack / prism, raw on+off)**: pending,
+  Hillel on the preview (login required). Charts:
+  - Tilt נטייה 7: `/sites/oBcqejjRiLRIFhG2UzPI/sec-3/2bFvKSdK5P34K6IoV7xS`
+  - Crack סדק 2 חדר שינה: `/sites/oBcqejjRiLRIFhG2UzPI/sec-1/AdQzZMedF1RMtB4Hf2g4`
+  - Prism A11: `/sites/hmPh7Hg2fjTc9GyNRDYO/sec-9/iG8STFDXZWbHy4ZYC2o3`
+  - Suspect-rich prism "12": `/sites/pUeJ6MlE8HwJPV57kETZ/sec-1/sen-prism-prism9`
+  - >90d check: use tilt/crack (A11 has only ~54d of history).
 
 ## Blockers for production deploy
 
