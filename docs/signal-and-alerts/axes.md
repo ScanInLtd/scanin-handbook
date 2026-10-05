@@ -1,6 +1,6 @@
 # Axes — one registry, honest everywhere
 
-_Status: decisions A + B taken (Hillel, 2026-10-05); C pending_
+_Status: decisions A–C taken (Hillel, 2026-10-05)_
 _Part of: [`plan.md`](./plan.md). Evidence: `ops/src/analysis/axis-audit.ts` (read-only, re-runnable)._
 
 ## 1. The problem
@@ -97,7 +97,7 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 | cracktemp | y (temperature) | auxiliary | ✓ | ✗ | ✗ | decision B: shown, never alerts, not reported; clear the 3 existing thresholds |
 | OPKON_60 | x (crack opening, mm) | measurement | ✓ | ✓ | ✓ | label it as a crack meter (today the report falls back to "Value") |
 | OPKON_100 | x (mm) | measurement | ✓ | ✓ | ✓ | create the devices-types doc |
-| temperature (new type) | celsius | auxiliary | ✓ | ✗ | ✗ | **decision C**: the one-wire probe `…TEMP(one-wire)-UN-2` is mistyped as OPKON_100 |
+| cracktemp | celsius (temperature) | auxiliary | ✓ | ✗ | ✗ | decision C: the one-wire probe `…TEMP(one-wire)-UN-2` is a cracktemp without a crack meter |
 | loadcell | x | measurement | ✓ | ✓ | ✓ | |
 | loadcell | raw | auxiliary | ✗ | ✗ | ✗ | |
 | battery | voltage | auxiliary | ✓ | ✗ | ✓ | health, not structure |
@@ -107,9 +107,9 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 **Decisions**
 - **A. Prisms — DECIDED 2026-10-05: East + North + Height are alertable; TwoD is charted + reported (derived), not alertable.** Today it's Height + TwoD (hidden East / North). With §4.2 this is just which defaults new sensors get; existing sensors keep exactly the thresholds they have. But today **166 prisms already carry E / N thresholds** (bridge defaults), so removing the hidden filter turns them on. Before that, a v1-vs-v2 backtest per project, then per project with Nathan: keep, or clear the E / N gaps (oneoff, dry-run → apply).
 - **B. cracktemp `y` (temperature) — DECIDED 2026-10-05:** shown in the UI, never alerts, not in reports. Clear the 3 existing thresholds (oneoff).
-- **C. OPKON — pending.** The `OPKON_*` type names describe the *hardware* (60 / 100 mm potentiometer), not what's measured:
+- **C. OPKON — decided.** The `OPKON_*` type names describe the *hardware* (60 / 100 mm potentiometer), not what's measured:
   - 11 `OPKON_60` sensors are crack meters (x in mm, warn 0.3). They alert, but the report labels them "Value". Registry: x = crack opening, mm.
-  - `sen-OPKON_100_Potentiometer-TEMP(one-wire)-UN-2` is really a **temperature probe** (field `celsius` ≈ 25 °C) typed as OPKON_100. It has thresholds 27.5 / 41.25 °C and **alerted 6 times**. Proposal: retype it to a new `temperature` type (auxiliary, never alerts) and clear its thresholds, consistent with B.
+  - `sen-OPKON_100_Potentiometer-TEMP(one-wire)-UN-2` is a temperature probe (field `celsius` ≈ 25 °C) typed as OPKON_100. It has thresholds 27.5 / 41.25 °C and **alerted 6 times**. **DECIDED 2026-10-05:** it's a cracktemp without the crack meter. Retype it to `cracktemp`, register `celsius` on cracktemp as an auxiliary temperature axis (shown, never alerts, not reported), and clear its thresholds (oneoff, together with B).
 
 ## 6. Rollout
 
