@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-05
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
-**Status:** implemented & committed (**`91e1bdf`**), emulator burst test **8/8** + inactive check + Phase 4 regression green, leftover notice resolved. **NOT deployed — pending approval** (deploy needs the new alerts index first, see §4).
+**Status:** ✅ approved + two additions (§6), committed **`91e1bdf`** + **`a3a0e34`**, index `alerts(whatsappPending, time)` READY, **deployed 2026-10-05 21:07 UTC** (handleAlerts, notifyDataIntegrity, checkThresholds, sendWhatsappAlerts·new, evaluateMultiSensorRules, cleanUnconfirmedSensors). Emulator: burst **8/8**, additions **10/10**, regressions green. Bridge `4450a5b` can deploy (item 3 is live).
 
 ---
 
@@ -38,8 +38,36 @@
 3. Watch the first real burst: `whatsapp-sender:` logs (digests, 429 waits), `whatsapp.failed` must stay empty, `SKIP-INACTIVE` counts.
 4. **Rollback:** redeploy `514ee06` — handleAlerts goes back to direct sends; any alerts stuck with `whatsappPending: true` keep their pending lists (re-queriable); delete the `sendWhatsappAlerts` function.
 
-## 5. Open questions
+## 5. Open questions (answered — review 2026-10-05 evening)
 
-1. `multiSensorAlerts` direct sends (§1) — migrate to the same outbox pattern, or leave (cooldown-throttled)?
-2. Worst-case delivery latency is now up to ~1 min (scheduler tick). Acceptable, or add an onCreate nudge that triggers a drain immediately (lease makes it safe)?
-3. Digest greeting: digests drop the personal "שלום ‹שם›" greeting (one message may span recipients' alerts only per phone, so a greeting is possible — kept impersonal for brevity). Fine?
+1. `multiSensorAlerts` → outbox: **done this round** (§6.3). ✔
+2. ~1 min latency: fine, no nudge. ✔
+3. Impersonal digest: fine. ✔
+
+---
+
+## 6. Review additions (`a3a0e34`, deployed 2026-10-05 21:07 UTC)
+
+### 6.1 `confirmed === false` → no threshold alerts (SKIP-UNCONFIRMED)
+
+Auto-created ATS points now get registry thresholds from the bridge (`4450a5b`) and stay `confirmed: false` while being set up. Same scope as SKIP-INACTIVE: v1/v2 evaluation, suspect QC, DIN and late-data notices skipped; **smoothing + stateless `eval` kept**. Strictly `=== false` — a missing field is a normal sensor. Emulator: 8 crossing samples on an unconfirmed sensor → 0 alerts, smooth+eval written, status untouched.
+
+### 6.2 `cleanUnconfirmedSensors` — clean deletes, day-5 warning
+
+- 7-day grace kept (intended: Nathan confirms new points same-day).
+- **`db.recursiveDelete(sensorRef)`** — doc + data-log + baseline-events + any subcollection (plain doc deletes used to orphan subcollections, e.g. `a079e4qX09IrQcHB5QK2`: no doc, 44 data-log docs).
+- **`ats-device-map` entries whose `sensorId` points at the sensor are deleted FIRST** — the bridge never writes into a deleted sensor; if the point keeps sending, the bridge auto-creates it again (unconfirmed → silent).
+- **Day-5 notice** per sensor: `unconfirmed-sensor` (warning), "‹name› ממתין לאישור, יימחק ב-‹date›"; resolved when confirmed (`auto`) or deleted (`released`). New `IntegrityKind` added.
+- The cleanup report email now lists deletions + map-entry count.
+- Existing orphan data-logs untouched (separate decision, as instructed).
+
+### 6.3 `multiSensorAlerts` → outbox
+
+Recipient collection unchanged; the **rule doc** carries `whatsapp {pending, text, sent, failed}` + `whatsappPending`. The sender's notice-like drain was generalized (one prebuilt text, N recipients) and covers `data-integrity` + `multi-sensor-rules`.
+
+### 6.4 Verification & deploy
+
+- Emulator additions suite **10/10** (unconfirmed skip; rule-doc drain; cleanup: day-8 recursive delete incl. subcollection + map entry, day-6 kept with day-5 notice, confirmed sensor's notice resolved) + WhatsApp burst suite re-run **8/8**.
+- Index `alerts (whatsappPending ASC, time ASC)` created additively, **READY** before deploy.
+- **Deployed 21:07 UTC, 0 errors.** `sendWhatsappAlerts` created; first scheduler ticks clean.
+- **Rollback:** redeploy `514ee06` + delete `sendWhatsappAlerts`.
