@@ -1,6 +1,6 @@
 # Axes — one registry, honest everywhere
 
-_Status: DRAFT for review (Hillel, Didi, Nathan) — 2026-10-05_
+_Status: decisions A + B taken (Hillel, 2026-10-05); C pending_
 _Part of: [`plan.md`](./plan.md). Evidence: `ops/src/analysis/axis-audit.ts` (read-only, re-runnable)._
 
 ## 1. The problem
@@ -94,8 +94,10 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 | tilt | x, y | measurement | ✓ | ✓ | ✓ | |
 | crack | x | measurement | ✓ | ✓ | ✓ | |
 | cracktemp | x | measurement | ✓ | ✓ | ✓ | |
-| cracktemp | y (temperature) | auxiliary | ✓ | ✗ | ✗ | **decision B** |
-| OPKON_60 / OPKON_100 | x / celsius | measurement / auxiliary | ✓ | ✓ | per unit | **decision C** (create OPKON_100 doc) |
+| cracktemp | y (temperature) | auxiliary | ✓ | ✗ | ✗ | decision B: shown, never alerts, not reported; clear the 3 existing thresholds |
+| OPKON_60 | x (crack opening, mm) | measurement | ✓ | ✓ | ✓ | label it as a crack meter (today the report falls back to "Value") |
+| OPKON_100 | x (mm) | measurement | ✓ | ✓ | ✓ | create the devices-types doc |
+| temperature (new type) | celsius | auxiliary | ✓ | ✗ | ✗ | **decision C**: the one-wire probe `…TEMP(one-wire)-UN-2` is mistyped as OPKON_100 |
 | loadcell | x | measurement | ✓ | ✓ | ✓ | |
 | loadcell | raw | auxiliary | ✗ | ✗ | ✗ | |
 | battery | voltage | auxiliary | ✓ | ✗ | ✓ | health, not structure |
@@ -103,9 +105,11 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 | vibration-* | velocity, frequency | measurement | (DIN charts) | ✓ | velocity only | fix `freqeuncy` |
 
 **Decisions**
-- **A. Prisms: which axes alert by default?** Today it's Height + TwoD (hidden East / North). Options: E + N + Height (Hillel's suggestion), H + TwoD, or all four. With §4.2 this is just which defaults new sensors get; existing sensors keep exactly the thresholds they have. But today **166 prisms already carry E / N thresholds** (bridge defaults), so removing the hidden filter turns them on. Before that, a v1-vs-v2 backtest per project, then per project with Nathan: keep, or clear the E / N gaps (oneoff, dry-run → apply).
-- **B. cracktemp `y` (temperature):** 3 sensors alert on temperature today, invisibly. Make it auxiliary (not alertable) and clear those 3 thresholds, or keep it alertable and show it?
-- **C. OPKON:** confirm units per sensor (one OPKON_100 reports `celsius`).
+- **A. Prisms — DECIDED 2026-10-05: East + North + Height are alertable; TwoD is charted + reported (derived), not alertable.** Today it's Height + TwoD (hidden East / North). With §4.2 this is just which defaults new sensors get; existing sensors keep exactly the thresholds they have. But today **166 prisms already carry E / N thresholds** (bridge defaults), so removing the hidden filter turns them on. Before that, a v1-vs-v2 backtest per project, then per project with Nathan: keep, or clear the E / N gaps (oneoff, dry-run → apply).
+- **B. cracktemp `y` (temperature) — DECIDED 2026-10-05:** shown in the UI, never alerts, not in reports. Clear the 3 existing thresholds (oneoff).
+- **C. OPKON — pending.** The `OPKON_*` type names describe the *hardware* (60 / 100 mm potentiometer), not what's measured:
+  - 11 `OPKON_60` sensors are crack meters (x in mm, warn 0.3). They alert, but the report labels them "Value". Registry: x = crack opening, mm.
+  - `sen-OPKON_100_Potentiometer-TEMP(one-wire)-UN-2` is really a **temperature probe** (field `celsius` ≈ 25 °C) typed as OPKON_100. It has thresholds 27.5 / 41.25 °C and **alerted 6 times**. Proposal: retype it to a new `temperature` type (auxiliary, never alerts) and clear its thresholds, consistent with B.
 
 ## 6. Rollout
 
@@ -115,7 +119,7 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 | X1 | handbook | Oneoff: write `axes` to the devices-types docs (incl. new OPKON_100, inclinometer docs; `chart-axes` regenerated). Dry-run → Hillel applies. | X0 |
 | X2 | web-platform | UI reads the registry: one-axis tabs (`chart: true` + any alerting axis), labels/units, threshold editor "מתריע / לא מתריע", suspect placeholders. **Fits the current preview round** (axis tabs already requested). | X1 |
 | X3 | functions | Registry loader; replace #2–#5 and #8; alert texts use labels and units. Keep the prism filter behind a flag until decision A is applied per project. Shadow-log what would alert without the filter. | X1 |
-| X4 | handbook + Nathan | Per project: E / N thresholds on prisms keep or clear (oneoff). Then drop the prism filter. | X3, decision A |
+| X4 | handbook + Nathan | Prisms: E / N / H become alertable and TwoD stops alerting. Backtest v1 vs v2 per project with E / N on and TwoD off, review with Nathan, then oneoff: clear TwoD gaps (keep as chart lines?) and drop the prism filter. Also clear the cracktemp `y` and temperature-probe thresholds. | X3, decisions A–C |
 | X5 | reports | Axes from the registry + invariant 2 (adds the TwoD chart for prisms); switches to `smooth` (Phase 5). | X1, Phase 5 |
 | X6 | bridge | ATS default thresholds from the registry (parked with the ATS work; until then the bridge keeps its current defaults). | X1 |
 | X7 | handbook / watchdog | `axis-audit.ts` violations mode; later a watchdog check. | X1 |

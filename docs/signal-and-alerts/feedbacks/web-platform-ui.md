@@ -195,6 +195,91 @@ Removed direct writes:
   - Prism A11: `/sites/hmPh7Hg2fjTc9GyNRDYO/sec-9/iG8STFDXZWbHy4ZYC2o3`
   - Suspect-rich prism "12": `/sites/pUeJ6MlE8HwJPV57kETZ/sec-1/sen-prism-prism9`
   - >90d check: use tilt/crack (A11 has only ~54d of history).
+  - Short links work too: `/s/<sensorDocId>` (route `s/:sensorDocId`), e.g. `/s/sen-prism-prism9`.
+
+### Preview round 2: one axis at a time + event markers (2026-10-05)
+
+Commit `1149c38` (web-platform). Built on Node 12, `dist/new-scanin-ui/index.html`
+checked before deploying, redeployed to channel `signal-ui` only (bundle
+`main-es2015.1545af64…`, expires 2026-10-19). Live not touched.
+
+**1. One axis at a time** (sensor page default chart + prism chart; compare, groups
+and vibration charts untouched)
+- Axis chips above the chart. Only the selected axis is drawn: smooth + optional raw +
+  that axis's thresholds + its own y-scale titled with the unit (`x (mm)`; prism
+  "Settlement (mm)", "2D Displacement (mm)", …). Multi-axis overlays and per-axis
+  y-scales are gone. On prisms the chips replace the 2D / X-Y-Z toggle (order:
+  Settlement, 2D, X, Y; X/Y still fall back to the 2D thresholds).
+- Chips list only axes that have data in the fetched range (sensors writing one axis per
+  doc may have none for some); hidden when there's only one.
+- Default: last choice for this sensor type (localStorage `sensorChart.axis.<type>`) →
+  first axis with thresholds (prism: HeightDisplacement, else TwoDDisplacement) → first
+  axis. Opening another sensor drops the previous sensor's selection.
+
+**2. Event markers** (`src/app/shared/chart-event-markers.ts`, shared by both charts)
+- **Alerts**: `alerts` where `sensor in [scanin-id, docId]` and `time` in the fetched range
+  (+1 day for evaluation lag), via the existing `sensor ASC, time DESC` index. Loaded
+  once per fetch in `sensor-chart-main` and passed to the chart. Checked on 30 days of
+  production alerts: `alert.sensor` is the scanin-id when the sensor has one, otherwise
+  the doc id (375/816 alerts). That's why both keys are queried.
+  - Placed at `sampleTime` (fallback `time`) on the selected axis only (`alert.axis`;
+    prism maps legacy `daily*` axes). y = `smoothValue` for confirmed alerts, else
+    `actualValue`; `rawValue` in the Unadjusted view. Alerts outside the data range are
+    skipped so they don't stretch the x-axis.
+  - Icon by tier on a severity-coloured disc (red alarm / orange warn): ⚡ instant,
+    📈 confirmed, ● legacy. Tooltip: level · tier, value · time, and the summary (link
+    stripped, max 140 chars). Toggle "הצג התראות", on by default, for every user.
+  - **No tiered alerts exist yet**: all 816 alerts of the last 30 days have no `tier`,
+    so every marker on the preview is ● until Phase 4 drives v2 alerts. Only 60/816
+    have `sampleTime`; the rest are placed at their creation `time`.
+- **Suspect points**: no longer part of any line (raw or smooth). Admins see them as
+  small red ✕ with `suspect_reason` in the tooltip, on by default, toggle "הצג חשודים".
+  Non-admins never see them (button and dataset both gated on `isAdmin`).
+- Baseline markers unchanged. Markers stay out of the legend, the threshold-visibility
+  logic and the out-of-range check.
+
+**3. Data-flow fixes made along the way** (in `sensor-chart-main`)
+- **Per-axis suspect flags**: `processData` merges docs by exact timestamp, so on sensors
+  that write x and y in separate docs, a suspect x-doc and a good y-doc share a row. The
+  old row-level `suspect` hid both. Now `suspect_<axis>` / `suspect_reason_<axis>` are
+  set only for the axes the suspect doc actually contains.
+- **Baseline change dropped the smooth line**: `recalculateAdjustedData()` (runs when
+  `initial-value` changes, e.g. after Set New Baseline) rebuilt rows with axis values
+  only, losing `smooth_*`, `smooth_w`, `suspect` and `isReplay` until the next fetch. All
+  four adjusted-data paths (fetch, baseline change, live append, manual insert) now go
+  through one `toAdjustedPoint()`.
+
+**Suggested data-flow improvements (not done, for a later round)**
+1. **A per-sensor chart store** (an injectable service scoped to the sensor page) that
+   owns sensor config, axes, thresholds, initial values, baseline events, alerts and the
+   fetched series as observables. Today these go page → `sensor-chart-main` → chart as
+   ~12 `@Input`s, and every chart re-derives state in `ngOnChanges` with key-set
+   heuristics (`hasData && !hasStructural`, early returns). This is where the live-append,
+   baseline-redraw and alerts-redraw edge cases come from. The sidebar (alerts list,
+   thresholds, initial value) could read the same store instead of querying separately.
+   The sidebar alerts list and the chart markers already run two different alert queries.
+2. **Keep series per axis instead of merged rows**: `{ [axis]: { t[], raw[], smooth[],
+   suspect[], replay[] } }`, built once in `processData`. This fits both sensor shapes
+   (x+y in one doc, or one axis per doc) without null-filling, removes the
+   exact-timestamp merge, and makes "one axis at a time" a plain lookup. `docId` per
+   point also makes point deletion unambiguous.
+3. **Parse the alert fields once**: `sensor` vs `sensorDocId` vs scanin-id, `time` vs
+   `sampleTime`, `actualValue`/`trigger`/`smoothValue`. Do it in one adapter in
+   `SensorAlertsService` instead of in each consumer.
+4. **`applyRotationAdjustment` does nothing**: its `forEach` returns new objects that are
+   discarded, and the facade angle arrives asynchronously after the function has already
+   returned. Virtual tilts with a facade therefore show unrotated data. It should be
+   fixed or removed, which needs a decision on whether facade rotation is still wanted.
+5. Remove the stale `sensor-chart-main.component.{ts,html}.bak/.fix/.part` files.
+
+**Screenshots for Didi (pending: Hillel on the preview, admin login).** Charts:
+- cracktemp, axis switch: סדק דירה 13 `/sites/HrZkKNt2ztXUui81Biue/sec-3/ChnGmWGqzR1FZlY6xC0z`
+  (also has 2 alarm alerts on x)
+- tilt with alerts: נטייה 6 `/sites/oBcqejjRiLRIFhG2UzPI/sec-3/iu1fbCeEi6sBW9UGdJTR`
+  (25 alerts in 30d, warn+alarm on x/y) or נטייה 7 (24)
+- prism A11: `/sites/hmPh7Hg2fjTc9GyNRDYO/sec-9/iG8STFDXZWbHy4ZYC2o3`
+- suspect-rich prism "12" as admin: `/sites/pUeJ6MlE8HwJPV57kETZ/sec-1/sen-prism-prism9`
+- Alert lookup for picking more: handbook `ops/src/queries/alert-fields.ts --days=30`.
 
 ## Blockers for production deploy
 

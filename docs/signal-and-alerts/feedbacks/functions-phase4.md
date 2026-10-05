@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-05
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
-**Status:** Phase 4 implemented & committed (**`dc272be`**), emulator **18/18** green, pilot backtest **−96%**. **NOT deployed — pending approval.** Full-history backfill: dry-run complete, hold-list produced (§1), **apply running** on the approved scope (will be updated here when done).
+**Status:** ✅ approved with the cumulative-clocks fix (§7), committed **`dc272be`** + **`7e4f6e1`**, **deployed 2026-10-05 06:26 UTC** (checkThresholds, setBaseline, recomputeSmoothing, notifyDataIntegrity, evaluateMultiSensorRules), emulator **22/22**, pilot backtest **−96%**. Full-history backfill **APPLIED** on the approved scope (§1); hold list → [`hold-list-2026-10-05.md`](../hold-list-2026-10-05.md). Pending: 6h `[v2-shadow]` fleet summary (§8), then Hillel flips צייטלין 12 to v2.
 
 ---
 
@@ -19,9 +19,11 @@ Per type: OPKON-100 97.8% · OPKON-60 97.3% · battery 90.9% · crack 92.7% · c
 **52 sensors carry 121,558 of the 122,759 suspects (99%).** As predicted: long "stuck eras" from historical re-zeros the migration never captured as baseline events. Dominated by JTCS prisms (H0/H2/H3/NEVIM61 families, 33–98% suspect share), the צייטלין tilts (נטייה 1/2/3/5/6 at 66–85%), office cracktemps, `Ci5mmC7CTZ9TU0AFKRwG` "8" (16,504/29,122 = 57%), and `sen-OPKON_100_Potentiometer-CRAK-WISKY-11` (11,360/34,872 = 33%). Full list with ratios: run
 `python3 -c` over `scripts/.recompute-checkpoint-fh2.jsonl` (per-sensor stats now live in the checkpoint lines) — or see the session log; the exact IDs were handed over in the reply.
 
-### Apply (216 sensors = 268 − 4 rigs − 52 held)
+### Apply (216 sensors = 268 − 4 rigs − 52 held) — ✅ DONE
 
-Running at the time of writing (`--run=fh2-apply`, checkpointed, resumable); ~1.7M reads / ~1.5M writes expected. **Result to be appended here.**
+**216/216 sensors, 1,640,184 docs read, 1,476,815 written, 34.7 min, 0 failures** (REST transport + retries held). Suspects flagged on the applied set: only **1,201** (the hold list carried 99% of them). Full-history smooth coverage on the applied set: crack 95.0% · cracktemp 98.4% · OPKON ~97% · battery 90.9% · **prism 90.3%** · tilt 89.3% (the "clean" fleet looks much better than the raw full-history numbers — the dirt was concentrated in the held sensors). Cost ≈ $0.98 reads + $2.66 writes.
+
+Hold list (52 sensors, id + name + project + suspect share): [`hold-list-2026-10-05.md`](../hold-list-2026-10-05.md). Their last 90 days ARE backfilled; full history stays un-smoothed until the re-zero baseline events are created (review with Nathan per family), then per-sensor: `node scripts/recompute-smoothing.js --sensor=<id> --days=all --apply`.
 
 ---
 
@@ -80,9 +82,50 @@ Beats the plan's −70% acceptance bar and the −80% backtest projection.
 
 **Rollback:** redeploy `8d3cc99` — v2 never drives anything without the flag anyway, so clearing the project flag is the instant kill-switch; shadow state fields in alert_state are inert.
 
-## 6. Open questions
+## 6. Open questions (answered — review 2026-10-05)
 
-1. **Hold-list review (52 sensors):** these need baseline-events for their historical re-zeros before their history can be filled (or a decision to leave their history un-smoothed). Process with Nathan per family (JTCS prisms → ATS repair; צייטלין tilts → likely recorded re-zeros)?
-2. `baseline` field on tier alerts = the axis' current initial-value (chose this over ref; ref is carried separately on instant alerts) — confirm.
-3. The backtest's 9 v2 alerts: want the per-alert details (times/values) to sanity-check against the charts before flipping the flag?
-4. Tier 2 candidate resets when the level changes (warn-candidate → alarm readings restart the clock at alarm) — per the contract's single-candidate shape; acceptable?
+1. Hold-list review with Nathan per family later; history stays un-smoothed meanwhile. List → `hold-list-2026-10-05.md`. ✔
+2. `baseline` = current initial-value: confirmed. ✔
+3. Backtest alert details: added (§9). ✔
+4. Candidate reset across levels: **fixed** — cumulative per-level clocks (§7). ✔
+
+---
+
+## 7. Review fix: cumulative per-level candidate clocks (`7e4f6e1`)
+
+The single candidate reset whenever the level changed, so smooth hovering around the **alarm** gap (alternating warn/alarm readings) never accumulated 3h at either level — despite being beyond warn the whole time.
+
+- `alert_state.axes.<axis>.candidate` → `{ warn: {since, count} | null, alarm: {since, count} | null }`. Beyond alarm bumps **both** clocks; beyond warn only bumps warn and clears alarm; below 80% of warn clears both; the 80%–100% warn band holds the clocks (hysteresis).
+- Escalate to the **highest** level above the current status whose own clock has ≥ 3h AND ≥ 2 evaluations. Warn escalation keeps the alarm clock running; alarm escalation clears both.
+- Legacy single-candidate shape read gracefully (`normalizeCandidates`).
+- Emulator (suite now **22/22**): alternating 1.05/0.95 around alarm (warn 0.5 / alarm 1.0) for 4h → exactly **1 confirmed WARN**; continuous ≥ 3h beyond alarm afterwards → **1 ALARM**; legacy-shape carry-over escalates correctly.
+
+---
+
+## 8. Deploy report
+
+- **Deployed 2026-10-05 06:26 UTC**, 0 errors: `checkThresholds` / `setBaseline` / `recomputeSmoothing` / `evaluateMultiSensorRules` updated, **`notifyDataIntegrity` created** (dormant — `system-config/data-integrity` doc absent; Hillel enables).
+- `processDataRequest.ts` turned out to be **dead code** — its exports (`createSensorTasks` / `processSensorTask` / `aggregateResults`) are not in `index.ts` and no matching functions exist in prod. The export fix is committed but inert; worth a cleanup decision later.
+- No project flag set — all sites on v1, shadow running fleet-wide.
+- **Pending:** [ ] **~6h `[v2-shadow]` fleet summary** (due ~12:30 UTC): per project, v1 alerts fired vs v2 would-have-fired + the instant-off axes list. Will be appended here. Then Hillel sets `projects/oBcqejjRiLRIFhG2UzPI.alerting = 'v2'`.
+- **Rollback:** clear the project flag (instant, per site); full rollback = redeploy `8d3cc99`.
+
+---
+
+## 9. Backtest alert details (צייטלין 12, 60d — for chart verification)
+
+Totals: **v1 = 227 → v2 = 9** (8 confirmed + 1 instant), **−96%**.
+
+| Sensor | Axis | Tier | Level | Sample time | smooth | raw adj | Extra |
+|---|---|---|---|---|---|---|---|
+| נטייה 7 (`2bFvKSdK5P34K6IoV7xS`) | y | confirmed | warn | 2026-08-06 11:00Z | 0.1239 | 0.1270 | 4.0h, 5 evals |
+| נטייה 7 | y | confirmed | alarm | 2026-08-11 22:00Z | 0.1318 | 0.1300 | 3.0h, 4 evals |
+| סדק 1 שירותים (`Y5Fmj6xhyJxESk2DOI7U`) | x | **instant** | alarm | 2026-10-05 02:46Z | −0.1588 | 2.4973 | jump 2.656 vs ref −0.159 |
+| נטייה 5 (`cBYnPKmA2NUoU7KHpLCP`) | x | confirmed | alarm | 2026-08-17 01:00Z | 0.1079 | 0.1150 | 3.0h, 4 evals |
+| נטייה 5 | y | confirmed | warn | 2026-08-17 01:00Z | 0.0195 | 0.0190 | 3.0h, 4 evals |
+| נטייה 5 | y | confirmed | alarm | 2026-08-28 17:00Z | 0.0201 | 0.0200 | 3.0h, 4 evals |
+| נטייה 6 (`iu1fbCeEi6sBW9UGdJTR`) | y | confirmed | warn | 2026-08-06 11:00Z | −0.0822 | −0.0300 | 4.0h, 4 evals |
+| נטייה 6 | y | confirmed | alarm | 2026-08-20 03:00Z | −0.1007 | −0.1090 | 4.0h, 5 evals |
+| נטייה 4 (`nG4q9Y0zYV6W2SgfWFB3`) | x | confirmed | alarm | 2026-08-17 01:00Z | 0.1456 | 0.1430 | 3.0h, 4 evals |
+
+Chart links: `https://new-scanin-ui.web.app/s/<sensorId>`. Note the instant alert on סדק 1 is dated 2026-10-05 02:46 — a fresh real jump last night, worth a look regardless of the rollout. Re-runnable: `node scripts/backtest-v2-zeitlin.js --days=60 --details`.
