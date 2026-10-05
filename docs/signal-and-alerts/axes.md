@@ -82,6 +82,13 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 | reports | `report`, labels, units; layout config (vibration DIN charts, raw series) stays in code | #6 |
 | bridge | default thresholds for new ATS points (`defaultThresholds` on the type) | #7 |
 
+### 4.5 Types with their own chart layout (vibration)
+
+Vibration isn't time series per axis. It's a DIN 4150-3 scatter (velocity vs frequency, short / long term) plus velocity over time, and it has its own evaluation (`evaluateDinSensor`, not `thresholds.axes`). The **layout** stays in code: the UI's `vibration-chart` / `vibration-vf-chart` components, the reports' `charts` config and the functions' DIN logic. That's fine as long as it's declared, not hidden:
+- The registry still lists the fields (velocity, frequency) with labels and units, so names and units come from one place.
+- Add `chartLayout: "din4150"` and `alertRule: "din4150"` on the vibration and vibration-din types (`vibration_vf` keeps `thresholds` on velocity). The UI, reports and audit then read "this type uses the DIN layout and rule", instead of guessing from the type name.
+- The one-axis tabs and the threshold editor don't apply to `chartLayout: "din4150"` types.
+
 ## 5. Proposed registry content (to agree with Didi / Nathan)
 
 | Type | Axis | role | chart | report | alertable | Note |
@@ -102,7 +109,7 @@ One reviewed table, readable by anyone, edited only through a committed oneoff s
 | loadcell | raw | auxiliary | ✗ | ✗ | ✗ | |
 | battery | voltage | auxiliary | ✓ | ✗ | ✓ | health, not structure |
 | inclinometer | x, y, temperature | measurement / aux | ✓ | ✓ | ✓ / ✗ | create doc |
-| vibration-* | velocity, frequency | measurement | (DIN charts) | ✓ | velocity only | fix `freqeuncy` |
+| vibration-* | velocity, frequency | measurement | (DIN charts) | ✓ | velocity only | fix `freqeuncy`. See §4.5. |
 
 **Decisions**
 - **A. Prisms — DECIDED 2026-10-05: East + North + Height are alertable; TwoD is charted + reported (derived), not alertable.** Today it's Height + TwoD (hidden East / North). With §4.2 this is just which defaults new sensors get; existing sensors keep exactly the thresholds they have. But today **166 prisms already carry E / N thresholds** (bridge defaults), so removing the hidden filter turns them on. Before that, a v1-vs-v2 backtest per project, then per project with Nathan: keep, or clear the E / N gaps (oneoff, dry-run → apply).
