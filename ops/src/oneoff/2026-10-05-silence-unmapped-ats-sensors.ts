@@ -1,4 +1,6 @@
 /**
+  * ⚠️ NOT APPLIED (Hillel 2026-10-05: handle with Nathan in a mapping session instead). Kept for reference.
+ *
  * Silence the auto-created, unmapped ATS sensors at מגדל דה וינצי דרום (name "ATS.DeVinci-1.*").
  *
  * After 2026-10-05 renames on the ATS-5 PC, the bridge auto-created 48 sensors "ATS.DeVinci-1.<point>".
