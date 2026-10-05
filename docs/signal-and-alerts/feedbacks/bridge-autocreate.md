@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-05
 **Repo:** [scanin-svc-mqtt-bridge](https://github.com/ScanInLtd/scanin-svc-mqtt-bridge)
-**Status:** implemented, emulator-tested, committed **`4450a5b`** and pushed to `master`. **VM deploy waiting for Hillel's approval** (§5).
+**Status:** implemented, emulator-tested, committed **`4450a5b`** and pushed to `master`, **deployed to `monitoring-bridge-vm` 2026-10-05** (Hillel). Functions-side suppression for unconfirmed points (§2) still required.
 **Trigger:** on 2026-10-05 Nathan re-taught many DeVinci points. The bridge auto-created 48 `ATS.DeVinci-1.*` sensors with 4/6 mm thresholds on E/N/H/TwoD. With v2 alerts and `prismAxes=registry` they produced 50 of the day's 53 alerts. The cause was points still being set up (f4p7 etc. went 0 → 10/40/−97 mm within a day while being re-aimed), not the thresholds themselves.
 
 **Rule (Hillel, revision 1):** auto-created points **do** get thresholds, since dozens of prisms share the same values. They stay `confirmed: false` and **don't alert until confirmed**. That suppression lives in functions + UI, not in the bridge.
@@ -66,7 +66,7 @@ The repo has no tests, so I wrote a throwaway script in `/tmp` (deleted afterwar
 - To populate the registry: add `defaultThresholds` to `devices-types/sensors/devices/prism`, for example `{ EastingDisplacement: {warn:{gap:4},alarm:{gap:6}}, NorthingDisplacement: {…}, HeightDisplacement: {…} }`. The bridge picks it up for the next new sensor, with no deploy needed.
 - Later (not done): BR-1.1 (no auto-create, unassigned list) and ATS-1.3 (station re-teach event → baseline event), `tasks.md` §4/§4b.
 
-## 5. Deploy (after approval)
+## 5. Deploy (done 2026-10-05)
 
 Commit `4450a5b` is on `origin/master`. On `monitoring-bridge-vm`:
 1. `cd ~/monitoring-bridge && ./deploy.sh`. It runs `git pull origin master`, rebuilds and restarts the container.
