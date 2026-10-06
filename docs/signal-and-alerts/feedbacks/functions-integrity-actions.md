@@ -3,7 +3,7 @@
 **Date:** 2026-10-06
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
 **Spec:** `integrity-actions.md` §2 (approved layout §1)
-**Status:** implemented & committed (**`da58113`**), emulator **14/14** green, all templates rendered below. **NOT deployed — pending approval.**
+**Status:** ✅ approved with one change (uiPageLive dropped — §6), committed **`da58113`** + **`cdf4517`**, emulator **17/17** green, final renders in §6. **NOT deployed — waiting for Hillel's go once the web-platform `/integrity` page is live** (otherwise WhatsApp links point at a missing page).
 
 ---
 
@@ -179,3 +179,91 @@ fallback message
 
 1. The release replay evaluates the episode's samples with the tier clocks — if the episode was **shorter than 3h**, no alert fires at release and the escalation completes on the next live samples. Matches "a client alert goes out only if the tiers say so"; flagging the latency so no one expects an instant alert on short episodes.
 2. `releaseSuspect` clears flags for the whole sensor since the episode start (all axes with evaluator reasons, matching the one-violation-flags-the-whole-sample write); the ref/replay applies to the notice's axis. Multi-axis episodes release together — intended?
+
+---
+
+## 6. Review change: uiPageLive dropped (`cdf4517`)
+
+The `/integrity` page ships together with this deploy, so there is no transition period: `system-config/data-integrity.uiPageLive` and both code paths were removed. Every message always links to `https://new-scanin-ui.web.app/integrity/‹noticeId›` and carries the full per-kind "מה לעשות?" block. Suite re-run: **17/17**. Answers recorded: short-episode releases alert on subsequent live samples (fine); multi-axis episodes release together (intended).
+
+**Deploy gate:** waiting for Hillel's "UI page is live", then:
+`firebase deploy --only functions:notifyDataIntegrity,functions:checkThresholds,functions:setBaseline,functions:recomputeSmoothing,functions:releaseSuspect,functions:ignoreNotice`
+
+### Final rendered templates (emulator, verbatim)
+
+```
+----- implausible-jump -----
+🔴 *קריאה חשודה*
+לא נשלחה ללקוח
+
+📍 פריזמה el · SAVYON LIVING
+🧭 חזית מערב
+
+📏 הטיה X: *8.95 °*
+↔️ הטיה Y 4.2 °
+
+*מה לעשות?*
+🔧 הוזז / הוחלף ← baseline חדש
+✅ תזוזה אמיתית ← אשר והתרע
+🗑️ תקלה ← התעלם
+
+🔗 https://new-scanin-ui.web.app/integrity/NOTICE123
+
+----- late-data -----
+🕒 *חיישן מעלה נתונים באיחור*
+
+📍 פריזמה el · SAVYON LIVING
+🧭 חזית מערב
+
+⏳ באיחור של *3.2 ימים*
+📅 קריאה אחרונה שנמדדה: 03.10
+
+*מה לעשות?*
+📡 לבדוק לוגר ותקשורת
+
+🔗 https://new-scanin-ui.web.app/integrity/NOTICE123
+
+----- level-shift -----
+📐 *קפיצת מדרגה*
+ייתכן שהחיישן הוזז או הוחלף
+
+📍 פריזמה el · SAVYON LIVING
+🧭 חזית מערב
+
+📏 הטיה X: *1.3 °* מאז 03.10
+
+*מה לעשות?*
+🔧 הוזז / הוחלף ← baseline חדש
+✅ תזוזה אמיתית ← אשר
+🗑️ תקלה ← התעלם
+
+🔗 https://new-scanin-ui.web.app/integrity/NOTICE123
+
+----- unconfirmed-sensor -----
+🆕 *חיישן בהקמה ממתין לאישור*
+
+📍 פריזמה el · SAVYON LIVING
+🧭 חזית מערב
+
+🗓️ יימחק ב-08.10
+
+*מה לעשות?*
+✅ לאשר את הנקודה בעמוד החיישן
+
+🔗 https://new-scanin-ui.web.app/integrity/NOTICE123
+
+----- test -----
+🧪 *בדיקה*
+
+בדיקת מערכת
+
+🔗 https://new-scanin-ui.web.app/integrity/NOTICE123
+
+----- unknown-kind -----
+fallback message
+
+📍 פריזמה el · SAVYON LIVING
+🧭 חזית מערב
+
+🔗 https://new-scanin-ui.web.app/integrity/NOTICE123
+```
