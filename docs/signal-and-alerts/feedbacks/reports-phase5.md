@@ -151,3 +151,15 @@ Runtime is about the same as v1 (REP134 30s, REP141 50s, REP106 ~2 min — domin
 5. Vibration fetch reads ~370k docs per report regardless of period (seconds/ms query) — cheap fix, ~2 min + reads per run.
 6. Pre-existing: group chart pages show an empty project header.
 7. Remove v1 code ~2026-10-20.
+
+---
+
+## 11. Follow-up round (2026-10-06): vibration over-read, group header — deployed
+
+| Item | Status |
+|---|---|
+| **Vibration fetch over-read** | ✅ fixed, `0dcf870`. The data-log was queried as one broad range `[startSec, endMs]` (to cover both seconds and milliseconds timestamps), which matched **every millisecond-timestamped doc ever written**. Now two exact range queries, one per unit, merged and sorted. Verified on REP106's vibration sensor (`IqXkMaI2PBbxLwgJ7AOX`): Jul 7–Aug 31 **372,104 → 523 reads, same 523 samples**; Sep 5–Oct 5 548 reads / 548 samples. Whole REP106 report **124 s → 21 s**. Applies to v1 and v2 (shared `getSensorData`). |
+| **Empty project header on group chart pages** (pre-existing) | ✅ fixed, `0dcf870`. `header-content.hbs` read `reportMetadata` from the current context — inside `group.hbs`'s `{{#each charts}}` that's the chart. Now `@root.reportMetadata` (report ID, project, date shown on every page type). |
+| Deploy | ✅ 2026-10-06 10:48Z → revision `reports-worker-00110-sew`, boot `build=0dcf870`. Tonight's scheduled runs use this build. |
+| Tonight's runs (22:00Z orchestrator, 02:00Z nightly) | ⏳ results (errors, empty charts, timings) appended in the morning. |
+| Pause `daily-prism-processing` (PD-5.1) | ⏳ waiting for Hillel's confirmation that the UI group view on `smooth` is live. Pause only; delete services + v1 code ~2026-10-20. |
