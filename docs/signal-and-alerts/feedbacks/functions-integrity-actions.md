@@ -296,7 +296,7 @@ fallback message
 
 ---
 
-## 8. Duplicate samples never raise notices (review 2026-10-06, commit `94153b4`) — NOT deployed, pending approval
+## 8. Duplicate samples never raise notices (review 2026-10-06, commit `94153b4`) — ✅ deployed 2026-10-06 12:24 UTC
 
 **Problem:** 13 vibration sensors got late-data notices from re-published copies of samples that already exist (same `time` — up to 55 copies of one SAVYON sample).
 
@@ -304,6 +304,6 @@ fallback message
 
 **Emulator Case E** (full suite green): first-time old sample → late-data notice exactly as today (count 1); a duplicate copy → `SKIP-DUPLICATE`, notice count unchanged; a closed-site duplicate → `inactive-site-data` count unchanged.
 
-**Deploy (pending approval):** `firebase deploy --only functions:checkThresholds`. Rollback: redeploy `86215d0`.
+**Deployed 2026-10-06 12:24 UTC, 0 errors** (`checkThresholds`). Rollback: redeploy `86215d0`.
 
 **Note:** the §7 closed-sites deploy that was interrupted mid-output on 2026-10-06 actually completed — both functions show `updateTime 12:05 UTC, ACTIVE` in prod.

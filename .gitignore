@@ -8,3 +8,5 @@ firebase-debug*.log
 
 # personal images for the Nathan meeting page (never committed)
 docs/signal-and-alerts/local-art/
+
+.DS_Store

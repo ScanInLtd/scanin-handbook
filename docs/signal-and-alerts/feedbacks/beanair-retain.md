@@ -67,7 +67,7 @@ Result: _pending deploy._
 # Part 2: startup replay (persisted publish watermark)
 
 **Date:** 2026-10-06
-**Status:** implemented and committed locally as **`115433c`** on `master`. **Not compiled, not pushed, not deployed; waiting for approval.** There's no .NET toolchain on the dev Mac (see §2.4).
+**Status:** `115433c` + `7792af0` pushed to `origin/master`. `115433c` compiled on the host (first deploy attempt failed at the copy step, see §2.6). **Deploy in progress.**
 **Trigger:** after the 10-06 redeploy (12:00–12:02Z), 13 vibration sensors received copies of old samples. SAVYON "1 רעידות" now has the same sample stored 55×. The same pattern appears at 2026-08-31 06:25Z and 2026-09-14 07:04Z (earlier restarts). Each copy opens a "late data" notice in the internal WhatsApp group.
 
 ## 2.1 Where the replay comes from
@@ -125,3 +125,22 @@ The watermark file doesn't exist yet, so the service can't know what was already
 - **No publish retry** (existing behaviour). If a publish fails, its batch isn't committed. Committing a later batch for the same key still moves the watermark past it.
 - **Duplicates already stored** (the 55 SAVYON copies and the other 12 sensors) are untouched. A oneoff in `ops/` could find and remove them.
 - **Steady-state reads after the first pass** (existing behaviour, not changed): `GetLastBatches` starts each incremental read with an unknown section type, so appended lines are picked up only when a new block with a section header is appended.
+
+## 2.6 Deploy finding: the process outlives "service stopped" (`7792af0`)
+
+The first deploy of `115433c` **compiled cleanly** (warnings only, no CS errors). It failed at the copy step: `bin\Release\SubscriberSSL.dll` was locked by `ScaninVibrationService (6848)`, although the SCM reported the service as STOPPED.
+
+**Cause:**
+- `VibrationService.OnStop()` only wrote a log line.
+- The `BeanairAdapter` worker loop and the `MqttSSL` publish loop are **foreground** threads, so they keep the process alive after `ServiceBase.Run` returns.
+- After every `sc stop`, the old process **kept running: it read the files and published to MQTT** under client ID `ScaninVibrationService`, while the SCM considered it stopped.
+- `redeploy.bat` force-killed only when the SCM state wasn't STOPPED, so the old process survived.
+
+This may also have contributed to past duplicates. If an earlier lingering process was still alive when the new one started, both published (and fought over the same MQTT client ID). That isn't proven.
+
+**Fix (`7792af0`, pushed):**
+- Both loop threads are now `IsBackground = true`.
+- `OnStop` calls `worker.Stop()`.
+- `redeploy.bat` step 1 checks the **process** (`tasklist`) and force-kills it if it's still alive. Note that this would also kill a running `--backfill`, which uses the same exe.
+
+The copy of `redeploy.bat` on the host only gets this fix after a pull. For this run, kill the process by hand first.
