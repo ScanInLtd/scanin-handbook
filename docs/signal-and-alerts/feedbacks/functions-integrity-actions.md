@@ -266,3 +266,30 @@ fallback message
 
 🔗 https://new-scanin-ui.web.app/integrity/NOTICE123
 ```
+
+---
+
+## 7. Closed sites (review 2026-10-06, commit `86215d0`) — NOT deployed, pending approval
+
+1. **`checkThresholds`:** `projects/{id}.isActive === false` → same treatment as `active === false` (SKIP-INACTIVE-SITE: no alerts, no suspect QC, no per-sensor notices; smoothing + stateless `eval` still written) — even when the sensor itself was left active. Project activity cached per instance (10 min). Only an explicit `isActive === false` closes a site — a missing project doc/field never silences a live sensor.
+2. **New kind `inactive-site-data`** (warning), ONE open notice per project (dedupe kind+projectId): raised when any sensor of an inactive project writes a new data-log doc — both the normal path and the **stale path** (closed sites draining buffered uploads get this instead of per-sensor late-data notices). Details merged on every hit: `sensorIds`/`sensorCount`, `lastWriteAt`, `sampleTimeMin/Max`, `deviceClockSuspect` when sample times trail arrival by > 30 days. Count bumps don't re-send (onCreate-only delivery). Found & fixed en route: `raiseIntegrity`'s dedupe bump overwrites `details`, so the merge now happens before the raise.
+3. **Emulator Case D** (suite green): closed site with an ACTIVE sensor — crossing samples → 0 alerts with smooth/eval written; a 40-day-old sample → project notice (no late-data); a second sensor merges into the same notice (count 2, widened range).
+
+### Rendered template (emulator, verbatim)
+
+```
+🚫 *אתר סגור מקבל נתונים*
+
+📍 אתר סגור לדוגמה
+
+📟 3 חיישנים
+התקבל 06.10 14:07
+🕰️ זמן הדגימות: 22.08–26.08 — שעון המכשיר תקוע?
+
+*מה לעשות?*
+🔌 לאתר את המכשיר ולנתק אותו, או למפות אותו לאתר הנכון
+
+🔗 https://new-scanin-ui.web.app/integrity/NOTICE123
+```
+
+**Deploy (pending approval):** `firebase deploy --only functions:checkThresholds,functions:notifyDataIntegrity` (template + evaluator; no new indexes — the dedupe query reuses `data-integrity (dedupeKey, status)`). Rollback: redeploy `cdf4517`.

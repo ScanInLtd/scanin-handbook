@@ -817,3 +817,34 @@ prism-daily can be paused:**
    list opens the right tab, scrolls to the card and highlights it (fade animation).
 4. **Counts** on both tabs (פתוחות N / טופלו N — both tabs stay live-subscribed) and on
    every kind filter chip.
+
+### Closing a site + inactive-site-data (2026-10-06, commit `50f79e1`, LIVE)
+
+- **Project settings**: toggling an existing project **inactive** opens the new
+  `close-site-dialog`:
+  - offers to deactivate the project's active sensors too (listed as chips; one click,
+    batched `active: false` + `deactivatedBy` (email) + `deactivatedAt` (ms));
+  - lists devices still mapped to the site, each linking to its settings page:
+    **photon-otac** ESP dataloggers (`siteId == projectId` → /settings/esp-dataloggers) and
+    **ats-device-map** entries whose `sensorId` belongs to the project's sensors
+    (→ /settings/ats-live-mapping).
+  - The project's own `isActive: false` is still saved by the existing Save flow — the
+    dialog never writes the project doc.
+- **/integrity**: new kind **`inactive-site-data`** — 🚫 **אתר סגור מקבל נתונים** — in the
+  kind map (list chips + detail header) with a **"פתח פרויקט"** action linking to
+  `/sites/:projectId`. Generic baseline/release/ignore actions are not offered for it.
+
+- **Breadcrumb consistency fix** (commit `47e91ca`, LIVE): the /integrity breadcrumbs now use
+  the exact settings-pages pattern (centered 18px `breadcrumb-container` with bottom border +
+  subtitle, `chevron_right`, styles copied from `settings.component.scss`): list =
+  "Settings › Data Integrity" (matching the dashboard card name), detail =
+  "Settings › Data Integrity › ‹kind title›" where the "Data Integrity" crumb carries
+  `?highlight=` back to the notice. Breadcrumb bar is LTR like all settings pages; the page
+  content below stays RTL.
+
+- **Project dropdown fix** (commit `1680d07`, LIVE): the /integrity project filter closed
+  itself on click — `availableProjects`/`availableKinds` were getters returning a fresh
+  array every change-detection pass, so Angular kept recreating the options under the open
+  dropdown. Now cached fields recomputed only when notices / tab / project names change
+  (stale selections cleared on tab switch), and the native `<select>` is replaced with a
+  compact Material outline `mat-select`.
