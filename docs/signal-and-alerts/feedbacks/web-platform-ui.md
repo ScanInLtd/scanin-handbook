@@ -764,3 +764,25 @@ do NOT drive the chart tabs yet; the notice page does use `axes` for labels/unit
   signal options, Enable Chart Sampling) converted to `mat-slide-toggle` — same pattern as
   the health report's Show Connectivity toggle. Sensor/site/section selection grids remain
   checkboxes (multi-select lists, not options).
+
+### Production go-live + registry option (b) (2026-10-06)
+
+- **LIVE**: https://new-scanin-ui.web.app — two production deploys:
+  1. the preview bundle cloned to live (`/integrity` + confirm-point flow + report-config
+     signal toggles; commits `982a696`…`2aaa5e5`);
+  2. registry option (b) on top (commit `810bf48`).
+  Functions can now switch the WhatsApp message links to `/integrity/<noticeId>`.
+- **Registry option (b)** — status:
+  - The sensor page + prism chart were **already registry-driven** by the parallel commits
+    (`1149c38`, `611be8b`, `80bf2f4`, `f116a70`): `shared/axis-registry.ts` builds the chart
+    tabs from the `axes` registry (Hebrew labels תזוזה X/Y/Z, `order`, `chart:false` drops
+    TwoD, "alerting axis always gets a tab"), falls back to legacy `chart-axes` when `axes`
+    is missing, and the prism **2D/X-Y-Z toggle is gone** (one-axis-at-a-time tabs).
+  - `810bf48` extends the same preference to the remaining `getTypeAxes` consumers that were
+    still on legacy `chart-axes`: `sensor-data.service.getTypeAxes` now returns
+    `[{key, unit, label}]` from the registry (chart !== false, ordered), legacy fallback
+    only when `axes` is missing; updated consumers: group bulk-settings dialog, group view,
+    data-handling-tools.
+  - Side effect: the **group view's prism "daily data" toggle** finds no daily* axes under
+    the registry — it always shows the raw X/Y/Z axes now. Aligned with dropping the daily
+    series; the toggle itself can be removed in a follow-up if desired.
