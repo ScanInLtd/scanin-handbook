@@ -269,7 +269,7 @@ fallback message
 
 ---
 
-## 7. Closed sites (review 2026-10-06, commit `86215d0`) — NOT deployed, pending approval
+## 7. Closed sites (review 2026-10-06, commit `86215d0`) — ✅ deployed 2026-10-06 12:05 UTC
 
 1. **`checkThresholds`:** `projects/{id}.isActive === false` → same treatment as `active === false` (SKIP-INACTIVE-SITE: no alerts, no suspect QC, no per-sensor notices; smoothing + stateless `eval` still written) — even when the sensor itself was left active. Project activity cached per instance (10 min). Only an explicit `isActive === false` closes a site — a missing project doc/field never silences a live sensor.
 2. **New kind `inactive-site-data`** (warning), ONE open notice per project (dedupe kind+projectId): raised when any sensor of an inactive project writes a new data-log doc — both the normal path and the **stale path** (closed sites draining buffered uploads get this instead of per-sensor late-data notices). Details merged on every hit: `sensorIds`/`sensorCount`, `lastWriteAt`, `sampleTimeMin/Max`, `deviceClockSuspect` when sample times trail arrival by > 30 days. Count bumps don't re-send (onCreate-only delivery). Found & fixed en route: `raiseIntegrity`'s dedupe bump overwrites `details`, so the merge now happens before the raise.
@@ -293,3 +293,17 @@ fallback message
 ```
 
 **Deploy (pending approval):** `firebase deploy --only functions:checkThresholds,functions:notifyDataIntegrity` (template + evaluator; no new indexes — the dedupe query reuses `data-integrity (dedupeKey, status)`). Rollback: redeploy `cdf4517`.
+
+---
+
+## 8. Duplicate samples never raise notices (review 2026-10-06, commit `94153b4`) — NOT deployed, pending approval
+
+**Problem:** 13 vibration sensors got late-data notices from re-published copies of samples that already exist (same `time` — up to 55 copies of one SAVYON sample).
+
+**Fix:** at the top of the stale path — before BOTH the late-data raise and the inactive-site-data raise — query the sensor's data-log for the same `time` (`limit 2`). The newly created doc itself matches the query, so **≥ 2 docs ⇒ a replay copy**: no notice, `SKIP-DUPLICATE` log. One extra read per stale sample only (the hot path is untouched).
+
+**Emulator Case E** (full suite green): first-time old sample → late-data notice exactly as today (count 1); a duplicate copy → `SKIP-DUPLICATE`, notice count unchanged; a closed-site duplicate → `inactive-site-data` count unchanged.
+
+**Deploy (pending approval):** `firebase deploy --only functions:checkThresholds`. Rollback: redeploy `86215d0`.
+
+**Note:** the §7 closed-sites deploy that was interrupted mid-output on 2026-10-06 actually completed — both functions show `updateTime 12:05 UTC, ACTIVE` in prod.
