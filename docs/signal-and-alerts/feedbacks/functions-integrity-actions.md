@@ -3,7 +3,7 @@
 **Date:** 2026-10-06
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
 **Spec:** `integrity-actions.md` §2 (approved layout §1)
-**Status:** ✅ approved with one change (uiPageLive dropped — §6), committed **`da58113`** + **`cdf4517`**, emulator **17/17** green, final renders in §6. **NOT deployed — waiting for Hillel's go once the web-platform `/integrity` page is live** (otherwise WhatsApp links point at a missing page).
+**Status:** ✅ approved with one change (uiPageLive dropped — §6), committed **`da58113`** + **`cdf4517`**, emulator **17/17** green, final renders in §6. **Deployed 2026-10-06 08:52 UTC** (UI `/integrity` page live; notifyDataIntegrity/checkThresholds/setBaseline/recomputeSmoothing updated, releaseSuspect + ignoreNotice created, 0 errors).
 
 ---
 
@@ -186,8 +186,7 @@ fallback message
 
 The `/integrity` page ships together with this deploy, so there is no transition period: `system-config/data-integrity.uiPageLive` and both code paths were removed. Every message always links to `https://new-scanin-ui.web.app/integrity/‹noticeId›` and carries the full per-kind "מה לעשות?" block. Suite re-run: **17/17**. Answers recorded: short-episode releases alert on subsequent live samples (fine); multi-axis episodes release together (intended).
 
-**Deploy gate:** waiting for Hillel's "UI page is live", then:
-`firebase deploy --only functions:notifyDataIntegrity,functions:checkThresholds,functions:setBaseline,functions:recomputeSmoothing,functions:releaseSuspect,functions:ignoreNotice`
+**Deployed 2026-10-06 08:52 UTC, 0 errors** — `releaseSuspect` + `ignoreNotice` created, the rest updated. Rollback: redeploy `a3a0e34` (new callables deletable; `details.otherAxes` additive).
 
 ### Final rendered templates (emulator, verbatim)
 

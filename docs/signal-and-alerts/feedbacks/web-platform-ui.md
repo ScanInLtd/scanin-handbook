@@ -670,3 +670,97 @@ Approved for the preview, with the changes below.
 6. **Rules:** leave the local `data-integrity` block uncommitted. It belongs to `docs/security/firestore-rules-task.md`.
 7. **Tier-1 band:** Phase 4 (UI-4.1).
 8. Push `f01dcf7`.
+
+---
+
+## UI-1.3 — /integrity notices page + confirm-point flow (2026-10-06)
+
+**Preview:** https://new-scanin-ui--signal-ui-40juh2g4.web.app/integrity (expires 2026-10-20)
+**Commit:** `982a696` on `main`. Preview only — production deploy awaits approval.
+
+### What was built
+
+- **Routes** `/integrity` + `/integrity/:noticeId`, new `AdminGuard`
+  (`src/app/guards/admin.guard.ts`): not logged in → `/login?returnUrl=…` — the login page
+  now honors `returnUrl` (all three sign-in paths), so a WhatsApp link opened on a phone
+  continues to the notice after sign-in; logged-in non-admin → `/unauthorized`.
+- **List** (`pages/integrity/integrity-list.component.*`): tabs פתוחות / טופלו (open first,
+  ordered by `lastSeenAt` desc), kind filter chips (emoji + Hebrew title, same wording as the
+  WhatsApp messages), project dropdown, per-card: kind title, sensor · project · section
+  (names resolved from Firestore), ×count, opened / last-seen times; resolved cards show
+  who/when. Mobile-first, RTL, 640px max width.
+- **Detail** (`integrity-detail.component.*`):
+  - header with the §1 emoji+titles (🔴 קריאה חשודה, 🕒 באיחור, 📐 קפיצת מדרגה, 🆕 בהקמה,
+    🧪 בדיקה), "לא נשלחה ללקוח" for suspect kinds, sensor · project / section lines, the
+    numbers from `details` per kind (Δ+unit vs ref — axis label+unit read from the
+    **registry `axes` map**, other jumped axes, days behind + last-measured date, step size
+    since date, auto-delete date), opened / last seen / ×count;
+  - **±3-day chart** of the affected axis around `details.sampleTime` (fallback lastSeenAt):
+    smooth line ("ממוצע 24/48 שעות (ללא חריגים)"), raw faint, suspect samples as red ✕ with
+    reason in the tooltip, baseline markers (shared helper), and a light-red vertical line at
+    the event time. Built as a compact standalone Chart.js chart (one axis, fixed range)
+    rather than embedding the full sensor-chart stack — decision noted below;
+  - **actions** (inline confirm panel + optional note, mobile-friendly):
+    - implausible-jump / out-of-range: 🔧 baseline חדש (opens the Set-Baseline dialog with
+      `noticeId` + the sample time preset) · ✅ תזוזה אמיתית — אשר והתרע (`releaseSuspect`;
+      the confirm text says readings return to the average and a client alert may follow per
+      the alert rules) · 🗑️ תקלה — התעלם (`ignoreNotice` + note);
+    - level-shift / run-common-mode: baseline + ignore only — **`releaseSuspect` rejects
+      non-evaluator kinds** (`EVALUATOR_REASONS = implausible-jump|out-of-range`), so the ✅
+      action is hidden there; if level-shift should be releasable, that's an FN change;
+    - late-data: no actions — the "📡 לבדוק לוגר ותקשורת" hint + פתח חיישן;
+    - unconfirmed-sensor: "✅ אשר נקודה" → the confirm-point dialog;
+  - resolved notices: green banner with resolution (Hebrew label), who, when, note; actions hidden.
+  - "פתח חיישן" → `/s/:sensorId` everywhere.
+- **Confirm-point flow** (`dialogs/confirm-sensor-dialog/*`):
+  - target project (required) + section selects (all projects — admin feature), change since
+    the creation baseline (latest sample − initial per axis; prisms get a headline
+    "+‹Δ› מ"מ (תזוזה דו-ממדית)" via hypot of E/N deltas), zero-point radio: keep creation /
+    new now (= `setBaseline` reason `ats-setup`, initial omitted → server median of last 24h,
+    `noticeId` passed when opened from a notice), then writes `location.site`/`section` +
+    `confirmed: true`;
+  - the sensor-page badge (`shared/components/unconfirmed-sensor-badge`) reworked: Hebrew
+    "בהקמה — לא מתריע" + "יימחק בעוד N ימים", **7-day window** (the old copy said 60
+    minutes), and the old one-click `confirmed:true` replaced by the dialog (also in the
+    compact variants on the dataloggers/sensor lists). Merging into an existing sensor: not
+    in this round, as specified.
+- Set-Baseline dialog: optional `noticeId` in its data → passed to the callable (resolves the
+  notice with 'baseline').
+
+### Registry verification (prism labels)
+
+The registry write is in: `devices-types/sensors/devices/prism.axes` has תזוזה X/Y/Z
+(order 2/3/1), TwoD `chart:false / report:false`, `smoothingWindowHours: 48`, `axesVersion: 1`.
+**But**: the web UI's chart tabs still read the legacy `chart-axes` field (which still lists
+TwoD + the daily* keys — daily* filtered client-side since UI-3.6). So the new `axes` flags
+do NOT drive the chart tabs yet; the notice page does use `axes` for labels/units. Options:
+(a) also update legacy `chart-axes` (data-only), or (b) a small UI change to prefer the
+`axes` registry (would drop TwoD from the prism chart per chart:false — which also makes the
+2D/X-Y-Z toggle moot). Decide and I'll follow up.
+
+### Open items
+
+- Phone-width screenshots (list, suspect-notice detail, confirm-point dialog) — Hillel on
+  the preview; two live late-data notices exist for the list/detail shots; a suspect-kind
+  shot needs an open implausible-jump notice (or a test one).
+- Production deploy after approval — then functions can switch the WhatsApp links.
+
+### Follow-ups (2026-10-06, commits `b3571c7` + `2aaa5e5`, preview redeployed)
+
+- **Settings dashboard card**: new admin card "Data Integrity" (`fact_check`, featured) on
+  the settings dashboard → navigates to `/integrity` (top-level route, not a settings tab);
+  participates in the per-user recent-interaction card ordering.
+- **Styling**: the `/integrity` pages now use the app's global **Heebo** font (was Segoe UI);
+  dialogs already inherit the global Material styling.
+- **Report-config editor** — two new optional `ReportConfig` fields (sensor/group reports
+  only, not written on health reports; saved on create/update, restored on edit, reset with
+  the form):
+  - `showSignalTables` — toggle "טבלאות סטטיסטיקה והתראות", default **off**
+    (edit-restore: `=== true`, so existing docs stay off);
+  - `zeroGroupSeries` — toggle "קבוצות: כל הקווים מאפס", default **on**
+    (edit-restore: `!== false`, so existing docs behave as on).
+  The reports service can start reading both fields.
+- **Form polish**: the edit form's option checkboxes (Include Raw Axes Data, the two new
+  signal options, Enable Chart Sampling) converted to `mat-slide-toggle` — same pattern as
+  the health report's Show Connectivity toggle. Sensor/site/section selection grids remain
+  checkboxes (multi-select lists, not options).
