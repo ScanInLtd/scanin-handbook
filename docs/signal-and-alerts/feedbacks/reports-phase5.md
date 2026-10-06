@@ -117,3 +117,37 @@ Runtime is about the same as v1 (REP134 30s, REP141 50s, REP106 ~2 min — domin
 - Scripted §5 spot-check (stored smooth vs report points) + a sensor with a non-migration baseline event.
 - web-platform: `showSignalTables` / `zeroGroupSeries` / `signalVersion` toggles in the report-config editor.
 - Pre-existing v1 glitch seen on group chart pages: the page header shows empty project crumbs (context of `{{#each charts}}`). Not touched.
+
+---
+
+## 10. Go-forward round (2026-10-06): v2 default, deployed
+
+**Correction to §7 (from the handbook):** the full-history smooth backfill *was* applied (216 sensors, functions-phase4 §1). Only the 52 hold-list sensors (`hold-list-2026-10-05.md`: most SAVYON LIVING prisms, צייטלין tilts 1/2/3/5/6, …) lack smooth before ~07-06 until their baseline review with Nathan. Their v2 charts show gaps until then (accepted).
+
+### Done
+1. **v2 is the code default.** `signalVersion` missing → v2; `signalVersion: 1` forces the legacy path (emergency rollback via oneoff, no UI). Same for health reports. `showSignalTables` default `false`, `zeroGroupSeries` default `true`. v1 code kept until ~2026-10-20.
+2. **REP141 re-rendered** (X / Y / Z, 63 charts per axis, no TwoD) and **REP139 health** (all sites without JCTS, 93 sensors) rendered v1/v2 → `output/compare/`.
+   - Health v1 vs v2: 3 status differences, all expected (the one-wire temperature probe → N/A, temperature doesn't alert; `TILT-01-X-0` / `-Y-0` → N/A, stale `status.axes` and no thresholds). A first run wrongly hid DIN statuses — fixed (DIN sensors keep their status).
+   - Health type column: Hebrew names for OPKON (+ any `OPKON_*`), cracktemp, straingage, inclinometer, load-cell-stretch, battery, loadcell; unknown types → first token, capped; CSS ellipsis so nothing spills into the next column; v2 column widths rebalanced.
+   - Statistics table: threshold column as colored chips ("● אזהרה ±0.1", "● אזעקה ±0.13"), "לא הוגדרו" when not set.
+3. **§5 spot-check** `scripts/debug/phase5-spotcheck.js`: **50/50 ✅** — 5 timestamps per axis on a tilt (צייטלין נטייה 1), crack (סדק 2 חדר שינה), cracktemp (גוט לווין סדק דירה 13) and prism (דה וינצי A11): every plotted value equals the stored `smooth.<axis>`; no suspect sample plotted; 76 `daily::*` docs skipped.
+4. **Committed `c4224ad`, pushed, deployed** 2026-10-06 09:40Z → revision `reports-worker-00108-peh`, 100% traffic. Boot log: `build=c4224ad`, `hasSendgridKey: true` (the deploy script's "SendGrid key not found in Cloud Run, using .env" warning was harmless — key present on the revision).
+5. **First scheduled runs:** `reports-orchestrator-daily` 01:00 Asia/Jerusalem (22:00Z tonight) and `nightly-reports-trigger` 02:00Z — results to be appended.
+
+### Not done — blocked: stopping prism-daily (PD-5.1)
+"Nothing reads `daily::*`" is **not true yet**:
+- **web-platform** `pages/sensor-groups/sensor-group-view.component.ts`: `showDailyData = true` **by default**; prism group charts plot `dailyEasting/Northing/Settlement`, with hardcoded "X Displacement / Settlement" labels (not the registry). Pausing `daily-prism-processing` would freeze those charts. → switch the group view to `smooth` + registry labels first.
+- `scanin-tool-data-replay` writes/invalidates `daily::` docs after a replay — harmless once paused.
+- functions / reports: only skip-filters (`derived:daily`), fine.
+
+### New data finding
+- **דה וינצי: ~+12 mm step across the site** around a data gap 08–16/09: stored Z on A11 −11.8 mm (05/09) → +0.6 mm (18/09); E4 the same. Looks like an ATS re-setup without a baseline event — v2 reports (and the UI) show it as movement. Needs an `ats-setup` baseline event (Nathan) before DeVinci clients get v2 reports.
+
+### Proposed follow-ups
+1. web-platform: sensor-group view on `smooth` + registry labels, remove the daily toggle (unblocks PD-5.1); report-config editor toggles for `showSignalTables` / `zeroGroupSeries`.
+2. DeVinci +12 mm step → baseline event with Nathan.
+3. 4 projects without `prismAxes: registry` still alert on TwoD (Hillel).
+4. SAVYON prisms without smooth inside the backfilled window (coverage rule) — decide before deleting prism-daily (pausing is fine).
+5. Vibration fetch reads ~370k docs per report regardless of period (seconds/ms query) — cheap fix, ~2 min + reads per run.
+6. Pre-existing: group chart pages show an empty project header.
+7. Remove v1 code ~2026-10-20.
