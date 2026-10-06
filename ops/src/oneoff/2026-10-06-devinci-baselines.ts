@@ -76,6 +76,9 @@ run(async () => {
   console.log(`\nSTEP BASELINES (${plan.length}) — reason ats-setup, time = 4th sample after the gap, initial = median of 24h:`);
   plan.forEach((p) => console.log(`  ${p.name.padEnd(8)} gap ${p.gap} · baseline ${iso(p.time)} · E ${p.initial.EastingDisplacement} N ${p.initial.NorthingDisplacement} H ${p.initial.HeightDisplacement} (n=${p.n})`));
   console.log(`\nSKIPPED (${skipped.length}): ${skipped.sort().join("; ")}`);
+  // Plan file for the direct runner (functions lib, ADC) — used when the callable's custom-token path
+  // is unavailable (IAM signBlob denied for the ops account).
+  require("node:fs").writeFileSync("/tmp/devinci-baselines-plan.json", JSON.stringify({ recompute, plan }, null, 1));
   if (!(await confirmApply(args, `recompute ${recompute.length} sensors + ${plan.length} ats-setup baselines at DeVinci`))) return;
 
   // auth as an admin user

@@ -45,7 +45,7 @@ const NATHAN: Record<string, string> = {
   E5: "f5p5", E6: "f6p5", E7: "f7p5", F10: "f10p8", F11: "f11p8", G10: "f10p9", G11: "f11p9",
   H6: "f6p13", H7: "f7p13", H10: "f10p13", H11: "f11p13", H13: "f13p13", I10: "f10p12", I11: "f11p12",
 };
-const DELETE_POINT_AND_SENSOR = ["A1", "A3", "B4", "E4", "f8p6"]; // station-5 points whose sensor + map entry go
+const DELETE_POINT_AND_SENSOR = ["A1", "A3", "B4", "E4", "f8p6", "f6p13"]; // station-5 points whose sensor + map entry go
 const DELETE_POINT_ONLY = ["A5", "f4p8", "f4p10", "f4p14", "f6p14", "f7p14"]; // sensor already deleted: map + orphan data
 const SKIP_RENAME = new Set([...DELETE_POINT_AND_SENSOR, ...DELETE_POINT_ONLY, "C4"]); // C4 handled by the split
 const C3_C4_SPLIT_U = -14.5;
