@@ -786,3 +786,34 @@ do NOT drive the chart tabs yet; the notice page does use `axes` for labels/unit
   - Side effect: the **group view's prism "daily data" toggle** finds no daily* axes under
     the registry — it always shows the raw X/Y/Z axes now. Aligned with dropping the daily
     series; the toggle itself can be removed in a follow-up if desired.
+
+### Group view on smooth + /integrity UX fixes (2026-10-06, commit `cba0d57`, LIVE)
+
+**Group view (`pages/sensor-groups/sensor-group-view`) — last prism-daily reader removed;
+prism-daily can be paused:**
+- Main line per sensor = stored `smooth.<axis>` (legend chip above the chart:
+  "ממוצע ‹w› שעות (ללא חריגים)", w from `smooth.w`, fallback 24/48 by type); raw samples are
+  an optional faint **"גולמי"** toggle; a sensor with no smooth in range falls back to raw
+  (adjusted) as its main line.
+- Zeroed mode re-zeroes each series (smooth and raw) at its first point in the window.
+- Suspect samples and `daily::` docs excluded everywhere; axes labels/units/order from the
+  registry (`getTypeAxes`). Removed: the "Daily" toggle + `showDailyData` +
+  `processPrismAxes` + all daily* reads/labels/axis mappings, and the cosmetic "Smooth"
+  tension toggle (tension 0 always). **Baseline markers skipped** here — N sensors × events
+  means clutter + N extra queries; can add later if wanted.
+
+**/integrity fixes (from the real-WhatsApp-link review):**
+1. **No more false "אין התראות פתוחות" on query errors** — list (both tabs) and detail show
+   a red error banner + console log instead of the empty state. Root cause of the 33-open
+   case: the `(status ==, orderBy lastSeenAt desc)` query needs the **(status ASC,
+   lastSeenAt DESC) composite index** (being created on the functions/rules side). All other
+   /integrity queries checked: per-doc gets (no index), chart query is a single-field time
+   range (no composite needed).
+2. **Context + navigation**: settings-style breadcrumbs — list "הגדרות › תקינות נתונים",
+   detail "הגדרות › תקינות נתונים › ‹kind›"; browser titles set via the Title service;
+   detail header gains a פתוחה/טופלה status badge; sensor and project names are links
+   (/s/:id, /sites/:siteId).
+3. **Back link lands on the notice**: "→ כל ההתראות" navigates with `?highlight=<id>` — the
+   list opens the right tab, scrolls to the card and highlights it (fade animation).
+4. **Counts** on both tabs (פתוחות N / טופלו N — both tabs stay live-subscribed) and on
+   every kind filter chip.
