@@ -29,18 +29,26 @@ Two Devin windows = two shells, but **the same global files**. Isolation has to 
 > expected account, explicit `--account` for Firebase, and its own port slot.**
 
 `CLOUDSDK_CONFIG` moves *all* gcloud state (accounts, configurations, tokens **and the ADC
-file**) into a folder you choose. The Google client libraries look for ADC there too:
+file**) into a folder you choose. But **not every client library looks for ADC there** —
+verified: `cloud-sql-proxy` ignores it and silently falls back to the global
+`~/.config/gcloud` ADC (= the wrong account, and it *seems* to work). So always pin the ADC file
+too:
 
-| Consumer | Honors `CLOUDSDK_CONFIG` for ADC? |
+```bash
+export CLOUDSDK_CONFIG=~/.config/gcloud-spotlock
+export GOOGLE_APPLICATION_CREDENTIALS="$CLOUDSDK_CONFIG/application_default_credentials.json"
+```
+
+`GOOGLE_APPLICATION_CREDENTIALS` is honored by every Google library and tool. If the file is
+missing they fail loudly ("no such file") instead of leaking another account — that's the point.
+
+| Consumer | Uses |
 |---|---|
-| `gcloud`, `gsutil`, `bq` | yes |
-| `cloud-sql-proxy` (Go) | yes |
-| Node `google-auth-library` / `firebase-admin` / `@googleapis/*` | yes |
-| Python `google-auth` | yes |
-| `firebase-tools` CLI | **no** (own login store) → always pass `--account` (§5) |
+| `gcloud`, `gsutil`, `bq` | `CLOUDSDK_CONFIG` |
+| `cloud-sql-proxy`, Node `google-auth-library` / `firebase-admin` / `@googleapis/*`, Python `google-auth` | `GOOGLE_APPLICATION_CREDENTIALS` (pinned to the folder's ADC file) |
+| `firebase-tools` CLI | **neither** (own login store) → always pass `--account` (§5) |
 
-⚠️ `GOOGLE_APPLICATION_CREDENTIALS` overrides everything. **Never set it globally** in
-`~/.zshrc`; set it only per repo if a service-account key is really needed.
+⚠️ **Never set either variable globally** in `~/.zshrc` — only per repo (script / `.envrc`).
 
 ### Naming convention
 
@@ -59,9 +67,8 @@ One folder **per client account**, not necessarily per repo: `commodex-office` a
 ```bash
 # 1. Create the isolated folder and log in INTO it (browser opens twice: user + ADC)
 export CLOUDSDK_CONFIG=~/.config/gcloud-spotlock
-gcloud auth login hillel@spotlock.co
+gcloud auth login hillel@spotlock.co --update-adc    # user login + ADC in one browser round
 gcloud config set project spotlock-exposure          # default project for this client
-gcloud auth application-default login                # ADC inside this folder
 gcloud auth application-default set-quota-project spotlock-exposure
 
 # 2. Firebase CLI: add the account (other logins are kept)
@@ -90,17 +97,22 @@ In each repo root, commit an `.envrc` (no secrets in it):
 
 ```bash
 # .envrc — repo identity (committed)
-export CLOUDSDK_CONFIG="$HOME/.config/gcloud-spotlock"
-export REPO_GCP_ACCOUNT="hillel@spotlock.co"
-export REPO_GCP_PROJECT="commodex-office"
-export CLOUDSDK_CORE_PROJECT="$REPO_GCP_PROJECT"     # gcloud default project in this repo
-export REPO_PORT_SLOT=90                             # see §8
+source_env_if_exists .envrc.local                    # personal overrides (COMMODEX_* only)
+export CLOUDSDK_CONFIG="${COMMODEX_CLOUDSDK_CONFIG:-$HOME/.config/gcloud-spotlock}"
+export GOOGLE_APPLICATION_CREDENTIALS="$CLOUDSDK_CONFIG/application_default_credentials.json"
+export CLOUDSDK_CORE_PROJECT="spotlock-exposure"     # gcloud default project in this repo
+export WEB_PORT=3090 API_PORT=8090 DB_PORT=5490      # slot 90, see §8
 ```
 
 Then `direnv allow` once. `cd` into the repo → variables load; `cd` out → they unload.
 
-> Each person's account differs → put the *person-specific* account in `.envrc.local`
-> (git-ignored) and `source_env_if_exists .envrc.local` at the end of `.envrc`.
+> Each person's account differs → put it in `.envrc.local` (git-ignored), e.g.
+> `export COMMODEX_GCP_ACCOUNT=dana@spotlock.co`.
+>
+> ⚠️ **Override variables are prefixed with the repo name** (`COMMODEX_*`, `SCANIN_*`…). Never
+> read generic names like `CLOUDSDK_CONFIG` / `REPO_GCP_ACCOUNT` *from the environment* in a
+> script: a value exported in the terminal for another repo would leak in — and the preflight
+> would then offer to log this repo's account into the *other* repo's folder.
 
 ---
 
@@ -114,12 +126,15 @@ Scripts must **not rely on direnv** being installed: they set the identity thems
 ```bash
 #!/bin/bash
 cd "$(dirname "$0")"
-# Repo identity — everything below (gcloud, proxy, API, tests, deploy) inherits it
-export CLOUDSDK_CONFIG="${CLOUDSDK_CONFIG:-$HOME/.config/gcloud-spotlock}"
-REPO_GCP_ACCOUNT="${REPO_GCP_ACCOUNT:-hillel@spotlock.co}"
+# Repo identity — everything below (gcloud, proxy, API, tests, deploy) inherits it.
+# Set unconditionally; overrides only via repo-prefixed names (never a generic CLOUDSDK_CONFIG
+# that another repo may have exported in this terminal).
+export CLOUDSDK_CONFIG="${COMMODEX_CLOUDSDK_CONFIG:-$HOME/.config/gcloud-spotlock}"
+export GOOGLE_APPLICATION_CREDENTIALS="$CLOUDSDK_CONFIG/application_default_credentials.json"
+REPO_GCP_ACCOUNT="${COMMODEX_GCP_ACCOUNT:-hillel@spotlock.co}"
 GCP_PROJECT="spotlock-exposure"        # project of shared infra (Cloud SQL)
 DEPLOY_PROJECT="commodex-office"       # project this repo deploys to
-PORT_SLOT=90                           # → web 3090, api 8090, db 5490 (§8)
+PORT_SLOT="${COMMODEX_PORT_SLOT:-90}"  # → web 3090, api 8090, db 5490 (§8)
 WEB_PORT=$((3000 + PORT_SLOT)); API_PORT=$((8000 + PORT_SLOT)); DB_PORT=$((5400 + PORT_SLOT))
 ```
 
@@ -207,7 +222,7 @@ Use a **two-digit slot `NN` per repo** and derive every port from it:
 | 20 | Scanin-Link | scanin-svc-reports local web UI (`PORT=8021`) | `scanin-svc-reports/.envrc` |
 | 20 | Scanin-Link | scanin-svc-watchdog local (`PORT=8022`) | `scanin-svc-watchdog/.envrc` |
 | 21–29 | Scanin-Link | free | functions emulators still on firebase defaults (Firestore 8080) — move to 90NN when touched |
-| 90 | Spotlock / Commodex | commodex-office | currently 3090 / 8090 / **5432 → move to 5490** |
+| 90 | Spotlock / Commodex | commodex-office | ✅ 3090 / 8090 / 5490 · `gcloud-spotlock` — reference implementation |
 | 50–89 | free | | allocate in blocks of 10 per new client |
 
 Rules:
@@ -223,7 +238,9 @@ Rules:
 
 - [ ] Pick the client folder (`~/.config/gcloud-<client>`) and do §3 once.
 - [ ] Add `.envrc` (+ `.envrc.local` in `.gitignore`) — §4.
-- [ ] Script header exports `CLOUDSDK_CONFIG`, account, projects, port slot — §5.1.
+- [ ] Script header exports `CLOUDSDK_CONFIG` **and** `GOOGLE_APPLICATION_CREDENTIALS`, account, projects, port slot — §5.1.
+- [ ] Prove isolation: with the new folder still empty, preflight must **fail** on the DB proxy
+      ("no such file") — if it connects, something still reads the global ADC.
 - [ ] Preflight checks account, ADC, Firebase account, ports — §5.2.
 - [ ] All `gcloud` calls have `--project`; all `firebase` calls have `--project --account` — §5.3.
 - [ ] Cloud SQL proxy on the slot's DB port; `.env` `DB_PORT` updated; dev proxy target updated.
@@ -238,23 +255,31 @@ Rules:
 |---|---|
 | `Failed to get Firebase project X` | Firebase CLI used another login → `--account`, `login:add` |
 | `Reauthentication required` | Workspace re-auth policy → just log in again (inside the right `CLOUDSDK_CONFIG`) |
-| Cloud SQL proxy: `403` / `NOT_AUTHORIZED` | ADC of the wrong account → check `$CLOUDSDK_CONFIG`, refresh ADC |
+| Cloud SQL proxy: `403` / `NOT_AUTHORIZED` | ADC of the wrong account → check `$GOOGLE_APPLICATION_CREDENTIALS`, refresh ADC |
+| Proxy works although the repo folder is empty | `GOOGLE_APPLICATION_CREDENTIALS` not set → it silently uses the global ADC |
 | `quota project` warnings | `gcloud auth application-default set-quota-project <id>` (inside the folder) |
 | API talks to the wrong DB | two proxies / Postgres on the same port → use the slot's `54NN` |
 | `Python 3.9 will be deprecated` / `importlib.metadata` errors | old Python bundled with gcloud → `gcloud components reinstall` (or `CLOUDSDK_PYTHON=$(which python3.12)`) |
 
 ---
 
-## 11. ScanIn setup (done 2026-10-08)
+---
+
+## 11. ScanIn setup (done 2026-10-08, lessons from commodex applied)
 
 | Piece | Where |
 |---|---|
 | gcloud + ADC | `~/.config/gcloud-scanin` (account `scanin.link@gmail.com`, project `dataloggerdev`) |
-| Client `.envrc` (identity for **all** repos under the folder) | `~/dev/clients/scanin/.envrc` — template: `scanin-handbook/ops/env/scanin.envrc` |
-| Firebase CLI pinning for interactive use | shim `~/dev/clients/scanin/.bin/firebase` (adds `--account`; login commands pass through), put on PATH by the `.envrc` — template: `scanin-handbook/ops/env/firebase-shim.sh` |
-| Per-repo ports | `scanin-svc-reports/.envrc`, `scanin-svc-watchdog/.envrc` (`source_up` + `PORT`), web-platform `angular.json` |
-| Scripts | `export CLOUDSDK_CONFIG=…gcloud-scanin` header in every deploy script; functions `DEPLOY.sh`, web-platform `deploy.sh` and handbook `go.sh` pass `--account` and use `login:add` (never `firebase logout`) |
+| Client `.envrc` — identity for **all** repos under the folder (direnv walks up): `CLOUDSDK_CONFIG` **+ `GOOGLE_APPLICATION_CREDENTIALS`** pinned, overrides only via `SCANIN_*` in `.envrc.local` | `~/dev/clients/scanin/.envrc` — template `scanin-handbook/ops/env/scanin.envrc` |
+| Firebase CLI pinning for interactive use | shim `~/dev/clients/scanin/.bin/firebase` (adds `--account $SCANIN_GCP_ACCOUNT`; login commands pass through), on PATH via the `.envrc` — template `ops/env/firebase-shim.sh` |
+| Per-repo ports (slot 20) | `scanin-svc-reports/.envrc` (`PORT=8021`), `scanin-svc-watchdog/.envrc` (`PORT=8022`) — both `source_up`; web-platform `angular.json` `port: 3020` |
+| Scripts | every deploy script sets `CLOUDSDK_CONFIG="${SCANIN_CLOUDSDK_CONFIG:-…gcloud-scanin}"` + `GOOGLE_APPLICATION_CREDENTIALS` **unconditionally**; functions `DEPLOY.sh`, web-platform `deploy.sh`, handbook `go.sh` pass `--account` and use `login:add` (never `firebase logout`) |
 | direnv | `brew install direnv` + hook in `~/.zshrc` |
+
+**Isolation proven (2026-10-08):**
+1. A Spotlock `CLOUDSDK_CONFIG` exported in the terminal does **not** leak into a ScanIn script (header still resolves `gcloud-scanin` → `scanin.link@gmail.com`).
+2. Inside a ScanIn repo: `gcloud-scanin`, ADC file pinned, slot port loaded. Outside: unset → `hillel@spotlock.co`.
+3. Pinned ADC missing → `firebase-admin` **fails loudly** ("file … does not exist"), no fallback to another account.
 
 **New Mac / re-create:**
 ```bash
@@ -262,7 +287,8 @@ brew install direnv && echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
 cp ~/dev/clients/scanin/scanin-handbook/ops/env/scanin.envrc ~/dev/clients/scanin/.envrc
 mkdir -p ~/dev/clients/scanin/.bin && cp ~/dev/clients/scanin/scanin-handbook/ops/env/firebase-shim.sh ~/dev/clients/scanin/.bin/firebase && chmod +x ~/dev/clients/scanin/.bin/firebase
 cd ~/dev/clients/scanin && direnv allow . && (cd scanin-svc-reports && direnv allow .) && (cd scanin-svc-watchdog && direnv allow .)
-cd scanin-handbook && ./go.sh preflight      # logs in INTO gcloud-scanin + adds the firebase account
+CLOUDSDK_CONFIG=~/.config/gcloud-scanin gcloud auth login scanin.link@gmail.com --update-adc
+cd scanin-handbook && ./go.sh preflight      # checks gcloud, ADC, Firestore, adds the firebase account
 ```
-**Check:** inside any scanin repo `gcloud config get-value account` → `scanin.link@gmail.com`; outside → your other client's account.
+**Check:** inside any scanin repo `echo $CLOUDSDK_CONFIG && gcloud config get-value account` → `gcloud-scanin` / `scanin.link@gmail.com`.
 Note: `npx firebase-tools …` bypasses the shim — pass `--account scanin.link@gmail.com` yourself.
