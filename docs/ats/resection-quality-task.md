@@ -6,6 +6,11 @@ _Don't deploy to a station PC without Hillel's approval. Step 0 is read-only and
 
 ---
 
+## Priority (updated 2026-10-08 16:20)
+1. **§6.1 Re-found reference from current resection: first, as a small standalone release.** At DeVinci, cycle 253 solved from R1, R2, R3, R5 with RMS 3.99 mm (residuals 4.35 / 6.03 / 1.31 / 2.62). R4 is disabled and needs to come back as a 5th reference without breaking the frame. Smallest useful scope: an API endpoint + one button on the references screen + history row + event-log line. No other UI changes in this release.
+2. §0 diagnosis (read-only).
+3. The rest (§3–§8).
+
 ## 0. Urgent, read-only: diagnose DeVinci station 5 now
 
 We're stuck on site (details in §1). Before any feature work, write `scripts/diagnose_cycles.py`, which runs on the station PC against the local DB and changes nothing. Produce a report (Markdown + CSV) for cycles **211–214, 251 and 252** (and the last 20 by default):
