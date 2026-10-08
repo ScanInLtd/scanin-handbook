@@ -60,11 +60,33 @@ For a reference that moved (or was replaced) on a running site, without breaking
 - If several points fail in one cycle: a station-level warning.
 - This complements the existing in-cycle re-measure / suspect hold (`movement-resection-guide.md`, "Suspect-result protection"). It adds identification of *which* prism was hit.
 
+### 6. The cycle screen must show what happened to each point
+Cycle #252 (2026-10-08): "MONITORING · PASSED — A2 · displacement 1381.872 mm" in green, although that's a wrong-target / suspect result. A user reading the screen must see the problem without opening logs.
+- Each monitored card shows its state with colour, never plain "PASSED" for a non-normal result:
+  - green: normal (displacement under the point's warn level);
+  - orange: displacement above warn, or re-measured once in the cycle;
+  - red: suspect (held, not published), wrong-target (`matchedPoint` shown: "probably hit A4"), or above alarm.
+  - Show the reason in one line, e.g. "suspect: 1382 mm vs last 0.4 mm — re-measured, held for confirmation".
+- The references cards and the resection card: a failed reference (R5 timeout) shows its cause in plain words ("ATR didn't find the prism — line of sight / prism blocked?"). When the resection used **only 3 references**, show an orange note "no redundancy: a bad reference can't be detected".
+- At the end of the cycle: a summary line (n ok / n suspect / n wrong-target / n failed, RMS, references used and excluded), the same as what's published to the cloud.
+
+### 7. Clear names and explanations for point actions
+The operator sees Teach / Re-aim / Measure / Go to / Resection, and it isn't clear what each changes. Rename and explain (tooltip + one line under the button):
+| Today | Proposed label | What it changes |
+|---|---|---|
+| Teach (new reference) | **Create reference here** | measures the point and sets its coordinates (only in the original setup) |
+| Teach / Re-aim (existing point) | **Fix aim (keep coordinates)** | aim angle only; coordinates and baseline unchanged |
+| Go to | **Point the instrument here** | nothing is saved |
+| Resection → Measure | **Measure reference for resection** | nothing is saved until "Solve" |
+| Resection | **Solve station position** | updates every point's aim angle; coordinates unchanged |
+| (new, §4) | **Re-found reference from current resection** | the reference's coordinates (history kept) |
+- A short "Which action do I need?" help panel: instrument moved → Solve station position; a point keeps hitting the wrong prism → Fix aim; a reference moved → Re-found reference.
+
 ## Verification
 - Unit tests for `solve_transform` with an injected outlier: §3 excludes it, the RMS drops, and only one reference is excluded.
 - A replay of the DeVinci cycles 211–214 (observations from the station DB) shows R4 excluded and the RMS around a few mm.
 - A simulated swap (two points' observations exchanged) shows both flagged `wrong-target` with the right `matchedPoint`.
-- UI screenshots: the Resection card with residuals (one red), the references screen with history, and the re-found dialog.
+- UI screenshots: the Resection card with residuals (one red), the references screen with history, the re-found dialog, a cycle screen with a suspect / wrong-target point in red, and the renamed point actions.
 
 ## Deploy
 - Build and deploy on the station PCs per `docs/fresh-pc-install.md` / the usual procedure. **After Hillel approves.**
