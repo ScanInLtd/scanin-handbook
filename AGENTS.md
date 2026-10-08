@@ -193,3 +193,10 @@ This repo is the home base for operating the whole system.
 5. **Secrets:** `.env`, `serviceAccountKey.json`, `service-account.json`, and `~/.firebase-keys` exist locally and are gitignored. Never print, copy, or commit them.
 6. **Node versions:** web-platform builds on Node 12 and deploys on Node 20. Functions use Node 20. Use `nvm`.
 7. **Tests are sparse.** Most repos have no automated tests. Verify with builds (`ng build`, `npm run build`/`tsc`), the emulator, or dry-run scripts.
+
+## 8. Google identity on this Mac (several clients side by side)
+
+- Run gcloud / Firestore / deploy commands from inside `~/dev/clients/scanin/**` (direnv loads `CLOUDSDK_CONFIG=~/.config/gcloud-scanin`) or via the repo scripts (`./go.sh`, `DEPLOY.sh`, `deploy.sh`), which set it themselves. Otherwise prefix `CLOUDSDK_CONFIG=$HOME/.config/gcloud-scanin`.
+- Never run `gcloud auth login`, `gcloud config set account` or `firebase login/logout` without that — it would switch the account used by other clients' windows.
+- Firebase CLI: always `--account scanin.link@gmail.com` (the `.bin/firebase` shim adds it for plain `firebase …`; `npx firebase-tools` doesn't go through the shim).
+- Ports: ScanIn slot 20 (web 3020, reports 8021, watchdog 8022). Details: `docs/DEV-ENV-ISOLATION.md` §8, §11.

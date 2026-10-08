@@ -166,14 +166,14 @@ check_firestore() {
 # `firebase` commands (deploys from other repos, functions:log).
 check_firebase() {
     command -v firebase >/dev/null || { warn "firebase CLI not installed (optional)"; return 0; }
-    local fbprojects; fbprojects=$(firebase projects:list 2>/dev/null || true)
+    # Always pin the account (firebase-tools ignores CLOUDSDK_CONFIG); never log out other clients.
+    local fbprojects; fbprojects=$(firebase --account "$REQUIRED_ACCOUNT" projects:list 2>/dev/null || true)
     if grep -q "$REQUIRED_PROJECT" <<<"$fbprojects"; then
-        ok "firebase CLI: access to $REQUIRED_PROJECT"
+        ok "firebase CLI: $REQUIRED_ACCOUNT → $REQUIRED_PROJECT"
     else
-        warn "firebase CLI can't list $REQUIRED_PROJECT — token expired or wrong account (global login: $(firebase login:list 2>/dev/null | grep -oE '[^ ]+@[^ ]+' | head -1 || echo none))"
-        if yes_default "  🔑 Re-login firebase CLI now? (logs out the current global firebase account)"; then
-            firebase logout >/dev/null 2>&1 || true
-            firebase login
+        warn "firebase CLI: $REQUIRED_ACCOUNT can't list $REQUIRED_PROJECT (not added, or token expired)"
+        if yes_default "  🔑 Add / refresh $REQUIRED_ACCOUNT in the firebase CLI? (other logins are kept)"; then
+            firebase login:add "$REQUIRED_ACCOUNT" || firebase login --reauth
         fi
     fi
 }
