@@ -79,6 +79,7 @@ By default the station does **not** publish held / suspect / wrong-target / stuc
 
 - Size: ~5–15 KB (≈60 points). `frame`, `orientation`, `instrument.tiltEnd` / `refDriftMgon` may be `null` (failed cycle, first cycle).
 - `points[].status`: `passed · warning · suspect · wrong-target · stuck-offset · too-large · held · failed`.
+- `health.checks[].details` never contains arrays inside arrays (Firestore rejects them): pairs are objects, e.g. `swapped-prisms.details.swaps = [{"a": "D8", "b": "G11"}]`, `wrong = [{"a": "F11", "b": "G11"}]`, `duplicate-points.details.same_prism = [{"a": "H11", "b": "I11"}]`, `same_place = [{"a": "B1", "b": "f4p4", "mm": 8}]`. The station also wraps any stray nested array as `{"values": [...]}` before sending.
 - `health.checks[].check`: `instrument-rotation`, `instrument-stability`, `reference-consistency`, `prism-constant`, `geometry`, `swapped-prisms`, `stuck-offset`, `duplicate-points`, `frame-offset`, `link`. **Store unknown values as-is** — more checks will be added without a schema bump. `details` is free-form.
 - Validate only: `schemaVersion === 1`, `deviceId` equals the topic's gateway id, `siteId` and `cycle.id` present. Otherwise → `ats_raw_payloads` + warning log (keep today's behaviour).
 
@@ -99,6 +100,7 @@ By default the station does **not** publish held / suspect / wrong-target / stuc
 
 - `stationSilent` = no `ats-health` received for `ATS_STATION_SILENT_AFTER_HOURS` (bridge env, default **8 h** ≈ two 4-h cycles), measured from `lastSeenAt`; `true` if the station never delivered a cycle. Re-evaluated on every heartbeat; every newer `ats-health` resets it to `false`.
 - A heartbeat older than the stored `lastStatus.timestamp` (outbox re-send) is ignored.
+- **No heartbeat during a cycle:** the station runs one task at a time, so while a cycle runs (DeVinci: ~30–35 min) no heartbeat is sent. With a 15-min interval the gap between heartbeats can reach ~50 min; an "alive" check on `lastStatusAt` needs at least that much slack. `lastStatus.lastCycleStatus` can now also be `held`.
 - The bridge can only update these fields when a message arrives. For a check: `stationSilent == true` with a fresh `lastStatusAt` means alive but not cycling; a stale `lastStatusAt` and `lastSeenAt` means the station or its link is down.
 - **Station:** heartbeats are off by default (`schedules.heartbeat_interval_s = 0`). Enable them (e.g. 15–30 min) with this release, or `stationSilent` / `lastStatusAt` never update.
 

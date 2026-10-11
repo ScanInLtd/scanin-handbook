@@ -3,7 +3,7 @@
 **Date:** 2026-10-11
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
 **Input:** `docs/ats/bridge-ats-health-handoff.md` (bridge writes `ats-station-health/{gatewayId}` + `/cycles` + `/events`), diagnosis `docs/ats/devinci-diagnosis-2026-10-11.md`
-**Status:** implemented & committed (**`6a87a0a`**), emulator **18/18** (DeVinci cycles 251–277 replay + noise paths), digest + integrity-actions suites green. **NOT deployed — pending approval.** Depends on the bridge deploy (§2–§4 of the handoff) to receive real data; harmless before that (the triggers just never fire).
+**Status:** ✅ approved + message fixes (§6), committed **`6a87a0a`** + **`4579e86`**, **deployed 2026-10-11 13:55 UTC** (onAtsCycleReport · onAtsStationEvent · atsHealthSweep created; checkThresholds · detectLevelShifts · notifyDataIntegrity · sendWhatsappAlerts updated; 0 errors). Replay **21/21** — final renders in §6. Depends on the bridge deploy (§2–§4 of the handoff) to receive real data; harmless before that (the triggers just never fire).
 
 ---
 
@@ -44,7 +44,34 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 - Noise paths: (a) qc_flag sample → suspect, no notice; (b) two jumps deferred; cycle report explains P2 (point suspect) → no notice; P3 passed → notice tagged "station says ok"; pending docs cleared; (c) 60 h-late ATS sample → no late-data; (d) a step near the f4p4 rebaseline → suppressed, days later → not.
 - Silent station (10 h, heartbeat 5 min old) → "התחנה חיה, אבל לא מודדת".
 
-### Rendered messages (emulator, in order)
+_Renders: see §6 (re-rendered after the message fixes)._
+
+## 4. Deploy plan (pending approval)
+
+1. `firebase deploy --only functions:onAtsCycleReport,functions:onAtsStationEvent,functions:atsHealthSweep,functions:checkThresholds,functions:detectLevelShifts,functions:notifyDataIntegrity,functions:sendWhatsappAlerts` (first three are new).
+2. No new composite indexes: the pending-jump queries are equality-only / single-field; events/cycles range queries are single-field.
+3. Optional config in `system-config/data-integrity`: `atsSilentHours` (default 9), `atsHeartbeatFreshMinutes` (default 60).
+4. Order vs the bridge: either order works. Before the bridge deploy nothing fires; after it, the first cycle report seeds `ats-station-state`.
+
+Rollback: redeploy `8599d35` and delete the three new functions; station notices are standalone.
+
+## 5. Notes for the station / bridge teams
+
+- **Firestore can't store nested arrays.** `health.checks[].details` with `pairs: [["D8","G11"]]` would fail the bridge's write (found when the emulator write crashed on it). Use `pairs: [{a: "D8", b: "G11"}]` for swapped-prisms / duplicate-points (both shapes are parsed here; only the object form can actually be stored).
+- `ats-station-silent` relies on the bridge's optional §3.3 (`lastStatusAt` from `uplink/status`); without it every silent station reads as "no heartbeat".
+- Jump deferral needs `gateway_id` + `cycle_id` on samples (handoff §2); older samples raise as before.
+
+---
+
+## 6. Review round (commit `4579e86`, deployed with the rest 2026-10-11 13:55 UTC)
+
+1. **Hebrew check templates from `details`** — instrument-rotation (`rotMgon`, `sinceCycle`), instrument-stability (`tiltJumpMgon`), reference-consistency (`refId`, `residualMm`), prism-constant (`pointId`, `offsetMm`), geometry (`refsUsed`, `rotMgon`), link (`reconnects`/`timeouts`, `failedPoints`, `totalPoints`), frame-offset (`offsetMm`). Missing numbers degrade to a Hebrew sentence without them; the station's English `message` / `suggestion` appear only for **unknown** checks. **Station team: please send these `details` keys** (they're the contract the templates read).
+2. **Point-level checks** (swapped-prisms, duplicate-points, stuck-offset) are excluded from `ats-station-health`; the health status used for transitions is the worst of the remaining station-level checks. Effect in the replay: 253 no longer opens a health message (only point issues remain → covered at 255 by `ats-point-issues`), and 276 lists only rotation + frame offset.
+3. **Partial rebaseline**: `onAtsStationEvent` records the points without a sensor and the message adds `⚠️ נקודות ללא חיישן: …` (replay: f6p13).
+
+Replay checks added: no English station text in any ATS-5 message; no point-level check in a station-health message; the partial line. **21/21 green; 27 cycles + 2 events → 11 WhatsApp messages.**
+
+### Final renders (emulator, in order)
 
 ```
 ----- cycle 251 -----
@@ -63,21 +90,6 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 
 🔗 https://new-scanin-ui.web.app/integrity?project=dv-proj
 
------ cycle 253 -----
-⚠️ *אזהרת תקינות בתחנת ATS*
-מחזור 253
-
-📍 תחנה ATS-5 · מגדל דה וינצי דרום
-
-⚠️ פריזמות מוחלפות: D8 and G11 read each other's prism
-💡 swap the point assignments D8 ↔ G11 (f11p11 ↔ f11p9)
-⚠️ נקודות כפולות: B1 and f4p4 have baselines 0 mm apart
-💡 one prism is defined twice — delete or fix one point
-⚠️ סטייה קבועה: 9 points sit 92–110 mm off their baseline, constant since cycle 215
-💡 re-baseline the cycle-215 points once the frame is stable
-
-🔗 https://new-scanin-ui.web.app/integrity/36FQIXyxO7QaDLjUBFUq
-
 ----- cycle 254 -----
 ⏸️ *מחזור מדידה נעצר*
 הנתונים לא פורסמו ללקוח
@@ -91,7 +103,7 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 *מה לעשות?*
 🔧 לבדוק רפרנסים וקו ראייה
 
-🔗 https://new-scanin-ui.web.app/integrity/sClhquEOPKivq887VJQq
+🔗 https://new-scanin-ui.web.app/integrity/vz1TbHLRjWwLDW6Rzoma
 
 ----- cycle 255 -----
 🎯 *נקודות בעייתיות בתחנה*
@@ -107,7 +119,7 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 👯 B1 = f4p4 אותה פריזמה פעמיים ← למחוק אחת
 📌 9 נקודות בסטייה קבועה (92.1–110 מ"מ): f4p4, f4p7, f5p7, f5p8, f5p10, f5p13, f6p7, f6p10, f8p13 ← baseline חדש
 
-🔗 https://new-scanin-ui.web.app/integrity/Z7B8vTmPMouJgFFYOrlA
+🔗 https://new-scanin-ui.web.app/integrity/mLNAKimfvifcP1mcrSdU
 
 ----- cycle 270 -----
 ⏸️ *מחזור מדידה נעצר*
@@ -122,7 +134,7 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 *מה לעשות?*
 🔧 לבדוק רפרנסים וקו ראייה
 
-🔗 https://new-scanin-ui.web.app/integrity/ZLdGjP3TFWwn0fbyKqdI
+🔗 https://new-scanin-ui.web.app/integrity/BS2wdmqsHQAEoqRzgfGh
 
 ----- cycle 271 -----
 ‼️ *מחזורי מדידה נעצרים ברצף*
@@ -137,7 +149,7 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 *מה לעשות?*
 🔧 לבדוק רפרנסים וקו ראייה
 
-🔗 https://new-scanin-ui.web.app/integrity/ZLdGjP3TFWwn0fbyKqdI
+🔗 https://new-scanin-ui.web.app/integrity/BS2wdmqsHQAEoqRzgfGh
 
 ----- cycle 272 -----
 🔴 *תחנת ATS במצב לא תקין*
@@ -145,10 +157,10 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 
 📍 תחנה ATS-5 · מגדל דה וינצי דרום
 
-🔴 תקשורת עם המכשיר: 1 timeout → reconnect → 59 of 61 points failed (truncated response)
-💡 station release with the desync fix; restart the instrument link
+🔴 תקשורת עם המכשיר: ניתוק אחד · 59 מתוך 61 נקודות נכשלו
+💡 לאתחל את החיבור למכשיר ולבדוק את הכבל
 
-🔗 https://new-scanin-ui.web.app/integrity/36FQIXyxO7QaDLjUBFUq
+🔗 https://new-scanin-ui.web.app/integrity/Dwf9uf5s9KnJRYCJUnVz
 
 ----- cycle 273 -----
 🔴 *תחנת ATS במצב לא תקין*
@@ -156,10 +168,10 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 
 📍 תחנה ATS-5 · מגדל דה וינצי דרום
 
-🔴 יציבות המכשיר: tilt jumped 6 mgon between start and end
-💡 check the mount / bracket screws
+🔴 יציבות המכשיר: הטיית המכשיר קפצה 6 mgon במהלך המחזור
+💡 לבדוק יציבות המתקן והברגים
 
-🔗 https://new-scanin-ui.web.app/integrity/36FQIXyxO7QaDLjUBFUq
+🔗 https://new-scanin-ui.web.app/integrity/Dwf9uf5s9KnJRYCJUnVz
 
 ----- cycle 275 -----
 ♻️ *רפרנס אותר מחדש*
@@ -170,7 +182,7 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 📌 R4 · Δ 58.5 מ"מ
 📐 RMS 4.38 מ"מ
 
-🔗 https://new-scanin-ui.web.app/integrity/F2qUz1aMWeNSHMyHdbZp
+🔗 https://new-scanin-ui.web.app/integrity/YromSPkVtMXDCxRUtb48
 
 ----- cycle 276 -----
 ⚠️ *אזהרת תקינות בתחנת ATS*
@@ -178,16 +190,12 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 
 📍 תחנה ATS-5 · מגדל דה וינצי דרום
 
-⚠️ סיבוב המכשיר על הבסיס: instrument turned -28.5 mgon on its base since cycle 269
-💡 check the mount / bracket screws; results are not affected (the resection absorbs it)
-⚠️ פריזמות מוחלפות: D8 and G11 read each other's prism
-💡 swap the point assignments D8 ↔ G11 (f11p11 ↔ f11p9)
-⚠️ נקודות כפולות: B1 and f4p4 have baselines 0 mm apart
-💡 one prism is defined twice — delete or fix one point
-⚠️ סטייה קבועה: 9 points sit 92–110 mm off their baseline, constant since cycle 215
-💡 re-baseline the cycle-215 points once the frame is stable
+⚠️ סיבוב המכשיר על הבסיס: ‎-28.5 mgon מאז מחזור 269
+💡 לבדוק את התושבת ואת ברגי המתקן (התוצאות לא מושפעות)
+⚠️ הסטת מערכת הייחוס: 8.2 מ"מ מה-baseline של הנקודות
+💡 לקבוע baseline מחדש כשמערכת הייחוס יציבה
 
-🔗 https://new-scanin-ui.web.app/integrity/36FQIXyxO7QaDLjUBFUq
+🔗 https://new-scanin-ui.web.app/integrity/Dwf9uf5s9KnJRYCJUnVz
 
 ----- rebaseline event -----
 ♻️ *התחנה קבעה baseline מחדש*
@@ -197,8 +205,9 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 
 📌 9 נקודות: f4p4, f4p7, f5p7, f5p8, f5p10, f5p13, f6p7, f6p10, f8p13
 📏 Δ עד 110 מ"מ
+⚠️ נקודות ללא חיישן: f6p13
 
-🔗 https://new-scanin-ui.web.app/integrity/deXGF2ojft8QSCTnRTOy
+🔗 https://new-scanin-ui.web.app/integrity/H9Mjers1Ken6oFGESwdl
 
 ----- ATS-9 jump (station says passed) -----
 🔴 *קריאה חשודה*
@@ -215,7 +224,7 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 ✅ תזוזה אמיתית ← אשר והתרע
 🗑️ תקלה ← התעלם
 
-🔗 https://new-scanin-ui.web.app/integrity/eeV2NziRSkTEe9jNTTbZ
+🔗 https://new-scanin-ui.web.app/integrity/VfnfbhijOHh5atDsw0Wr
 
 ----- silent check -----
 📴 *תחנת ATS לא מודדת*
@@ -228,22 +237,7 @@ Fixtures for ATS-5 / DeVinci-1 cycles 251–277 from the diagnosis (§2–§3): 
 *מה לעשות?*
 🖥️ לבדוק את תוכנת המדידה ואת המכשיר
 
-🔗 https://new-scanin-ui.web.app/integrity/sERkzjrDRmgfIoBaV6Yz
+🔗 https://new-scanin-ui.web.app/integrity/VHoLLRf8tln7PyzVAhO6
 ```
 
 (The ATS-9 jump render shows the raw axis key because the emulator had no prism registry doc for that test; prod has it → "שקיעה · מ"מ".)
-
-## 4. Deploy plan (pending approval)
-
-1. `firebase deploy --only functions:onAtsCycleReport,functions:onAtsStationEvent,functions:atsHealthSweep,functions:checkThresholds,functions:detectLevelShifts,functions:notifyDataIntegrity,functions:sendWhatsappAlerts` (first three are new).
-2. No new composite indexes: the pending-jump queries are equality-only / single-field; events/cycles range queries are single-field.
-3. Optional config in `system-config/data-integrity`: `atsSilentHours` (default 9), `atsHeartbeatFreshMinutes` (default 60).
-4. Order vs the bridge: either order works. Before the bridge deploy nothing fires; after it, the first cycle report seeds `ats-station-state`.
-
-Rollback: redeploy `8599d35` and delete the three new functions; station notices are standalone.
-
-## 5. Notes for the station / bridge teams
-
-- **Firestore can't store nested arrays.** `health.checks[].details` with `pairs: [["D8","G11"]]` would fail the bridge's write (found when the emulator write crashed on it). Use `pairs: [{a: "D8", b: "G11"}]` for swapped-prisms / duplicate-points (both shapes are parsed here; only the object form can actually be stored).
-- `ats-station-silent` relies on the bridge's optional §3.3 (`lastStatusAt` from `uplink/status`); without it every silent station reads as "no heartbeat".
-- Jump deferral needs `gateway_id` + `cycle_id` on samples (handoff §2); older samples raise as before.
