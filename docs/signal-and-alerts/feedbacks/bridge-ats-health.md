@@ -3,7 +3,7 @@
 **Date:** 2026-10-11
 **Task:** [`docs/ats/bridge-ats-health-handoff.md`](../../ats/bridge-ats-health-handoff.md) §1–§4 (bridge part). §5 (functions `onAtsStationEvent`) is **not** done, see §6.
 **Repo:** [scanin-svc-mqtt-bridge](https://github.com/ScanInLtd/scanin-svc-mqtt-bridge)
-**Status:** implemented and tested end to end locally. Committed **`2f5593f`** and pushed to `master`. **VM deploy waiting for Hillel's approval.**
+**Status:** implemented and tested end to end locally. Committed **`2f5593f`** + **`f925499`** (§7: required liveness, `stationSilent`) and pushed to `master`. **VM deploy waiting for Hillel's approval.**
 
 ---
 
@@ -65,3 +65,16 @@ Rollback: `git revert 2f5593f`, push, `./deploy.sh`. The raw-payload fallback th
 - **§5 `onAtsStationEvent` is not implemented.** Until it is, `rebaseline` events stay at `pending-baseline` (stored, nothing applied). Contract as delivered: `points[i].sensorId` **or** `points[i].error`, and the event's `status` is exactly `"pending-baseline"` when it's ready. The function should skip points with `error` and report them in `"partial"`. I can implement it in `scanin-svc-firebase-functions` if you want, reusing `applyBaseline` with zero initials as in the handoff.
 - Want the bridge to raise an internal notice (`data-integrity`) for rebaseline points that resolve to `no sensor` / `sensor doc missing`? Today it's only in the event doc and the bridge log.
 - Watchdog on `lastHealthStatus` / `lastSeenAt` and the UI page are out of scope (§7). `lastSeenAt` is **not** touched by a late (older) re-send. Liveness without cycles comes from `lastStatusAt`.
+
+## 7. Revision: liveness required, `stationSilent` (`f925499`)
+
+Hillel: make §3.3 required and add `stationSilent` to the latest doc, so the "alive but not cycling" check reads one doc. The handoff §1/§3.2/§3.3 is updated to match.
+
+- Gateway `uplink/status` → transaction on `ats-station-health/{deviceId}`: merges `lastStatus`, `lastStatusAt` (server time) and **`stationSilent`** = no `ats-health` received for **`ATS_STATION_SILENT_AFTER_HOURS`** (bridge env, default **8 h**, about two 4-h cycles), measured from `lastSeenAt`. It's `true` if the station never delivered a cycle. The raw copy in `ats_raw_payloads` stays.
+- Every newer `ats-health` sets `stationSilent: false` and keeps `lastStatus` / `lastStatusAt`. An older (history-only) `ats-health` doesn't touch it.
+- New: a heartbeat **older** than the stored `lastStatus.timestamp` (outbox re-send after an outage) is ignored. Before this, it would have overwritten `lastStatus` with stale data.
+- The bridge can only update these fields when a message arrives:
+  - fresh `lastStatusAt` + `stationSilent == true` → alive, not cycling;
+  - stale `lastStatusAt` and `lastSeenAt` → station or link down.
+- **Station prerequisite:** heartbeats are **off by default** (`schedules.heartbeat_interval_s = 0`, `engine/scheduler.py`). Enable them (e.g. 15–30 min) in the DeVinci release, otherwise `lastStatusAt` / `stationSilent` never update. Heartbeats go through the station outbox, so after an outage they arrive late. The out-of-order guard covers that.
+- Tested on the Firestore emulator (all passed): never-cycled station → `true`; a cycle → `false` with `lastStatus` kept; last cycle 9 h ago → `true`, 7 h ago → `false`; older heartbeat ignored; a new cycle clears it; an older `ats-health` leaves it unchanged.
