@@ -3,7 +3,7 @@
 **Date:** 2026-10-08
 **Repo:** [scanin-svc-firebase-functions](https://github.com/ScanInLtd/scanin-svc-firebase-functions)
 **Trigger:** DeVinci sent 33 WhatsApp messages in 3 days (one notice per sensor+axis, one message per notice) → ignored.
-**Status:** implemented & committed (**`c5e067f`**), emulator digest suite **14/14** + integrity-actions regression green, prod migration dry-run done (33 open → 15). **NOT deployed — pending approval.**
+**Status:** implemented & committed (**`c5e067f`**), emulator digest suite **14/14** + integrity-actions regression green, prod migration dry-run done (33 open → 15). **✅ Deployed 2026-10-08 15:03 UTC** (checkThresholds, detectLevelShifts, notifyDataIntegrity, sendWhatsappAlerts, releaseSuspect; 0 errors) from HEAD `8599d35` (= `c5e067f` + two dev-env script commits, no runtime changes). Migration `--apply` run right after: **33 open → 15**; verification dry-run: 15 open, all per-sensor, 0 left to merge.
 
 ---
 

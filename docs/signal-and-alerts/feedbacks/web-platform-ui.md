@@ -848,3 +848,8 @@ prism-daily can be paused:**
   dropdown. Now cached fields recomputed only when notices / tab / project names change
   (stale selections cleared on tab switch), and the native `<select>` is replaced with a
   compact Material outline `mat-select`.
+
+- **`/integrity?project=<id>`** (LIVE, 2026-10-08): pre-selects the project filter — for the
+  grouped WhatsApp messages. Applied on load, kept even before/without matching notices in
+  the current tab, dropdown stays visible so it can be cleared; combinable with
+  `?highlight=`; survives the login redirect (returnUrl keeps the query string).
