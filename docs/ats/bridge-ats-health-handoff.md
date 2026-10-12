@@ -80,6 +80,8 @@ By default the station does **not** publish held / suspect / wrong-target / stuc
 - Size: ~5–15 KB (≈60 points). `frame`, `orientation`, `instrument.tiltEnd` / `refDriftMgon` may be `null` (failed cycle, first cycle).
 - `points[].status`: `passed · warning · suspect · wrong-target · stuck-offset · too-large · held · failed`.
 - `health.checks[].details` never contains arrays inside arrays (Firestore rejects them): pairs are objects, e.g. `swapped-prisms.details.swaps = [{"a": "D8", "b": "G11"}]`, `wrong = [{"a": "F11", "b": "G11"}]`, `duplicate-points.details.same_prism = [{"a": "H11", "b": "I11"}]`, `same_place = [{"a": "B1", "b": "f4p4", "mm": 8}]`. The station also wraps any stray nested array as `{"values": [...]}` before sending.
+- `software` (station 1.3.0+): e.g. `"ScanIn-ATS 1.3.0 (d9485e9)"` — the release the station runs (also in heartbeats as `status.firmware`).
+- `recommendations` (optional, station 1.3.0+): the station's **open to-do items**, flat: `[{"key": "reaim:D8", "kind": "reaim", "severity": "bad|warning", "title": "Re-aim D8 (swapped with G11)", "action": "reaim|rebaseline|review|deactivate|refound|site-check", "points": ["D8"], "sinceCycle": 253, "lastCycle": 272, "nCycles": 16, "status": "open"}]`. Store as-is with the payload (the latest doc then always holds the current list); `key` is stable across cycles, so the UI can track an item. Unknown `kind` / `action` values: show `title`.
 - `health.checks[].check`: `instrument-rotation`, `instrument-stability`, `reference-consistency`, `prism-constant`, `geometry`, `swapped-prisms`, `stuck-offset`, `duplicate-points`, `frame-offset`, `link`. **Store unknown values as-is** — more checks will be added without a schema bump. `details` is free-form.
 - Validate only: `schemaVersion === 1`, `deviceId` equals the topic's gateway id, `siteId` and `cycle.id` present. Otherwise → `ats_raw_payloads` + warning log (keep today's behaviour).
 
@@ -100,9 +102,9 @@ By default the station does **not** publish held / suspect / wrong-target / stuc
 
 - `stationSilent` = no `ats-health` received for `ATS_STATION_SILENT_AFTER_HOURS` (bridge env, default **8 h** ≈ two 4-h cycles), measured from `lastSeenAt`; `true` if the station never delivered a cycle. Re-evaluated on every heartbeat; every newer `ats-health` resets it to `false`.
 - A heartbeat older than the stored `lastStatus.timestamp` (outbox re-send) is ignored.
-- **No heartbeat during a cycle:** the station runs one task at a time, so while a cycle runs (DeVinci: ~30–35 min) no heartbeat is sent. With a 15-min interval the gap between heartbeats can reach ~50 min; an "alive" check on `lastStatusAt` needs at least that much slack. `lastStatus.lastCycleStatus` can now also be `held`.
+- **Heartbeats continue during cycles** (own thread, own MQTT client id `…-hb`, published directly — not via the outbox, so they're never re-sent late). New fields in `status`: `activity` (`measuring` | `publishing` | null), `cycleRunning`, `cycleProgress` `{cycleId, startedAt, completedSteps, totalSteps, currentStep}`, `nextRunTs`. So `lastStatusAt` is never older than ~1 interval while the station is up, even mid-cycle; `cycleRunning` + an old `cycleProgress.startedAt` = a cycle that is stuck. `lastStatus.lastCycleStatus` can now also be `held`.
 - The bridge can only update these fields when a message arrives. For a check: `stationSilent == true` with a fresh `lastStatusAt` means alive but not cycling; a stale `lastStatusAt` and `lastSeenAt` means the station or its link is down.
-- **Station:** heartbeats are off by default (`schedules.heartbeat_interval_s = 0`). Enable them (e.g. 15–30 min) with this release, or `stationSilent` / `lastStatusAt` never update.
+- **Station:** heartbeats are **on by default every 300 s** from this release (stations that had them off get 300 s once on upgrade; an explicit 0 later is respected). Suggested silence threshold for an alert: ~3 intervals (15 min).
 
 ## 4. `ats-event` → store, resolve sensors, trigger the baseline
 

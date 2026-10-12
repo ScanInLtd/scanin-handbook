@@ -163,3 +163,16 @@ Gates as in §3.5. Health on top — e.g. cycle 269:
 1. Sites with only 3 references are held every cycle (`min_refs_publish`).
 2. Expect DeVinci to show warnings until the site is fixed: swapped prisms, stuck offsets (until re-baselined), reference consistency (R1/R2), geometry. The ~17 stuck points stop publishing immediately (that's intended).
 3. Re-baseline the stuck groups only once the frame is stable; the bridge must turn the `rebaseline` event into `ats-setup` baselines (or do it by hand meanwhile).
+
+---
+
+## 5. Recommendations tab (2026-10-11) — branch `recommendations`, not merged
+
+**Status:** implemented and tested on branch `recommendations` (on top of `main` = release 2 + health, `4761d1a`). Not merged into `main`, not deployed — awaiting Hillel's approval.
+
+- **What:** a "Recommendations" tab (badge with the open count) — the station's to-do list, one row per thing to do: *Re-aim D8 (swapped with G11)*, *Re-baseline f4p4*, *B1 and f4p4 measure the same prism*, *R2 is 6.5 mm off in every cycle*, *Check the instrument mount*, *Cycles held: too few references*… Each row: since which cycle, in how many cycles, evidence, suggestion, and action buttons (Auto re-aim, Steer, Re-aim here, Re-baseline, Re-found, Deactivate, Mark done, Dismiss). Below it: **Recent observations** (held / failed cycles, excluded references, instrument / link findings, re-founds, re-baselines, items opened / closed).
+- **Lifecycle** (`recommendations` table): an item seen again is updated; resolved automatically after **2 consecutive cycles that could see it and didn't** (a point not measured, or a held cycle, never resolves anything); instrument items close only by the operator; a closed item that comes back opens a new one (history kept); dismissed items stay dismissed.
+- **Auto re-aim** (`POST /api/points/reaim-expected`): aims at the point's expected position (baseline in the latest trusted frame), locks with a ±0.5° ATR window, saves the aim **only** if the prism found is the point's own (position + distance within 50 mm, not another point's position). If the only prism there is the one the cycles already measure, it says so: the aim is right, the baseline is wrong → Re-baseline.
+- **Cloud:** open items go out in `ats-health.recommendations` (flat, see the bridge handoff §3.1).
+- **Replay on DeVinci (cycles 253–272):** 32 open items at cycle 272 — 8 re-aims (A2, B1, B2→E5, D8↔G11, F11→G11, I11→H11, f8p1→f7p14), 17 re-baselines (the cycle-215/216/234 groups), B1 = f4p4, R1 / R2 constant offsets, common 7.8 mm offset, geometry, link (cycle 272), held cycles (270/271).
+- **Tests:** 46 (`tests/test_recommendations.py`: lifecycle, held cycles, operator-only items, dismissed, explained duplicates, thin-data checks, wrong prism → item → auto re-aim refused while the prism is hidden → succeeds → resolved after 2 clean cycles; auto re-aim says "baseline" when the aim is right).
