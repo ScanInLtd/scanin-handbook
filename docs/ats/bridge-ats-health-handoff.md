@@ -165,6 +165,11 @@ Acceptance:
 - A `rebaseline` event for 2 points → event doc with `sensorId`s → function applies `rebaseline` baselines at `at` with zero initials → `status: "applied"`; the sensors' charts restart at 0 and no alert fires.
 - An `ats-health` message from a gateway id never creates a `work-sensors` doc.
 
+## 6b. Later: `ats-log` (station 1.3.6+)
+
+`scanin/{gatewayId}/uplink/ats-log` — the station's event log for a time window, sent only when an operator presses "Send to support…". Payload: `{schemaVersion: 1, kind: "ats-log", deviceId, siteId, software, requestId, requestedAt, window: {fromTs, toTs, minutes}, nEvents, encoding: "gzip+base64", format: "jsonl", fields: [...], chunk, chunks, data}`; one request = `chunks` messages sharing `requestId`, each ≤ 300 KB of `data`.
+**Today** it lands in `ats_raw_payloads` (`messageType: "ats-log"`) — nothing to do. **Later** (when convenient): store it as `ats-station-health/{deviceId}/logs/{requestId}_{chunk}` without the duplicate `rawMessage`, with a TTL (e.g. 30 days). Reader: handbook `ops/src/queries/ats-log.ts`.
+
 ## 7. Not in this task
 
 - Watchdog alerting on `ats-station-health/{deviceId}.lastHealthStatus` / `lastSeenAt`.
