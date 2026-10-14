@@ -49,6 +49,8 @@ run(async () => {
   if (!entry) throw new Error(`request ${want} not found`);
   const [id, parts] = entry;
   parts.sort((a, b) => a.chunk - b.chunk);
+  // A chunk can arrive twice (immediate send + a later outbox retry): keep one.
+  for (let i = parts.length - 1; i > 0; i--) if (parts[i].chunk === parts[i - 1].chunk) parts.splice(i, 1);
   const missing = parts[0].chunks - new Set(parts.map((c) => c.chunk)).size;
   let rows: any[] = [];
   for (const c of parts) {
