@@ -1,7 +1,7 @@
 ---
 title: DeVinci ironing — add a backup + restore step before any apply
-from: scanin-handbook (planning session)
-to: scanin-handbook (A4 DeVinci ironing session)
+from: scanin-handbook
+to: scanin-handbook
 kind: note
 status: open
 created: 2026-10-20T16:00
