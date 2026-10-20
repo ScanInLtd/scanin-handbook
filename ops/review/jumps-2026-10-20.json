@@ -1,0 +1,21 @@
+{
+  "title": "קפיצות לאישור – 20.10.2026",
+  "source": "functions dry-run (docs/signal-and-alerts/feedbacks/functions-recompute-ref-lock.md)",
+  "items": [
+    { "sensorId": "xmXaS7p7cjlRTkoRZhrs", "time": "2026-02-09", "note": "מאז 12/2025 גובה ‎+1,832 מ״מ, חוזר ל-0 ב-9.2" },
+    { "sensorId": "AG6010IORg3UCFmN0r3A", "time": "2026-02-09", "note": "מאז 3/2025 גובה ‎−1,828 מ״מ, חוזר ל-0 ב-9.2" },
+    { "sensorId": "1E6nK59E5xWEAXKE4Lmv", "time": "2026-08-10", "note": "גובה ‎+3,055 מ״מ" },
+    { "sensorId": "lCzOkCIT88VwrLQPMAkM", "time": "2026-10-08", "note": "גובה ‎+3,622 / צפון ‎+231 מ״מ" },
+    { "sensorId": "0wD0jDKhIH4wJk1s6G8v", "time": "2026-10-11", "note": "גובה ‎−2,721 מ״מ" },
+    { "sensorId": "XnYw2FlxUawGpur9qXba", "time": "2026-08-09", "note": "גובה ‎−1,290 מ״מ" },
+    { "sensorId": "sen-prism-PRISM_JTCS_H0_12A", "time": "2026-07-08", "note": "קפיצה ראשונה (מזרח/צפון ±8,600)" },
+    { "sensorId": "sen-prism-PRISM_JTCS_H0_12A", "time": "2026-08-08", "note": "קפיצה שנייה" },
+    { "sensorId": "sen-prism-PRISM_JTCS_H0_12A", "time": "2026-08-26", "note": "חזרה לסביבת 0" },
+    { "sensorId": "sen-prism-PRISM_JTCS_H0_12B", "time": "2026-08-26", "note": "‎−8,825 / ‎−2,737 / ‎−2,774" },
+    { "sensorId": "sen-prism-PRISM_JTCS_H0_9B", "time": "2026-08-26", "note": "גובה ‎−2,471" },
+    { "sensorId": "sen-prism-prism_JTCS_H2_3F", "time": "2026-08-10", "note": "‎+8,873 / ‎+2,717" },
+    { "sensorId": "sen-prism-prism_JTCS_H2_3F", "time": "2026-09-08", "note": "חזרה לסביבת 0" },
+    { "sensorId": "7mqLg96n468ocH0AGeUo", "time": "2026-10-06", "note": "צפון ‎+7,513 / גובה ‎−1,535" },
+    { "sensorId": "7mqLg96n468ocH0AGeUo", "time": "2026-10-14", "note": "חזרה לסביבת 0" }
+  ]
+}
