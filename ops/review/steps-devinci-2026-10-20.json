@@ -1,0 +1,881 @@
+{
+  "title": "קפיצות לגיהוץ – מגדל דה וינצי דרום",
+  "source": "step-inventory ≥3 mm since 2026-08-15",
+  "items": [
+    {
+      "sensorId": "RRhr8wvLvlCTMv9OKTh6",
+      "time": "2026-08-18T09:02",
+      "note": "Z +3.2 מ״מ · חוזר ב-08-25"
+    },
+    {
+      "sensorId": "77eMf4CHjLSYUHkuscLK",
+      "time": "2026-08-23T13:08",
+      "note": "Z +3.2 מ״מ · חוזר ב-08-24"
+    },
+    {
+      "sensorId": "RRhr8wvLvlCTMv9OKTh6",
+      "time": "2026-08-24T01:02",
+      "note": "Z +3.2 מ״מ · חוזר ב-08-25"
+    },
+    {
+      "sensorId": "77eMf4CHjLSYUHkuscLK",
+      "time": "2026-08-24T13:04",
+      "note": "X +3.6 מ״מ · חוזר ב-09-16"
+    },
+    {
+      "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+      "time": "2026-08-30T09:50",
+      "note": "Z -5.9 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+      "time": "2026-08-30T09:51",
+      "note": "Z -5.5 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "iG8STFDXZWbHy4ZYC2o3",
+      "time": "2026-08-30T09:51",
+      "note": "Z -6.0 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "9bTGpriNmM9ViOS7se90",
+      "time": "2026-08-30T09:51",
+      "note": "Z -6.0 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "QFkREzIcQbpWICF9uaRT",
+      "time": "2026-08-30T09:52",
+      "note": "Z -6.0 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "4zAVchdSlamFiKsghK5Q",
+      "time": "2026-08-30T09:52",
+      "note": "Z -4.5 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "KDAHpmd6d2cxfx4YNWMz",
+      "time": "2026-08-30T09:52",
+      "note": "Z -4.8 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "WbMyNi8uv0qXs1Q7OnJs",
+      "time": "2026-08-30T09:53",
+      "note": "Z -4.8 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "Hrm0tH08Pto0UVJLzVaW",
+      "time": "2026-08-30T09:53",
+      "note": "Z -4.5 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "IF4nGc5nhUShBzJmqXle",
+      "time": "2026-08-30T09:53",
+      "note": "Z -4.4 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "UvEfoSorzgLAjI924BPY",
+      "time": "2026-08-30T09:53",
+      "note": "Z -4.9 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "dlV1twfOmh6PIzOXXRJI",
+      "time": "2026-08-30T09:53",
+      "note": "Z -4.1 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "kcOMHKbxkWh73oenKu5r",
+      "time": "2026-08-30T09:53",
+      "note": "Z -4.6 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "8CkArrjNGPLRdDZ7LWHA",
+      "time": "2026-08-30T09:54",
+      "note": "Z -4.6 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "qi03ZLSnFYV18uMc6Boa",
+      "time": "2026-08-30T09:54",
+      "note": "Z -3.8 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "mccaJCredDWfS6pxjUY9",
+      "time": "2026-08-30T09:54",
+      "note": "Z -4.2 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "77eMf4CHjLSYUHkuscLK",
+      "time": "2026-08-30T09:54",
+      "note": "Z -4.1 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "LF6qP7XsO7psp5XDBgfO",
+      "time": "2026-08-30T09:54",
+      "note": "Z -4.1 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "TtsG1ExE5cgUl4NcBml1",
+      "time": "2026-08-30T09:54",
+      "note": "Z -4.2 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "3OSEOQnOHxD7RgY6xzIE",
+      "time": "2026-08-30T09:55",
+      "note": "Z -3.9 מ״מ · חוזר ב-09-16"
+    },
+    {
+      "sensorId": "3aJUGbbNwmcwZ7K8TMbi",
+      "time": "2026-08-30T09:55",
+      "note": "Z -4.6 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "k9jNwBsFwFDpCdRhVK3P",
+      "time": "2026-08-30T09:55",
+      "note": "Z -4.0 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+      "time": "2026-08-30T09:55",
+      "note": "Z -4.1 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "FkEhSkUDSMcsqkg1VjvJ",
+      "time": "2026-08-30T09:56",
+      "note": "Z -4.3 מ״מ · חוזר ב-09-16"
+    },
+    {
+      "sensorId": "w6pufuxhEkQbMU7OgNa6",
+      "time": "2026-08-30T09:56",
+      "note": "Z -4.9 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "982hVQBaXNtK0pCbdRTb",
+      "time": "2026-08-30T09:56",
+      "note": "Z -5.0 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+      "time": "2026-08-30T09:56",
+      "note": "Z -4.9 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "wAb0YymNT4psUNZS6bEv",
+      "time": "2026-08-30T09:57",
+      "note": "Z -4.8 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "VnjDEVRMA23u8M383fAM",
+      "time": "2026-08-30T09:57",
+      "note": "Z -5.0 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "NwiRpiOQHAN7jj6P6qvC",
+      "time": "2026-08-30T09:57",
+      "note": "Z -4.5 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "fOF9rMVdCipkIlf7r2ol",
+      "time": "2026-08-30T09:57",
+      "note": "Z -4.3 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "LIho7Eb1sGJRSBne7WUh",
+      "time": "2026-08-30T09:58",
+      "note": "Z -4.6 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "8NeniwhOc3IiPTpRU1mv",
+      "time": "2026-08-30T09:58",
+      "note": "Z -4.5 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "GqqUXYqHcKSourfPrblA",
+      "time": "2026-08-30T09:58",
+      "note": "Z -5.0 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "RRhr8wvLvlCTMv9OKTh6",
+      "time": "2026-08-30T13:02",
+      "note": "Z -4.9 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "y25VvYinODz3kK9K2r6H",
+      "time": "2026-08-30T13:04",
+      "note": "Z -4.8 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "szfIH9jk4CoLdymoI4TK",
+      "time": "2026-08-30T17:05",
+      "note": "Z -3.6 מ״מ · חוזר ב-09-07"
+    },
+    {
+      "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+      "time": "2026-09-07T05:03",
+      "note": "X +3.4 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+      "time": "2026-09-07T05:07",
+      "note": "X +3.7 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "fOF9rMVdCipkIlf7r2ol",
+      "time": "2026-09-07T05:08",
+      "note": "X +3.3 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "faq1WUOxSuTTpSia2qmu",
+      "time": "2026-09-16T11:00",
+      "note": "Z +12.8 · X +7.1 מ״מ · מסתיים בבייסליין ats-setup ב-09-18"
+    },
+    {
+      "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+      "time": "2026-09-16T11:01",
+      "note": "Z +11.8 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+      "time": "2026-09-16T11:02",
+      "note": "Z +12.1 · Y +6.5 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "iG8STFDXZWbHy4ZYC2o3",
+      "time": "2026-09-16T11:02",
+      "note": "Y +6.6 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "9bTGpriNmM9ViOS7se90",
+      "time": "2026-09-16T11:02",
+      "note": "Z +10.8 · Y +6.9 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "KDAHpmd6d2cxfx4YNWMz",
+      "time": "2026-09-16T11:03",
+      "note": "X +5.7 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "IF4nGc5nhUShBzJmqXle",
+      "time": "2026-09-16T11:04",
+      "note": "Z +10.4 · X +6.3 · Y +5.0 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "y25VvYinODz3kK9K2r6H",
+      "time": "2026-09-16T11:04",
+      "note": "X +6.5 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "UvEfoSorzgLAjI924BPY",
+      "time": "2026-09-16T11:04",
+      "note": "X +6.5 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "dlV1twfOmh6PIzOXXRJI",
+      "time": "2026-09-16T11:04",
+      "note": "X +5.5 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "QFkREzIcQbpWICF9uaRT",
+      "time": "2026-09-16T13:07",
+      "note": "Z +13.4 · X +5.6 · Y +3.2 מ״מ · מסתיים בבייסליין ats-setup ב-09-19"
+    },
+    {
+      "sensorId": "BMb1K6ofgcK6tKgajYy3",
+      "time": "2026-09-16T13:20",
+      "note": "X +5.5 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "w6pufuxhEkQbMU7OgNa6",
+      "time": "2026-09-16T13:20",
+      "note": "X +6.8 · Y +5.3 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "fOF9rMVdCipkIlf7r2ol",
+      "time": "2026-09-16T13:24",
+      "note": "Y +7.0 · X +3.4 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "jaOKpKTkxQj5ovtfuH0k",
+      "time": "2026-09-16T13:24",
+      "note": "Y +7.4 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "LIho7Eb1sGJRSBne7WUh",
+      "time": "2026-09-16T13:24",
+      "note": "X +6.1 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "GqqUXYqHcKSourfPrblA",
+      "time": "2026-09-16T13:25",
+      "note": "Y +6.7 · X +4.0 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "42STukgfeSY1202cbmfx",
+      "time": "2026-09-16T13:26",
+      "note": "Y +7.0 · X +3.2 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "w6pufuxhEkQbMU7OgNa6",
+      "time": "2026-09-16T17:15",
+      "note": "Z +11.0 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "982hVQBaXNtK0pCbdRTb",
+      "time": "2026-09-16T17:16",
+      "note": "X +5.9 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+      "time": "2026-09-16T17:16",
+      "note": "Z +7.9 · Y +6.7 · X +3.8 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "NwiRpiOQHAN7jj6P6qvC",
+      "time": "2026-09-16T17:18",
+      "note": "Y +6.7 · X +3.6 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "fOF9rMVdCipkIlf7r2ol",
+      "time": "2026-09-16T17:18",
+      "note": "Z +7.2 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "8NeniwhOc3IiPTpRU1mv",
+      "time": "2026-09-16T17:19",
+      "note": "Z +6.7 · X +6.1 · Y +6.0 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+      "time": "2026-09-16T21:04",
+      "note": "X +3.5 מ״מ · מסתיים בבייסליין ats-setup ב-09-17"
+    },
+    {
+      "sensorId": "QFkREzIcQbpWICF9uaRT",
+      "time": "2026-09-17T13:07",
+      "note": "X +5.8 מ״מ · מסתיים בבייסליין ats-setup ב-09-19"
+    },
+    {
+      "sensorId": "9VHR5QUPTT178FKt1QiZ",
+      "time": "2026-10-05T17:11",
+      "note": "X +5.4 · Z +4.6 · Y +3.6 מ״מ · חוזר ב-10-08"
+    },
+    {
+      "sensorId": "faq1WUOxSuTTpSia2qmu",
+      "time": "2026-10-06T17:02",
+      "note": "Z -1153.2 · Y -235.4 · X +205.1 מ״מ · חוזר ב-10-11"
+    },
+    {
+      "sensorId": "wAb0YymNT4psUNZS6bEv",
+      "time": "2026-10-06T21:14",
+      "note": "Y -5395.8 · X -2397.0 · Z +239.8 מ״מ · חוזר ב-10-10"
+    },
+    {
+      "sensorId": "7mqLg96n468ocH0AGeUo",
+      "time": "2026-10-06T21:15",
+      "note": "Y +7523.4 · Z -1533.1 · X +162.3 מ״מ · חוזר ב-10-11"
+    },
+    {
+      "sensorId": "42STukgfeSY1202cbmfx",
+      "time": "2026-10-07T01:17",
+      "note": "Y +3934.9 · X +263.5 · Z -55.3 מ״מ · חוזר ב-10-11"
+    },
+    {
+      "sensorId": "AgrDBCCwkaGW07ElMQhU",
+      "time": "2026-10-07T09:03",
+      "note": "Z +2898.7 · Y +113.8 · X +69.0 מ״מ · חוזר ב-10-13"
+    },
+    {
+      "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+      "time": "2026-10-07T21:12",
+      "note": "Y -7533.9 · Z +1531.3 · X -171.1 מ״מ · חוזר ב-10-10"
+    },
+    {
+      "sensorId": "QOhF4DGT7UiAF6fYkZg4",
+      "time": "2026-10-08T09:03",
+      "note": "X +3744.6 · Z -1519.7 · Y +316.3 מ״מ · חוזר ב-10-13"
+    },
+    {
+      "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+      "time": "2026-10-08T14:13",
+      "note": "X -12.1 · Y -10.1 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+      "time": "2026-10-08T14:14",
+      "note": "Y -10.6 · X -10.1 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "iG8STFDXZWbHy4ZYC2o3",
+      "time": "2026-10-08T14:14",
+      "note": "Y -10.7 · X -9.5 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "9bTGpriNmM9ViOS7se90",
+      "time": "2026-10-08T14:14",
+      "note": "Y -10.8 · X -9.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "QFkREzIcQbpWICF9uaRT",
+      "time": "2026-10-08T14:16",
+      "note": "X -13.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "4zAVchdSlamFiKsghK5Q",
+      "time": "2026-10-08T14:16",
+      "note": "X -12.3 · Y -10.1 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "KDAHpmd6d2cxfx4YNWMz",
+      "time": "2026-10-08T14:16",
+      "note": "X -11.9 · Y -9.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "WbMyNi8uv0qXs1Q7OnJs",
+      "time": "2026-10-08T14:17",
+      "note": "X -13.8 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "Hrm0tH08Pto0UVJLzVaW",
+      "time": "2026-10-08T14:17",
+      "note": "Y -10.0 · X -8.2 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "IF4nGc5nhUShBzJmqXle",
+      "time": "2026-10-08T14:17",
+      "note": "X -13.5 · Y -8.6 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "y25VvYinODz3kK9K2r6H",
+      "time": "2026-10-08T14:18",
+      "note": "X -13.2 · Y -9.2 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "UvEfoSorzgLAjI924BPY",
+      "time": "2026-10-08T14:18",
+      "note": "X -12.5 · Y -9.6 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "kcOMHKbxkWh73oenKu5r",
+      "time": "2026-10-08T14:19",
+      "note": "X -10.7 · Y -9.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "8CkArrjNGPLRdDZ7LWHA",
+      "time": "2026-10-08T14:20",
+      "note": "X -9.9 · Y -9.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "qi03ZLSnFYV18uMc6Boa",
+      "time": "2026-10-08T14:20",
+      "note": "Y -9.8 · X -9.3 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "mccaJCredDWfS6pxjUY9",
+      "time": "2026-10-08T14:20",
+      "note": "Y -9.9 · X -8.8 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "77eMf4CHjLSYUHkuscLK",
+      "time": "2026-10-08T14:21",
+      "note": "X -13.3 · Y -9.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "LF6qP7XsO7psp5XDBgfO",
+      "time": "2026-10-08T14:21",
+      "note": "Y -9.9 · X -7.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "TtsG1ExE5cgUl4NcBml1",
+      "time": "2026-10-08T14:22",
+      "note": "X -13.4 · Y -9.2 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "szfIH9jk4CoLdymoI4TK",
+      "time": "2026-10-08T14:22",
+      "note": "X -12.3 · Y -9.4 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "3OSEOQnOHxD7RgY6xzIE",
+      "time": "2026-10-08T14:22",
+      "note": "X -12.1 · Y -9.5 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "3aJUGbbNwmcwZ7K8TMbi",
+      "time": "2026-10-08T14:23",
+      "note": "X -10.8 · Y -9.6 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "k9jNwBsFwFDpCdRhVK3P",
+      "time": "2026-10-08T14:23",
+      "note": "X -10.1 · Y -9.7 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "9VHR5QUPTT178FKt1QiZ",
+      "time": "2026-10-08T14:24",
+      "note": "X -9.8 · Y -9.6 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "FkEhSkUDSMcsqkg1VjvJ",
+      "time": "2026-10-08T14:25",
+      "note": "Y -9.8 · X -8.3 מ״מ · חוזר ב-10-14"
+    },
+    {
+      "sensorId": "BMb1K6ofgcK6tKgajYy3",
+      "time": "2026-10-08T14:25",
+      "note": "X -12.8 · Y -9.5 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "w6pufuxhEkQbMU7OgNa6",
+      "time": "2026-10-08T14:26",
+      "note": "X -12.5 · Y -10.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+      "time": "2026-10-08T14:27",
+      "note": "X -9.9 · Y -9.7 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "VnjDEVRMA23u8M383fAM",
+      "time": "2026-10-08T14:28",
+      "note": "X -10.2 · Y -9.6 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "NwiRpiOQHAN7jj6P6qvC",
+      "time": "2026-10-08T14:29",
+      "note": "X -9.8 · Y -9.2 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "fOF9rMVdCipkIlf7r2ol",
+      "time": "2026-10-08T14:30",
+      "note": "Y -9.4 · X -9.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "jaOKpKTkxQj5ovtfuH0k",
+      "time": "2026-10-08T14:30",
+      "note": "Y -9.4 · X -7.8 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "LIho7Eb1sGJRSBne7WUh",
+      "time": "2026-10-08T14:30",
+      "note": "X -12.6 · Y -8.5 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "8NeniwhOc3IiPTpRU1mv",
+      "time": "2026-10-08T14:31",
+      "note": "X -12.2 · Y -8.9 מ״מ · חוזר ב-10-11"
+    },
+    {
+      "sensorId": "GqqUXYqHcKSourfPrblA",
+      "time": "2026-10-08T14:31",
+      "note": "X -9.9 · Y -9.4 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "dKiZ1WHMWTs7vTOXX6TQ",
+      "time": "2026-10-08T17:04",
+      "note": "Y -4780.2 · X +464.7 · Z -201.2 מ״מ · חוזר ב-10-13"
+    },
+    {
+      "sensorId": "dlV1twfOmh6PIzOXXRJI",
+      "time": "2026-10-08T17:07",
+      "note": "X -11.0 · Y -9.8 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "982hVQBaXNtK0pCbdRTb",
+      "time": "2026-10-08T17:14",
+      "note": "X -11.4 · Y -9.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "Pwa1HSukv1MszmKvoEPe",
+      "time": "2026-10-08T21:27",
+      "note": "X -12.0 · Y -9.2 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "C8pgVOzlngpzahirW7qk",
+      "time": "2026-10-08T21:28",
+      "note": "X -10.8 · Y -9.3 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "HzALozyFwLz7VlN7CndJ",
+      "time": "2026-10-08T21:28",
+      "note": "X -11.2 · Y -8.7 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "3KU1YB1UgDybrDp35cZx",
+      "time": "2026-10-09T01:19",
+      "note": "X -14.7 · Y -8.9 · Z -4.8 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "WLEWiWgOc1a2WoopBPZF",
+      "time": "2026-10-09T01:19",
+      "note": "X -14.3 · Y -8.6 · Z -4.7 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "zmBp6ZSXFYdvw40WJ8u6",
+      "time": "2026-10-09T01:20",
+      "note": "X -13.2 · Y -8.7 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "gI9w85X1QuPEyrdfVy3l",
+      "time": "2026-10-09T01:21",
+      "note": "X -13.6 · Y -8.3 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "MgTpEd2AgXhQjOHmcrbO",
+      "time": "2026-10-09T01:22",
+      "note": "X -13.6 · Y -8.7 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "iJkn0gEOGrvRUT4QSdBY",
+      "time": "2026-10-09T01:22",
+      "note": "X -13.6 · Y -8.9 · Z -3.2 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "LHLiEXfDqjUHSnfSddGO",
+      "time": "2026-10-09T01:23",
+      "note": "X -12.6 · Y -8.6 · Z -3.0 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "EIYFGfG7ZZk4edhWxGVR",
+      "time": "2026-10-09T01:24",
+      "note": "X -13.1 · Y -8.9 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "mZ2JNARX8en8CIjvnwkI",
+      "time": "2026-10-09T01:25",
+      "note": "X -12.6 · Y -8.7 מ״מ · חוזר ב-10-10"
+    },
+    {
+      "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+      "time": "2026-10-11T10:48",
+      "note": "Y +3.1 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "8CkArrjNGPLRdDZ7LWHA",
+      "time": "2026-10-11T10:55",
+      "note": "Z -17.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "3OSEOQnOHxD7RgY6xzIE",
+      "time": "2026-10-11T10:59",
+      "note": "Y +3.1 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "LIho7Eb1sGJRSBne7WUh",
+      "time": "2026-10-11T11:07",
+      "note": "Y +3.9 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "C8pgVOzlngpzahirW7qk",
+      "time": "2026-10-11T11:23",
+      "note": "Z -3.2 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "QOhF4DGT7UiAF6fYkZg4",
+      "time": "2026-10-13T10:44",
+      "note": "X -3744.7 · Z +1519.6 · Y -316.0 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "AgrDBCCwkaGW07ElMQhU",
+      "time": "2026-10-13T10:46",
+      "note": "Z -2899.4 · Y -113.7 · X -69.2 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "dKiZ1WHMWTs7vTOXX6TQ",
+      "time": "2026-10-13T10:47",
+      "note": "Y +4780.9 · X -464.6 · Z +199.7 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+      "time": "2026-10-14T07:04",
+      "note": "Z -21.0 · Y +3.1 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+      "time": "2026-10-14T07:04",
+      "note": "Z -21.1 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "iG8STFDXZWbHy4ZYC2o3",
+      "time": "2026-10-14T07:05",
+      "note": "Z -20.7 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "9bTGpriNmM9ViOS7se90",
+      "time": "2026-10-14T07:05",
+      "note": "Z -18.5 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "4zAVchdSlamFiKsghK5Q",
+      "time": "2026-10-14T07:06",
+      "note": "Z -18.7 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "KDAHpmd6d2cxfx4YNWMz",
+      "time": "2026-10-14T07:07",
+      "note": "Z -19.5 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "WbMyNi8uv0qXs1Q7OnJs",
+      "time": "2026-10-14T07:07",
+      "note": "Z -17.6 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "Hrm0tH08Pto0UVJLzVaW",
+      "time": "2026-10-14T07:07",
+      "note": "Z -17.5 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "IF4nGc5nhUShBzJmqXle",
+      "time": "2026-10-14T07:08",
+      "note": "Z -17.9 · Y +5.1 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "y25VvYinODz3kK9K2r6H",
+      "time": "2026-10-14T07:08",
+      "note": "Z -17.5 · Y +4.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "UvEfoSorzgLAjI924BPY",
+      "time": "2026-10-14T07:09",
+      "note": "Z -17.6 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "dlV1twfOmh6PIzOXXRJI",
+      "time": "2026-10-14T07:09",
+      "note": "Z -18.4 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "8CkArrjNGPLRdDZ7LWHA",
+      "time": "2026-10-14T07:10",
+      "note": "Z -17.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "qi03ZLSnFYV18uMc6Boa",
+      "time": "2026-10-14T07:10",
+      "note": "Z -18.1 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "mccaJCredDWfS6pxjUY9",
+      "time": "2026-10-14T07:11",
+      "note": "Z -17.8 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "77eMf4CHjLSYUHkuscLK",
+      "time": "2026-10-14T07:11",
+      "note": "Z -16.1 · Y +6.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "LF6qP7XsO7psp5XDBgfO",
+      "time": "2026-10-14T07:11",
+      "note": "Z -15.6 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "TtsG1ExE5cgUl4NcBml1",
+      "time": "2026-10-14T07:12",
+      "note": "Z -15.8 · Y +5.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "szfIH9jk4CoLdymoI4TK",
+      "time": "2026-10-14T07:12",
+      "note": "Y +3.4 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "3OSEOQnOHxD7RgY6xzIE",
+      "time": "2026-10-14T07:13",
+      "note": "Z -16.0 · Y +3.1 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "3aJUGbbNwmcwZ7K8TMbi",
+      "time": "2026-10-14T07:13",
+      "note": "Z -16.1 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "k9jNwBsFwFDpCdRhVK3P",
+      "time": "2026-10-14T07:13",
+      "note": "Z -16.3 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "9VHR5QUPTT178FKt1QiZ",
+      "time": "2026-10-14T07:14",
+      "note": "Z -16.2 מ״מ · חוזר ב-10-16"
+    },
+    {
+      "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+      "time": "2026-10-14T07:14",
+      "note": "Y +7523.8 · Z -1549.1 · X +162.3 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "w6pufuxhEkQbMU7OgNa6",
+      "time": "2026-10-14T07:15",
+      "note": "Y +4.0 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "982hVQBaXNtK0pCbdRTb",
+      "time": "2026-10-14T07:15",
+      "note": "Z -18.2 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+      "time": "2026-10-14T07:16",
+      "note": "Z -16.8 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "VnjDEVRMA23u8M383fAM",
+      "time": "2026-10-14T07:17",
+      "note": "Z -18.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "7mqLg96n468ocH0AGeUo",
+      "time": "2026-10-14T07:17",
+      "note": "Y -7525.0 · Z +1515.3 · X -161.9 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "fOF9rMVdCipkIlf7r2ol",
+      "time": "2026-10-14T07:18",
+      "note": "Z -16.0 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "jaOKpKTkxQj5ovtfuH0k",
+      "time": "2026-10-14T07:19",
+      "note": "Z -15.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "LIho7Eb1sGJRSBne7WUh",
+      "time": "2026-10-14T07:19",
+      "note": "Z -16.7 · Y +3.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "GqqUXYqHcKSourfPrblA",
+      "time": "2026-10-14T07:20",
+      "note": "Z -17.2 מ״מ · חוזר ב-10-16"
+    },
+    {
+      "sensorId": "UvEfoSorzgLAjI924BPY",
+      "time": "2026-10-14T09:56",
+      "note": "Y +3.2 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "kcOMHKbxkWh73oenKu5r",
+      "time": "2026-10-14T09:57",
+      "note": "Z -17.9 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "NwiRpiOQHAN7jj6P6qvC",
+      "time": "2026-10-14T10:06",
+      "note": "Z -15.6 מ״מ · חוזר ב-10-15"
+    },
+    {
+      "sensorId": "wAb0YymNT4psUNZS6bEv",
+      "time": "2026-10-14T10:52",
+      "note": "Y +5393.9 · X +2396.8 · Z -154.9 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "42STukgfeSY1202cbmfx",
+      "time": "2026-10-14T10:57",
+      "note": "Y -3939.3 · X -270.7 · Z +29.3 מ״מ · מסתיים בבייסליין rebaseline ב-10-16"
+    },
+    {
+      "sensorId": "WLEWiWgOc1a2WoopBPZF",
+      "time": "2026-10-16T05:21",
+      "note": "X +3.3 מ״מ · לא חוזר (פתוח)"
+    }
+  ]
+}
