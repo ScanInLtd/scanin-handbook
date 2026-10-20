@@ -40,6 +40,9 @@ _Status: DRAFT for review (Hillel). Source list: Hillel 2026-10-20 (priority ord
   - Estimated ~$15 and a few hours.
   - Writes only `smooth/eval/suspect` fields. Needs Hillel's approval, run in slices.
   - Then re-run `smooth-history.ts` per active site.
+  - **JAFFA_68 done 2026-10-20** (last 365 days, `--run=a1-jaffa68-365-apply`, 12,064 prism samples written, 0 errors). MA coverage Nov 2025–Jul 2026 now 83–100% per prism (was 0% before July).
+    - Still open: prisms "1"/"2" Feb–Apr 2026 85–100% suspect (zero changed in Feb 2026 without an event; no data since April); "6" suspect from Jul 2026 and "8" in Oct (steps); Sep–Oct very few samples on all prisms (ATS-6 data gaps). These need baseline events at the steps, the same method as A4.
+    - **Full history (`--days=all`) is blocked** until the recompute ref-lock fix ([`tasks/FN-recompute-ref-lock.md`](./tasks/FN-recompute-ref-lock.md)): installation junk at the start would flag 84% of some prisms' history as suspect.
 - **A2. Replace the iron with a non-destructive "temporary step" correction** (#1).
   - A temporary shift = **a pair of baseline events**: one at the step start (new level) and one at the step end (back), then `recomputeSmoothing` over the window. Raw stays untouched; it's reversible and visible as markers.
   - **Station-wide variant for ATS:** when many points of one station step together (DeVinci ATS-5, 10-09 → 10-16), one action creates the pair for all affected sensors. Detection reuses `detectLevelShifts` + common-mode (the run check from the plan).
