@@ -27,7 +27,7 @@ run(async () => {
     const x = d.data();
     if (typeof x.time !== "number") return;
     const k = new Date(x.time).toISOString().slice(0, 7);
-    const e = m.get(k) ?? { vals: {}, n: 0, susp: 0, src: new Map() };
+    const e = m.get(k) ?? { vals: {} as Record<string, number[]>, n: 0, susp: 0, src: new Map<string, number>() };
     e.n++;
     if (x.suspect) e.susp++;
     e.src.set(String(x.source ?? "-"), (e.src.get(String(x.source ?? "-")) ?? 0) + 1);
