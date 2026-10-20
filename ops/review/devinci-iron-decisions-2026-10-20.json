@@ -1,0 +1,2039 @@
+{
+ "projectId": "hmPh7Hg2fjTc9GyNRDYO",
+ "generated": 1792504870152,
+ "reviewer": "Nathan",
+ "decidedAt": "2026-10-20",
+ "decisions": [
+  {
+   "id": "g0",
+   "kind": "group",
+   "time": "2026-08-18T09:02",
+   "count": 1,
+   "medianMm": 3.2,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "RRhr8wvLvlCTMv9OKTh6",
+     "name": "f4p5",
+     "axis": "Z",
+     "sizeMm": 3.2,
+     "time": "2026-08-18T09:02",
+     "end": "2026-08-25T01:02",
+     "endKind": "returns"
+    }
+   ]
+  },
+  {
+   "id": "g1",
+   "kind": "group",
+   "time": "2026-08-23T13:08",
+   "count": 2,
+   "medianMm": 3.4,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "77eMf4CHjLSYUHkuscLK",
+     "name": "f4p11",
+     "axis": "X",
+     "sizeMm": 3.6,
+     "time": "2026-08-24T13:04",
+     "end": "2026-09-16T17:11",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "RRhr8wvLvlCTMv9OKTh6",
+     "name": "f4p5",
+     "axis": "Z",
+     "sizeMm": 3.2,
+     "time": "2026-08-24T01:02",
+     "end": "2026-08-25T01:02",
+     "endKind": "returns"
+    }
+   ]
+  },
+  {
+   "id": "g2",
+   "kind": "group",
+   "time": "2026-08-30T09:50",
+   "count": 37,
+   "medianMm": -4.6,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "iG8STFDXZWbHy4ZYC2o3",
+     "name": "f11p1",
+     "axis": "Z",
+     "sizeMm": -6,
+     "time": "2026-08-30T09:51",
+     "end": "2026-09-07T01:02",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "QFkREzIcQbpWICF9uaRT",
+     "name": "f5p3",
+     "axis": "Z",
+     "sizeMm": -6,
+     "time": "2026-08-30T09:52",
+     "end": "2026-09-06T21:02",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "9bTGpriNmM9ViOS7se90",
+     "name": "f12p1",
+     "axis": "Z",
+     "sizeMm": -6,
+     "time": "2026-08-30T09:51",
+     "end": "2026-09-06T21:02",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+     "name": "f7p1",
+     "axis": "Z",
+     "sizeMm": -5.9,
+     "time": "2026-08-30T09:50",
+     "end": "2026-09-07T05:01",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+     "name": "f10p1",
+     "axis": "Z",
+     "sizeMm": -5.5,
+     "time": "2026-08-30T09:51",
+     "end": "2026-09-06T21:02",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "VnjDEVRMA23u8M383fAM",
+     "name": "f10p9",
+     "axis": "Z",
+     "sizeMm": -5,
+     "time": "2026-08-30T09:57",
+     "end": "2026-09-07T01:07",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "982hVQBaXNtK0pCbdRTb",
+     "name": "f7p5",
+     "axis": "Z",
+     "sizeMm": -5,
+     "time": "2026-08-30T09:56",
+     "end": "2026-09-06T21:06",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "GqqUXYqHcKSourfPrblA",
+     "name": "f10p12",
+     "axis": "Z",
+     "sizeMm": -5,
+     "time": "2026-08-30T09:58",
+     "end": "2026-09-07T01:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "RRhr8wvLvlCTMv9OKTh6",
+     "name": "f4p5",
+     "axis": "Z",
+     "sizeMm": -4.9,
+     "time": "2026-08-30T13:02",
+     "end": "2026-09-06T21:02",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "w6pufuxhEkQbMU7OgNa6",
+     "name": "f6p5",
+     "axis": "Z",
+     "sizeMm": -4.9,
+     "time": "2026-08-30T09:56",
+     "end": "2026-09-07T01:06",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "UvEfoSorzgLAjI924BPY",
+     "name": "f7p6",
+     "axis": "Z",
+     "sizeMm": -4.9,
+     "time": "2026-08-30T09:53",
+     "end": "2026-09-06T21:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+     "name": "f10p8",
+     "axis": "Z",
+     "sizeMm": -4.9,
+     "time": "2026-08-30T09:56",
+     "end": "2026-09-06T21:06",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "WbMyNi8uv0qXs1Q7OnJs",
+     "name": "f4p6",
+     "axis": "Z",
+     "sizeMm": -4.8,
+     "time": "2026-08-30T09:53",
+     "end": "2026-09-06T21:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "y25VvYinODz3kK9K2r6H",
+     "name": "f6p6",
+     "axis": "Z",
+     "sizeMm": -4.8,
+     "time": "2026-08-30T13:04",
+     "end": "2026-09-06T21:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "wAb0YymNT4psUNZS6bEv",
+     "name": "f11p8",
+     "axis": "Z",
+     "sizeMm": -4.8,
+     "time": "2026-08-30T09:57",
+     "end": "2026-09-06T21:07",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "KDAHpmd6d2cxfx4YNWMz",
+     "name": "f8p4",
+     "axis": "Z",
+     "sizeMm": -4.8,
+     "time": "2026-08-30T09:52",
+     "end": "2026-09-06T21:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "8CkArrjNGPLRdDZ7LWHA",
+     "name": "f10p6",
+     "axis": "Z",
+     "sizeMm": -4.6,
+     "time": "2026-08-30T09:54",
+     "end": "2026-09-07T05:05",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "3aJUGbbNwmcwZ7K8TMbi",
+     "name": "f8p11",
+     "axis": "Z",
+     "sizeMm": -4.6,
+     "time": "2026-08-30T09:55",
+     "end": "2026-09-06T21:05",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "LIho7Eb1sGJRSBne7WUh",
+     "name": "f6p13",
+     "axis": "Z",
+     "sizeMm": -4.6,
+     "time": "2026-08-30T09:58",
+     "end": "2026-09-07T01:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "kcOMHKbxkWh73oenKu5r",
+     "name": "f9p6",
+     "axis": "Z",
+     "sizeMm": -4.6,
+     "time": "2026-08-30T09:53",
+     "end": "2026-09-06T21:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "Hrm0tH08Pto0UVJLzVaW",
+     "name": "f13p6",
+     "axis": "Z",
+     "sizeMm": -4.5,
+     "time": "2026-08-30T09:53",
+     "end": "2026-09-07T01:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "NwiRpiOQHAN7jj6P6qvC",
+     "name": "f10p13",
+     "axis": "Z",
+     "sizeMm": -4.5,
+     "time": "2026-08-30T09:57",
+     "end": "2026-09-06T21:07",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "8NeniwhOc3IiPTpRU1mv",
+     "name": "f7p13",
+     "axis": "Z",
+     "sizeMm": -4.5,
+     "time": "2026-08-30T09:58",
+     "end": "2026-09-06T21:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "4zAVchdSlamFiKsghK5Q",
+     "name": "f7p4",
+     "axis": "Z",
+     "sizeMm": -4.5,
+     "time": "2026-08-30T09:52",
+     "end": "2026-09-06T21:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "IF4nGc5nhUShBzJmqXle",
+     "name": "f5p6",
+     "axis": "Z",
+     "sizeMm": -4.4,
+     "time": "2026-08-30T09:53",
+     "end": "2026-09-06T21:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "FkEhSkUDSMcsqkg1VjvJ",
+     "name": "f12p11",
+     "axis": "Z",
+     "sizeMm": -4.3,
+     "time": "2026-08-30T09:56",
+     "end": "2026-09-16T17:14",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "fOF9rMVdCipkIlf7r2ol",
+     "name": "f11p13",
+     "axis": "Z",
+     "sizeMm": -4.3,
+     "time": "2026-08-30T09:57",
+     "end": "2026-09-07T01:07",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "TtsG1ExE5cgUl4NcBml1",
+     "name": "f5p11",
+     "axis": "Z",
+     "sizeMm": -4.2,
+     "time": "2026-08-30T09:54",
+     "end": "2026-09-06T21:05",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "mccaJCredDWfS6pxjUY9",
+     "name": "f12p6",
+     "axis": "Z",
+     "sizeMm": -4.2,
+     "time": "2026-08-30T09:54",
+     "end": "2026-09-07T01:05",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "dlV1twfOmh6PIzOXXRJI",
+     "name": "f8p6",
+     "axis": "Z",
+     "sizeMm": -4.1,
+     "time": "2026-08-30T09:53",
+     "end": "2026-09-07T01:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "LF6qP7XsO7psp5XDBgfO",
+     "name": "f13p11",
+     "axis": "Z",
+     "sizeMm": -4.1,
+     "time": "2026-08-30T09:54",
+     "end": "2026-09-07T01:05",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+     "name": "f11p11",
+     "axis": "Z",
+     "sizeMm": -4.1,
+     "time": "2026-08-30T09:55",
+     "end": "2026-09-07T01:06",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "77eMf4CHjLSYUHkuscLK",
+     "name": "f4p11",
+     "axis": "Z",
+     "sizeMm": -4.1,
+     "time": "2026-08-30T09:54",
+     "end": "2026-09-07T01:05",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "k9jNwBsFwFDpCdRhVK3P",
+     "name": "f9p11",
+     "axis": "Z",
+     "sizeMm": -4,
+     "time": "2026-08-30T09:55",
+     "end": "2026-09-07T01:06",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "3OSEOQnOHxD7RgY6xzIE",
+     "name": "f7p11",
+     "axis": "Z",
+     "sizeMm": -3.9,
+     "time": "2026-08-30T09:55",
+     "end": "2026-09-16T13:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "qi03ZLSnFYV18uMc6Boa",
+     "name": "f11p6",
+     "axis": "Z",
+     "sizeMm": -3.8,
+     "time": "2026-08-30T09:54",
+     "end": "2026-09-06T21:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "szfIH9jk4CoLdymoI4TK",
+     "name": "f6p11",
+     "axis": "Z",
+     "sizeMm": -3.6,
+     "time": "2026-08-30T17:05",
+     "end": "2026-09-06T21:05",
+     "endKind": "returns"
+    }
+   ]
+  },
+  {
+   "id": "g3",
+   "kind": "group",
+   "time": "2026-09-07T05:03",
+   "count": 3,
+   "medianMm": 3.4,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+     "name": "f10p8",
+     "axis": "X",
+     "sizeMm": 3.7,
+     "time": "2026-09-07T05:07",
+     "end": "2026-09-17T13:18",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+     "name": "f10p1",
+     "axis": "X",
+     "sizeMm": 3.4,
+     "time": "2026-09-07T05:03",
+     "end": "2026-09-17T01:04",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "fOF9rMVdCipkIlf7r2ol",
+     "name": "f11p13",
+     "axis": "X",
+     "sizeMm": 3.3,
+     "time": "2026-09-07T05:08",
+     "end": "2026-09-17T01:17",
+     "endKind": "event:ats-setup"
+    }
+   ]
+  },
+  {
+   "id": "g4",
+   "kind": "group",
+   "time": "2026-09-16T11:00",
+   "count": 22,
+   "medianMm": 6.9,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "QFkREzIcQbpWICF9uaRT",
+     "name": "f5p3",
+     "axis": "Z",
+     "sizeMm": 13.4,
+     "time": "2026-09-16T13:07",
+     "end": "2026-09-18T21:06",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "faq1WUOxSuTTpSia2qmu",
+     "name": "f5p1",
+     "axis": "Z",
+     "sizeMm": 12.8,
+     "time": "2026-09-16T11:00",
+     "end": "2026-09-18T13:03",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+     "name": "f10p1",
+     "axis": "Z",
+     "sizeMm": 12.1,
+     "time": "2026-09-16T11:02",
+     "end": "2026-09-17T01:04",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+     "name": "f7p1",
+     "axis": "Z",
+     "sizeMm": 11.8,
+     "time": "2026-09-16T11:01",
+     "end": "2026-09-17T01:03",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "w6pufuxhEkQbMU7OgNa6",
+     "name": "f6p5",
+     "axis": "Z",
+     "sizeMm": 11,
+     "time": "2026-09-16T17:15",
+     "end": "2026-09-17T01:14",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "9bTGpriNmM9ViOS7se90",
+     "name": "f12p1",
+     "axis": "Z",
+     "sizeMm": 10.8,
+     "time": "2026-09-16T11:02",
+     "end": "2026-09-17T01:04",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "IF4nGc5nhUShBzJmqXle",
+     "name": "f5p6",
+     "axis": "Z",
+     "sizeMm": 10.4,
+     "time": "2026-09-16T11:04",
+     "end": "2026-09-17T01:07",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+     "name": "f10p8",
+     "axis": "Z",
+     "sizeMm": 7.9,
+     "time": "2026-09-16T17:16",
+     "end": "2026-09-17T13:18",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "jaOKpKTkxQj5ovtfuH0k",
+     "name": "f13p13",
+     "axis": "Y",
+     "sizeMm": 7.4,
+     "time": "2026-09-16T13:24",
+     "end": "2026-09-17T01:17",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "fOF9rMVdCipkIlf7r2ol",
+     "name": "f11p13",
+     "axis": "Z",
+     "sizeMm": 7.2,
+     "time": "2026-09-16T17:18",
+     "end": "2026-09-17T01:17",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "42STukgfeSY1202cbmfx",
+     "name": "f11p12",
+     "axis": "Y",
+     "sizeMm": 7,
+     "time": "2026-09-16T13:26",
+     "end": "2026-09-17T01:19",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "8NeniwhOc3IiPTpRU1mv",
+     "name": "f7p13",
+     "axis": "Z",
+     "sizeMm": 6.7,
+     "time": "2026-09-16T17:19",
+     "end": "2026-09-17T13:21",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "NwiRpiOQHAN7jj6P6qvC",
+     "name": "f10p13",
+     "axis": "Y",
+     "sizeMm": 6.7,
+     "time": "2026-09-16T17:18",
+     "end": "2026-09-17T05:20",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "GqqUXYqHcKSourfPrblA",
+     "name": "f10p12",
+     "axis": "Y",
+     "sizeMm": 6.7,
+     "time": "2026-09-16T13:25",
+     "end": "2026-09-17T01:18",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "iG8STFDXZWbHy4ZYC2o3",
+     "name": "f11p1",
+     "axis": "Y",
+     "sizeMm": 6.6,
+     "time": "2026-09-16T11:02",
+     "end": "2026-09-16T21:05",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "UvEfoSorzgLAjI924BPY",
+     "name": "f7p6",
+     "axis": "X",
+     "sizeMm": 6.5,
+     "time": "2026-09-16T11:04",
+     "end": "2026-09-17T01:08",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "y25VvYinODz3kK9K2r6H",
+     "name": "f6p6",
+     "axis": "X",
+     "sizeMm": 6.5,
+     "time": "2026-09-16T11:04",
+     "end": "2026-09-17T01:08",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "LIho7Eb1sGJRSBne7WUh",
+     "name": "f6p13",
+     "axis": "X",
+     "sizeMm": 6.1,
+     "time": "2026-09-16T13:24",
+     "end": "2026-09-17T01:18",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "982hVQBaXNtK0pCbdRTb",
+     "name": "f7p5",
+     "axis": "X",
+     "sizeMm": 5.9,
+     "time": "2026-09-16T17:16",
+     "end": "2026-09-17T05:18",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "KDAHpmd6d2cxfx4YNWMz",
+     "name": "f8p4",
+     "axis": "X",
+     "sizeMm": 5.7,
+     "time": "2026-09-16T11:03",
+     "end": "2026-09-17T01:06",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "BMb1K6ofgcK6tKgajYy3",
+     "name": "f5p5",
+     "axis": "X",
+     "sizeMm": 5.5,
+     "time": "2026-09-16T13:20",
+     "end": "2026-09-17T01:14",
+     "endKind": "event:ats-setup"
+    },
+    {
+     "sensorId": "dlV1twfOmh6PIzOXXRJI",
+     "name": "f8p6",
+     "axis": "X",
+     "sizeMm": 5.5,
+     "time": "2026-09-16T11:04",
+     "end": "2026-09-16T21:10",
+     "endKind": "event:ats-setup"
+    }
+   ]
+  },
+  {
+   "id": "g5",
+   "kind": "group",
+   "time": "2026-09-17T13:07",
+   "count": 1,
+   "medianMm": 5.8,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "QFkREzIcQbpWICF9uaRT",
+     "name": "f5p3",
+     "axis": "X",
+     "sizeMm": 5.8,
+     "time": "2026-09-17T13:07",
+     "end": "2026-09-18T21:06",
+     "endKind": "event:ats-setup"
+    }
+   ]
+  },
+  {
+   "id": "g6",
+   "kind": "group",
+   "time": "2026-10-05T17:11",
+   "count": 1,
+   "medianMm": 5.4,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "9VHR5QUPTT178FKt1QiZ",
+     "name": "f10p11",
+     "axis": "X",
+     "sizeMm": 5.4,
+     "time": "2026-10-05T17:11",
+     "end": "2026-10-07T21:11",
+     "endKind": "returns"
+    }
+   ]
+  },
+  {
+   "id": "g7",
+   "kind": "group",
+   "time": "2026-10-07T01:17",
+   "count": 2,
+   "medianMm": 6.8,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "AgrDBCCwkaGW07ElMQhU",
+     "name": "f4p1",
+     "axis": "X",
+     "sizeMm": 69,
+     "time": "2026-10-07T09:03",
+     "end": "2026-10-13T01:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "42STukgfeSY1202cbmfx",
+     "name": "f11p12",
+     "axis": "Z",
+     "sizeMm": -55.3,
+     "time": "2026-10-07T01:17",
+     "end": "2026-10-15T05:20",
+     "endKind": "returns"
+    }
+   ]
+  },
+  {
+   "id": "g8",
+   "kind": "group",
+   "time": "2026-10-08T14:13",
+   "count": 49,
+   "medianMm": -12,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "3KU1YB1UgDybrDp35cZx",
+     "name": "f4p4",
+     "axis": "X",
+     "sizeMm": -14.7,
+     "time": "2026-10-09T01:19",
+     "end": null,
+     "endKind": "open"
+    },
+    {
+     "sensorId": "WLEWiWgOc1a2WoopBPZF",
+     "name": "f4p7",
+     "axis": "X",
+     "sizeMm": -14.3,
+     "time": "2026-10-09T01:19",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "WbMyNi8uv0qXs1Q7OnJs",
+     "name": "f4p6",
+     "axis": "X",
+     "sizeMm": -13.8,
+     "time": "2026-10-08T14:17",
+     "end": "2026-10-15T17:07",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "MgTpEd2AgXhQjOHmcrbO",
+     "name": "f5p7",
+     "axis": "X",
+     "sizeMm": -13.6,
+     "time": "2026-10-09T01:22",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "iJkn0gEOGrvRUT4QSdBY",
+     "name": "f5p8",
+     "axis": "X",
+     "sizeMm": -13.6,
+     "time": "2026-10-09T01:22",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "gI9w85X1QuPEyrdfVy3l",
+     "name": "f5p13",
+     "axis": "X",
+     "sizeMm": -13.6,
+     "time": "2026-10-09T01:21",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "IF4nGc5nhUShBzJmqXle",
+     "name": "f5p6",
+     "axis": "X",
+     "sizeMm": -13.5,
+     "time": "2026-10-08T14:17",
+     "end": "2026-10-15T17:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "TtsG1ExE5cgUl4NcBml1",
+     "name": "f5p11",
+     "axis": "X",
+     "sizeMm": -13.4,
+     "time": "2026-10-08T14:22",
+     "end": "2026-10-15T17:11",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "77eMf4CHjLSYUHkuscLK",
+     "name": "f4p11",
+     "axis": "X",
+     "sizeMm": -13.3,
+     "time": "2026-10-08T14:21",
+     "end": "2026-10-15T17:10",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "zmBp6ZSXFYdvw40WJ8u6",
+     "name": "f5p10",
+     "axis": "X",
+     "sizeMm": -13.2,
+     "time": "2026-10-09T01:20",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "y25VvYinODz3kK9K2r6H",
+     "name": "f6p6",
+     "axis": "X",
+     "sizeMm": -13.2,
+     "time": "2026-10-08T14:18",
+     "end": "2026-10-15T17:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "EIYFGfG7ZZk4edhWxGVR",
+     "name": "f6p7",
+     "axis": "X",
+     "sizeMm": -13.1,
+     "time": "2026-10-09T01:24",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "QFkREzIcQbpWICF9uaRT",
+     "name": "f5p3",
+     "axis": "X",
+     "sizeMm": -13,
+     "time": "2026-10-08T14:16",
+     "end": "2026-10-15T17:06",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "BMb1K6ofgcK6tKgajYy3",
+     "name": "f5p5",
+     "axis": "X",
+     "sizeMm": -12.8,
+     "time": "2026-10-08T14:25",
+     "end": "2026-10-15T17:14",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "LHLiEXfDqjUHSnfSddGO",
+     "name": "f6p10",
+     "axis": "X",
+     "sizeMm": -12.6,
+     "time": "2026-10-09T01:23",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "LIho7Eb1sGJRSBne7WUh",
+     "name": "f6p13",
+     "axis": "X",
+     "sizeMm": -12.6,
+     "time": "2026-10-08T14:30",
+     "end": "2026-10-15T17:18",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "mZ2JNARX8en8CIjvnwkI",
+     "name": "f6p8",
+     "axis": "X",
+     "sizeMm": -12.6,
+     "time": "2026-10-09T01:25",
+     "end": "2026-10-10T17:27",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "w6pufuxhEkQbMU7OgNa6",
+     "name": "f6p5",
+     "axis": "X",
+     "sizeMm": -12.5,
+     "time": "2026-10-08T14:26",
+     "end": "2026-10-15T14:55",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "UvEfoSorzgLAjI924BPY",
+     "name": "f7p6",
+     "axis": "X",
+     "sizeMm": -12.5,
+     "time": "2026-10-08T14:18",
+     "end": "2026-10-15T17:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "4zAVchdSlamFiKsghK5Q",
+     "name": "f7p4",
+     "axis": "X",
+     "sizeMm": -12.3,
+     "time": "2026-10-08T14:16",
+     "end": "2026-10-15T14:46",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "szfIH9jk4CoLdymoI4TK",
+     "name": "f6p11",
+     "axis": "X",
+     "sizeMm": -12.3,
+     "time": "2026-10-08T14:22",
+     "end": "2026-10-15T17:12",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "8NeniwhOc3IiPTpRU1mv",
+     "name": "f7p13",
+     "axis": "X",
+     "sizeMm": -12.2,
+     "time": "2026-10-08T14:31",
+     "end": "2026-10-11T11:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+     "name": "f7p1",
+     "axis": "X",
+     "sizeMm": -12.1,
+     "time": "2026-10-08T14:13",
+     "end": "2026-10-15T14:43",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "3OSEOQnOHxD7RgY6xzIE",
+     "name": "f7p11",
+     "axis": "X",
+     "sizeMm": -12.1,
+     "time": "2026-10-08T14:22",
+     "end": "2026-10-15T17:12",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "Pwa1HSukv1MszmKvoEPe",
+     "name": "f7p8",
+     "axis": "X",
+     "sizeMm": -12,
+     "time": "2026-10-08T21:27",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "KDAHpmd6d2cxfx4YNWMz",
+     "name": "f8p4",
+     "axis": "X",
+     "sizeMm": -11.9,
+     "time": "2026-10-08T14:16",
+     "end": "2026-10-15T14:46",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "982hVQBaXNtK0pCbdRTb",
+     "name": "f7p5",
+     "axis": "X",
+     "sizeMm": -11.4,
+     "time": "2026-10-08T17:14",
+     "end": "2026-10-15T17:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "HzALozyFwLz7VlN7CndJ",
+     "name": "f8p13",
+     "axis": "X",
+     "sizeMm": -11.2,
+     "time": "2026-10-08T21:28",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "dlV1twfOmh6PIzOXXRJI",
+     "name": "f8p6",
+     "axis": "X",
+     "sizeMm": -11,
+     "time": "2026-10-08T17:07",
+     "end": "2026-10-15T17:09",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "C8pgVOzlngpzahirW7qk",
+     "name": "f8p10",
+     "axis": "X",
+     "sizeMm": -10.8,
+     "time": "2026-10-08T21:28",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "3aJUGbbNwmcwZ7K8TMbi",
+     "name": "f8p11",
+     "axis": "X",
+     "sizeMm": -10.8,
+     "time": "2026-10-08T14:23",
+     "end": "2026-10-15T17:12",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "9bTGpriNmM9ViOS7se90",
+     "name": "f12p1",
+     "axis": "Y",
+     "sizeMm": -10.8,
+     "time": "2026-10-08T14:14",
+     "end": "2026-10-15T17:05",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "kcOMHKbxkWh73oenKu5r",
+     "name": "f9p6",
+     "axis": "X",
+     "sizeMm": -10.7,
+     "time": "2026-10-08T14:19",
+     "end": "2026-10-15T17:09",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "iG8STFDXZWbHy4ZYC2o3",
+     "name": "f11p1",
+     "axis": "Y",
+     "sizeMm": -10.7,
+     "time": "2026-10-08T14:14",
+     "end": "2026-10-15T05:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+     "name": "f10p1",
+     "axis": "Y",
+     "sizeMm": -10.6,
+     "time": "2026-10-08T14:14",
+     "end": "2026-10-15T05:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "VnjDEVRMA23u8M383fAM",
+     "name": "f10p9",
+     "axis": "X",
+     "sizeMm": -10.2,
+     "time": "2026-10-08T14:28",
+     "end": "2026-10-15T14:57",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "k9jNwBsFwFDpCdRhVK3P",
+     "name": "f9p11",
+     "axis": "X",
+     "sizeMm": -10.1,
+     "time": "2026-10-08T14:23",
+     "end": "2026-10-15T17:13",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "Hrm0tH08Pto0UVJLzVaW",
+     "name": "f13p6",
+     "axis": "Y",
+     "sizeMm": -10,
+     "time": "2026-10-08T14:17",
+     "end": "2026-10-15T17:07",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "mccaJCredDWfS6pxjUY9",
+     "name": "f12p6",
+     "axis": "Y",
+     "sizeMm": -9.9,
+     "time": "2026-10-08T14:20",
+     "end": "2026-10-15T17:10",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "8CkArrjNGPLRdDZ7LWHA",
+     "name": "f10p6",
+     "axis": "X",
+     "sizeMm": -9.9,
+     "time": "2026-10-08T14:20",
+     "end": "2026-10-15T17:09",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "LF6qP7XsO7psp5XDBgfO",
+     "name": "f13p11",
+     "axis": "Y",
+     "sizeMm": -9.9,
+     "time": "2026-10-08T14:21",
+     "end": "2026-10-15T17:11",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "GqqUXYqHcKSourfPrblA",
+     "name": "f10p12",
+     "axis": "X",
+     "sizeMm": -9.9,
+     "time": "2026-10-08T14:31",
+     "end": "2026-10-15T17:19",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+     "name": "f10p8",
+     "axis": "X",
+     "sizeMm": -9.9,
+     "time": "2026-10-08T14:27",
+     "end": "2026-10-15T17:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "9VHR5QUPTT178FKt1QiZ",
+     "name": "f10p11",
+     "axis": "X",
+     "sizeMm": -9.8,
+     "time": "2026-10-08T14:24",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "NwiRpiOQHAN7jj6P6qvC",
+     "name": "f10p13",
+     "axis": "X",
+     "sizeMm": -9.8,
+     "time": "2026-10-08T14:29",
+     "end": "2026-10-15T17:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "qi03ZLSnFYV18uMc6Boa",
+     "name": "f11p6",
+     "axis": "Y",
+     "sizeMm": -9.8,
+     "time": "2026-10-08T14:20",
+     "end": "2026-10-15T17:10",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "FkEhSkUDSMcsqkg1VjvJ",
+     "name": "f12p11",
+     "axis": "Y",
+     "sizeMm": -9.8,
+     "time": "2026-10-08T14:25",
+     "end": "2026-10-14T13:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "fOF9rMVdCipkIlf7r2ol",
+     "name": "f11p13",
+     "axis": "Y",
+     "sizeMm": -9.4,
+     "time": "2026-10-08T14:30",
+     "end": "2026-10-15T17:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "jaOKpKTkxQj5ovtfuH0k",
+     "name": "f13p13",
+     "axis": "Y",
+     "sizeMm": -9.4,
+     "time": "2026-10-08T14:30",
+     "end": "2026-10-15T17:18",
+     "endKind": "returns"
+    }
+   ]
+  },
+  {
+   "id": "g9",
+   "kind": "group",
+   "time": "2026-10-11T10:48",
+   "count": 5,
+   "medianMm": 3.1,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "8CkArrjNGPLRdDZ7LWHA",
+     "name": "f10p6",
+     "axis": "Z",
+     "sizeMm": -17.9,
+     "time": "2026-10-11T10:55",
+     "end": "2026-10-15T17:09",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "LIho7Eb1sGJRSBne7WUh",
+     "name": "f6p13",
+     "axis": "Y",
+     "sizeMm": 3.9,
+     "time": "2026-10-11T11:07",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "C8pgVOzlngpzahirW7qk",
+     "name": "f8p10",
+     "axis": "Z",
+     "sizeMm": -3.2,
+     "time": "2026-10-11T11:23",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "3OSEOQnOHxD7RgY6xzIE",
+     "name": "f7p11",
+     "axis": "Y",
+     "sizeMm": 3.1,
+     "time": "2026-10-11T10:59",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+     "name": "f7p1",
+     "axis": "Y",
+     "sizeMm": 3.1,
+     "time": "2026-10-11T10:48",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    }
+   ]
+  },
+  {
+   "id": "g10",
+   "kind": "group",
+   "time": "2026-10-13T10:46",
+   "count": 34,
+   "medianMm": -17.6,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "AgrDBCCwkaGW07ElMQhU",
+     "name": "f4p1",
+     "axis": "X",
+     "sizeMm": -69.2,
+     "time": "2026-10-13T10:46",
+     "end": null,
+     "endKind": "open"
+    },
+    {
+     "sensorId": "pBzdhH69vPP3w5Ox3XMs",
+     "name": "f10p1",
+     "axis": "Z",
+     "sizeMm": -21.1,
+     "time": "2026-10-14T07:04",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "oewh9Fbbm2YdXTihe1Ei",
+     "name": "f7p1",
+     "axis": "Z",
+     "sizeMm": -21,
+     "time": "2026-10-14T07:04",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "iG8STFDXZWbHy4ZYC2o3",
+     "name": "f11p1",
+     "axis": "Z",
+     "sizeMm": -20.7,
+     "time": "2026-10-14T07:05",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "KDAHpmd6d2cxfx4YNWMz",
+     "name": "f8p4",
+     "axis": "Z",
+     "sizeMm": -19.5,
+     "time": "2026-10-14T07:07",
+     "end": "2026-10-15T14:46",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "4zAVchdSlamFiKsghK5Q",
+     "name": "f7p4",
+     "axis": "Z",
+     "sizeMm": -18.7,
+     "time": "2026-10-14T07:06",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "9bTGpriNmM9ViOS7se90",
+     "name": "f12p1",
+     "axis": "Z",
+     "sizeMm": -18.5,
+     "time": "2026-10-14T07:05",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "dlV1twfOmh6PIzOXXRJI",
+     "name": "f8p6",
+     "axis": "Z",
+     "sizeMm": -18.4,
+     "time": "2026-10-14T07:09",
+     "end": "2026-10-15T17:09",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "982hVQBaXNtK0pCbdRTb",
+     "name": "f7p5",
+     "axis": "Z",
+     "sizeMm": -18.2,
+     "time": "2026-10-14T07:15",
+     "end": "2026-10-15T17:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "qi03ZLSnFYV18uMc6Boa",
+     "name": "f11p6",
+     "axis": "Z",
+     "sizeMm": -18.1,
+     "time": "2026-10-14T07:10",
+     "end": "2026-10-15T17:10",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "VnjDEVRMA23u8M383fAM",
+     "name": "f10p9",
+     "axis": "Z",
+     "sizeMm": -18,
+     "time": "2026-10-14T07:17",
+     "end": "2026-10-15T14:57",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "IF4nGc5nhUShBzJmqXle",
+     "name": "f5p6",
+     "axis": "Z",
+     "sizeMm": -17.9,
+     "time": "2026-10-14T07:08",
+     "end": "2026-10-15T17:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "kcOMHKbxkWh73oenKu5r",
+     "name": "f9p6",
+     "axis": "Z",
+     "sizeMm": -17.9,
+     "time": "2026-10-14T09:57",
+     "end": "2026-10-15T17:09",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "8CkArrjNGPLRdDZ7LWHA",
+     "name": "f10p6",
+     "axis": "Z",
+     "sizeMm": -17.9,
+     "time": "2026-10-14T07:10",
+     "end": "2026-10-15T17:09",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "mccaJCredDWfS6pxjUY9",
+     "name": "f12p6",
+     "axis": "Z",
+     "sizeMm": -17.8,
+     "time": "2026-10-14T07:11",
+     "end": "2026-10-15T17:10",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "WbMyNi8uv0qXs1Q7OnJs",
+     "name": "f4p6",
+     "axis": "Z",
+     "sizeMm": -17.6,
+     "time": "2026-10-14T07:07",
+     "end": "2026-10-15T17:07",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "UvEfoSorzgLAjI924BPY",
+     "name": "f7p6",
+     "axis": "Z",
+     "sizeMm": -17.6,
+     "time": "2026-10-14T07:09",
+     "end": "2026-10-15T17:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "y25VvYinODz3kK9K2r6H",
+     "name": "f6p6",
+     "axis": "Z",
+     "sizeMm": -17.5,
+     "time": "2026-10-14T07:08",
+     "end": "2026-10-15T17:08",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "Hrm0tH08Pto0UVJLzVaW",
+     "name": "f13p6",
+     "axis": "Z",
+     "sizeMm": -17.5,
+     "time": "2026-10-14T07:07",
+     "end": "2026-10-15T17:07",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "GqqUXYqHcKSourfPrblA",
+     "name": "f10p12",
+     "axis": "Z",
+     "sizeMm": -17.2,
+     "time": "2026-10-14T07:20",
+     "end": "2026-10-15T21:21",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "UYR7TlGE9GEJKb7ZZNiJ",
+     "name": "f10p8",
+     "axis": "Z",
+     "sizeMm": -16.8,
+     "time": "2026-10-14T07:16",
+     "end": "2026-10-15T17:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "LIho7Eb1sGJRSBne7WUh",
+     "name": "f6p13",
+     "axis": "Z",
+     "sizeMm": -16.7,
+     "time": "2026-10-14T07:19",
+     "end": "2026-10-15T17:18",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "k9jNwBsFwFDpCdRhVK3P",
+     "name": "f9p11",
+     "axis": "Z",
+     "sizeMm": -16.3,
+     "time": "2026-10-14T07:13",
+     "end": "2026-10-15T17:13",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "9VHR5QUPTT178FKt1QiZ",
+     "name": "f10p11",
+     "axis": "Z",
+     "sizeMm": -16.2,
+     "time": "2026-10-14T07:14",
+     "end": "2026-10-15T21:14",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "77eMf4CHjLSYUHkuscLK",
+     "name": "f4p11",
+     "axis": "Z",
+     "sizeMm": -16.1,
+     "time": "2026-10-14T07:11",
+     "end": "2026-10-15T17:10",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "3aJUGbbNwmcwZ7K8TMbi",
+     "name": "f8p11",
+     "axis": "Z",
+     "sizeMm": -16.1,
+     "time": "2026-10-14T07:13",
+     "end": "2026-10-15T17:12",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "3OSEOQnOHxD7RgY6xzIE",
+     "name": "f7p11",
+     "axis": "Z",
+     "sizeMm": -16,
+     "time": "2026-10-14T07:13",
+     "end": "2026-10-15T17:12",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "fOF9rMVdCipkIlf7r2ol",
+     "name": "f11p13",
+     "axis": "Z",
+     "sizeMm": -16,
+     "time": "2026-10-14T07:18",
+     "end": "2026-10-15T17:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "jaOKpKTkxQj5ovtfuH0k",
+     "name": "f13p13",
+     "axis": "Z",
+     "sizeMm": -15.9,
+     "time": "2026-10-14T07:19",
+     "end": "2026-10-15T17:18",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "TtsG1ExE5cgUl4NcBml1",
+     "name": "f5p11",
+     "axis": "Z",
+     "sizeMm": -15.8,
+     "time": "2026-10-14T07:12",
+     "end": "2026-10-15T17:11",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "NwiRpiOQHAN7jj6P6qvC",
+     "name": "f10p13",
+     "axis": "Z",
+     "sizeMm": -15.6,
+     "time": "2026-10-14T10:06",
+     "end": "2026-10-15T17:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "LF6qP7XsO7psp5XDBgfO",
+     "name": "f13p11",
+     "axis": "Z",
+     "sizeMm": -15.6,
+     "time": "2026-10-14T07:11",
+     "end": "2026-10-15T17:11",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "w6pufuxhEkQbMU7OgNa6",
+     "name": "f6p5",
+     "axis": "Y",
+     "sizeMm": 4,
+     "time": "2026-10-14T07:15",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "szfIH9jk4CoLdymoI4TK",
+     "name": "f6p11",
+     "axis": "Y",
+     "sizeMm": 3.4,
+     "time": "2026-10-14T07:12",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    }
+   ]
+  },
+  {
+   "id": "g11",
+   "kind": "group",
+   "time": "2026-10-14T10:57",
+   "count": 1,
+   "medianMm": 29.3,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "42STukgfeSY1202cbmfx",
+     "name": "f11p12",
+     "axis": "Z",
+     "sizeMm": 29.3,
+     "time": "2026-10-14T10:57",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    }
+   ]
+  },
+  {
+   "id": "g12",
+   "kind": "group",
+   "time": "2026-10-16T05:21",
+   "count": 1,
+   "medianMm": 3.3,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "WLEWiWgOc1a2WoopBPZF",
+     "name": "f4p7",
+     "axis": "X",
+     "sizeMm": 3.3,
+     "time": "2026-10-16T05:21",
+     "end": null,
+     "endKind": "open"
+    }
+   ]
+  },
+  {
+   "id": "x0",
+   "kind": "giant",
+   "time": "2026-10-06T17:02",
+   "count": 1,
+   "medianMm": -1153.2,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "faq1WUOxSuTTpSia2qmu",
+     "name": "f5p1",
+     "axis": "X",
+     "sizeMm": 205.1,
+     "time": "2026-10-06T17:02",
+     "end": "2026-10-10T21:01",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "faq1WUOxSuTTpSia2qmu",
+     "name": "f5p1",
+     "axis": "Y",
+     "sizeMm": -235.4,
+     "time": "2026-10-06T17:02",
+     "end": "2026-10-10T21:01",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "faq1WUOxSuTTpSia2qmu",
+     "name": "f5p1",
+     "axis": "Z",
+     "sizeMm": -1153.2,
+     "time": "2026-10-06T17:02",
+     "end": "2026-10-10T21:01",
+     "endKind": "returns"
+    }
+   ]
+  },
+  {
+   "id": "x1",
+   "kind": "giant",
+   "time": "2026-10-06T21:14",
+   "count": 1,
+   "medianMm": -5395.8,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "wAb0YymNT4psUNZS6bEv",
+     "name": "f11p8",
+     "axis": "X",
+     "sizeMm": -2397,
+     "time": "2026-10-06T21:14",
+     "end": "2026-10-10T17:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "wAb0YymNT4psUNZS6bEv",
+     "name": "f11p8",
+     "axis": "Y",
+     "sizeMm": -5395.8,
+     "time": "2026-10-06T21:14",
+     "end": "2026-10-10T17:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "wAb0YymNT4psUNZS6bEv",
+     "name": "f11p8",
+     "axis": "Z",
+     "sizeMm": 239.8,
+     "time": "2026-10-06T21:14",
+     "end": "2026-10-14T21:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "wAb0YymNT4psUNZS6bEv",
+     "name": "f11p8",
+     "axis": "X",
+     "sizeMm": 2396.8,
+     "time": "2026-10-14T10:52",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "wAb0YymNT4psUNZS6bEv",
+     "name": "f11p8",
+     "axis": "Y",
+     "sizeMm": 5393.9,
+     "time": "2026-10-14T10:52",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "wAb0YymNT4psUNZS6bEv",
+     "name": "f11p8",
+     "axis": "Z",
+     "sizeMm": -154.9,
+     "time": "2026-10-14T10:52",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    }
+   ]
+  },
+  {
+   "id": "x2",
+   "kind": "giant",
+   "time": "2026-10-06T21:15",
+   "count": 1,
+   "medianMm": 7523.4,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "7mqLg96n468ocH0AGeUo",
+     "name": "f11p9",
+     "axis": "X",
+     "sizeMm": 162.3,
+     "time": "2026-10-06T21:15",
+     "end": "2026-10-10T21:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "7mqLg96n468ocH0AGeUo",
+     "name": "f11p9",
+     "axis": "Y",
+     "sizeMm": 7523.4,
+     "time": "2026-10-06T21:15",
+     "end": "2026-10-10T21:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "7mqLg96n468ocH0AGeUo",
+     "name": "f11p9",
+     "axis": "Z",
+     "sizeMm": -1533.1,
+     "time": "2026-10-06T21:15",
+     "end": "2026-10-10T21:15",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "7mqLg96n468ocH0AGeUo",
+     "name": "f11p9",
+     "axis": "X",
+     "sizeMm": -161.9,
+     "time": "2026-10-14T07:17",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "7mqLg96n468ocH0AGeUo",
+     "name": "f11p9",
+     "axis": "Y",
+     "sizeMm": -7525,
+     "time": "2026-10-14T07:17",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "7mqLg96n468ocH0AGeUo",
+     "name": "f11p9",
+     "axis": "Z",
+     "sizeMm": 1515.3,
+     "time": "2026-10-14T07:17",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    }
+   ]
+  },
+  {
+   "id": "x3",
+   "kind": "giant",
+   "time": "2026-10-07T01:17",
+   "count": 1,
+   "medianMm": 3934.9,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "42STukgfeSY1202cbmfx",
+     "name": "f11p12",
+     "axis": "X",
+     "sizeMm": 263.5,
+     "time": "2026-10-07T01:17",
+     "end": "2026-10-10T21:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "42STukgfeSY1202cbmfx",
+     "name": "f11p12",
+     "axis": "Y",
+     "sizeMm": 3934.9,
+     "time": "2026-10-07T01:17",
+     "end": "2026-10-10T21:17",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "42STukgfeSY1202cbmfx",
+     "name": "f11p12",
+     "axis": "X",
+     "sizeMm": -270.7,
+     "time": "2026-10-14T10:57",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "42STukgfeSY1202cbmfx",
+     "name": "f11p12",
+     "axis": "Y",
+     "sizeMm": -3939.3,
+     "time": "2026-10-14T10:57",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    }
+   ]
+  },
+  {
+   "id": "x4",
+   "kind": "giant",
+   "time": "2026-10-07T09:03",
+   "count": 1,
+   "medianMm": 2898.7,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "AgrDBCCwkaGW07ElMQhU",
+     "name": "f4p1",
+     "axis": "Y",
+     "sizeMm": 113.8,
+     "time": "2026-10-07T09:03",
+     "end": "2026-10-13T01:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "AgrDBCCwkaGW07ElMQhU",
+     "name": "f4p1",
+     "axis": "Z",
+     "sizeMm": 2898.7,
+     "time": "2026-10-07T09:03",
+     "end": "2026-10-13T01:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "AgrDBCCwkaGW07ElMQhU",
+     "name": "f4p1",
+     "axis": "Y",
+     "sizeMm": -113.7,
+     "time": "2026-10-13T10:46",
+     "end": null,
+     "endKind": "open"
+    },
+    {
+     "sensorId": "AgrDBCCwkaGW07ElMQhU",
+     "name": "f4p1",
+     "axis": "Z",
+     "sizeMm": -2899.4,
+     "time": "2026-10-13T10:46",
+     "end": null,
+     "endKind": "open"
+    }
+   ]
+  },
+  {
+   "id": "x5",
+   "kind": "giant",
+   "time": "2026-10-07T21:12",
+   "count": 1,
+   "medianMm": -7533.9,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+     "name": "f11p11",
+     "axis": "X",
+     "sizeMm": -171.1,
+     "time": "2026-10-07T21:12",
+     "end": "2026-10-10T17:12",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+     "name": "f11p11",
+     "axis": "Y",
+     "sizeMm": -7533.9,
+     "time": "2026-10-07T21:12",
+     "end": "2026-10-10T17:12",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+     "name": "f11p11",
+     "axis": "Z",
+     "sizeMm": 1531.3,
+     "time": "2026-10-07T21:12",
+     "end": "2026-10-10T17:12",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+     "name": "f11p11",
+     "axis": "X",
+     "sizeMm": 162.3,
+     "time": "2026-10-14T07:14",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+     "name": "f11p11",
+     "axis": "Y",
+     "sizeMm": 7523.8,
+     "time": "2026-10-14T07:14",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    },
+    {
+     "sensorId": "z3zJ1cg7xUkiBaxmDWgl",
+     "name": "f11p11",
+     "axis": "Z",
+     "sizeMm": -1549.1,
+     "time": "2026-10-14T07:14",
+     "end": "2026-10-15T22:15",
+     "endKind": "event:rebaseline"
+    }
+   ]
+  },
+  {
+   "id": "x6",
+   "kind": "giant",
+   "time": "2026-10-08T09:03",
+   "count": 1,
+   "medianMm": 3744.6,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "QOhF4DGT7UiAF6fYkZg4",
+     "name": "f11p3",
+     "axis": "X",
+     "sizeMm": 3744.6,
+     "time": "2026-10-08T09:03",
+     "end": "2026-10-12T21:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "QOhF4DGT7UiAF6fYkZg4",
+     "name": "f11p3",
+     "axis": "Y",
+     "sizeMm": 316.3,
+     "time": "2026-10-08T09:03",
+     "end": "2026-10-12T21:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "QOhF4DGT7UiAF6fYkZg4",
+     "name": "f11p3",
+     "axis": "Z",
+     "sizeMm": -1519.7,
+     "time": "2026-10-08T09:03",
+     "end": "2026-10-12T21:03",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "QOhF4DGT7UiAF6fYkZg4",
+     "name": "f11p3",
+     "axis": "X",
+     "sizeMm": -3744.7,
+     "time": "2026-10-13T10:44",
+     "end": null,
+     "endKind": "open"
+    },
+    {
+     "sensorId": "QOhF4DGT7UiAF6fYkZg4",
+     "name": "f11p3",
+     "axis": "Y",
+     "sizeMm": -316,
+     "time": "2026-10-13T10:44",
+     "end": null,
+     "endKind": "open"
+    },
+    {
+     "sensorId": "QOhF4DGT7UiAF6fYkZg4",
+     "name": "f11p3",
+     "axis": "Z",
+     "sizeMm": 1519.6,
+     "time": "2026-10-13T10:44",
+     "end": null,
+     "endKind": "open"
+    }
+   ]
+  },
+  {
+   "id": "x7",
+   "kind": "giant",
+   "time": "2026-10-08T17:04",
+   "count": 1,
+   "medianMm": -4780.2,
+   "decision": "iron",
+   "excluded": [],
+   "members": [
+    {
+     "sensorId": "dKiZ1WHMWTs7vTOXX6TQ",
+     "name": "f5p7b",
+     "axis": "X",
+     "sizeMm": 464.7,
+     "time": "2026-10-08T17:04",
+     "end": "2026-10-13T01:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "dKiZ1WHMWTs7vTOXX6TQ",
+     "name": "f5p7b",
+     "axis": "Y",
+     "sizeMm": -4780.2,
+     "time": "2026-10-08T17:04",
+     "end": "2026-10-13T01:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "dKiZ1WHMWTs7vTOXX6TQ",
+     "name": "f5p7b",
+     "axis": "Z",
+     "sizeMm": -201.2,
+     "time": "2026-10-08T17:04",
+     "end": "2026-10-13T01:04",
+     "endKind": "returns"
+    },
+    {
+     "sensorId": "dKiZ1WHMWTs7vTOXX6TQ",
+     "name": "f5p7b",
+     "axis": "X",
+     "sizeMm": -464.6,
+     "time": "2026-10-13T10:47",
+     "end": null,
+     "endKind": "open"
+    },
+    {
+     "sensorId": "dKiZ1WHMWTs7vTOXX6TQ",
+     "name": "f5p7b",
+     "axis": "Y",
+     "sizeMm": 4780.9,
+     "time": "2026-10-13T10:47",
+     "end": null,
+     "endKind": "open"
+    },
+    {
+     "sensorId": "dKiZ1WHMWTs7vTOXX6TQ",
+     "name": "f5p7b",
+     "axis": "Z",
+     "sizeMm": 199.7,
+     "time": "2026-10-13T10:47",
+     "end": null,
+     "endKind": "open"
+    }
+   ]
+  }
+ ]
+}
