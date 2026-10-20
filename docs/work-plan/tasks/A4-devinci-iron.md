@@ -32,6 +32,14 @@ Dozens of DeVinci prisms (station ATS-5) show **temporary** jumps: the level ste
    - before/after numbers (max jump in the window, old vs simulated);
    - optionally a small HTML with before/after mini-charts for 5 representative prisms.
 
+## Backup before apply (required, added 2026-10-20 at Hillel's request)
+The apply script must **first** write a JSON backup of every sensor it will touch to `ops/out/devinci-iron-backup-<timestamp>.json`, and refuse to continue if the file wasn't written:
+- the sensor doc fields `initial-value`, `status`, `alert_state`, `thresholds`;
+- all `baseline-events` (id + data);
+- for every `data-log` doc from the earliest planned event time onwards: doc id + `smooth`, `eval`, `suspect`, `suspect_reason` (raw values are never changed, so there's no need to copy them).
+
+Also write `ops/src/oneoff/2026-10-20-devinci-iron-restore.ts` (dry-run by default, `--apply` to write): it deletes the events the apply script added and writes back the backed-up fields exactly. Test it on one test sensor (`בדיקות משרד`) before the real apply.
+
 ## Rules
 - **Read-only.** No `applyBaseline`, no `recompute --apply`, no Firestore writes. Hillel approves, then the apply script runs.
 - Exclude `suspect` ingestion samples (`run-common-mode`, `implausible-jump`) from the medians.
