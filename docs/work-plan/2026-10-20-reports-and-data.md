@@ -2,6 +2,24 @@
 
 _Status: DRAFT for review (Hillel). Source list: Hillel 2026-10-20 (priority order as given). Findings: read-only checks on prod the same day (scripts under `ops/src/`)._
 
+## 0. Status board (end of 2026-10-20)
+
+| # | Task | Status | Where it stands / next |
+|---|---|---|---|
+| 4 | Police report (REP142) | ✅ **Done** | Cause: full-resolution section-map photos made the PDF 55.6 MB (> SendGrid 30 MB). Reports now shrink remote images (`scanin-svc-reports` `1c32d28`, deployed). Re-run 20.10 15:46: 2.9 MB, **email sent**. |
+| 8 | Delete a baseline (UI + functions) | ✅ **Live** | Functions `deleteBaseline` / `restoreBaseline` deployed (`f691fa2`). UI live (`b2e2497`): delete from the chart marker or the Initial Value list, undo toast. ⏳ E2E on a `בדיקות משרד` sensor (Nathan testing). |
+| 9 | Delete point needs Fetch | ✅ **Live** | Fixed in the same UI release (`refreshCurrentData` was dead code). |
+| 10 | Map pin hover enlarges all pins | 🟡 **Live, not committed** | Shipped with the delete-baseline deploy, but the change is still uncommitted in `scanin-web-platform` (working tree: section-cmp, sensor-list, chart components). **Commit it** so the repo matches what's live. |
+| 1 | DeVinci ironing | ✅ **Done** | All 98 active prisms flattened over their whole history (`ops/src/oneoff/2026-10-20-devinci-flatten.ts`, `6847d1e`): zero at the first sample + every jump ironed on all axes, including 10 station-wide moments. 356 old events archived, 400 new; MA recomputed. 96/98 end within ±5 mm. Exceptions: f4p5, f8p1 (bad prisms). Backup `ops/out/devinci-flatten-backup-2026-10-20T15-01-07-902Z.json`. Tools for review: `group-review.ts` / `jump-review.ts`. Open: slow Y drift −3…−4 mm on most prisms in the last 2 weeks (ask Nathan: real or station). |
+| 6 | JAFFA_68 MA | 🟡 **Last year done** | 365-day MA applied (12,064 samples). Prisms 1/2 (Feb 2026 zero change), 6/8 (two prisms in one sensor / wrong zero) still need fixing. Full history waits for the functions ref-lock fix. |
+| 3 | Maccabi Yafo demo (REP136) | ✅ **Ready for review** | Data filled site start → 15.10 (`isWorked` tag), Height −3.0 mm on R11–R15, MA 99%+, R15's foreign readings hidden. REP136 period set to 20.05 → 15.10. Local PDF: `scanin-svc-reports/output/reports/QpaWmsa4k2uOA1TjmVBN_2026-10-20T15-21-49.228Z/pdfs/report.pdf`. **Next: Hillel reviews, then runs REP136 from the UI (emails).** Feedback: `feedbacks/B2-maccabi-demo.md`. |
+| — | Recompute ref-lock fix (functions) | 🟡 **Committed, not deployed** | `71cdde1` + `5283676`, local only (not pushed). JAFFA_68 full history 2,191 → 404 suspects. **Before deploy/apply:** baseline events at the giant steps. Nathan's answers (12 iron / 3 unsure): `ops/review/jumps-2026-10-20-answers.json`. **Don't deploy functions** until then: any functions deploy ships this. |
+| 2 | Holes in reports (Shtraus 4) | ⏳ Open | Holes are real data gaps (Jun/Sep/Oct). Hillel: connect lines, see first, maybe fill (B4). |
+| 5 | Explanation pages + merged reports | ⏳ Open | Spec not written yet (B3). |
+| 7 | ESP flasher | ⏳ Open | E1. |
+| 11 | Notice noise (TerraScan group) | ⏳ Open | D1 measurement first. |
+| — | Oversized images in Storage | ⏳ Open | B5: resize at upload + one-off cleanup. |
+
 ## 1. The list (as given)
 
 | # | Task (Hillel's words, translated) |
