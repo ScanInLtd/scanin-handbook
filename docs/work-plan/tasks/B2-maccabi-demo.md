@@ -17,15 +17,15 @@ Hillel needs REP136 from the **site's start to 2026-10-15**, looking like real d
 ## Decisions (Hillel, 2026-10-20)
 - The demo must look like **real data**: no dashed segments, no "נתונים משוחזרים" footnote.
 - Base it on the recent backfills (same copy-&-follow method and noise character).
-- **Tagging, to confirm with Hillel before `--apply`:** tag generated docs for this demo site as `demo: true, source: 'demo'` **instead of** `isReplay: true`. Then the MA, the UI and reports treat them as normal data, with no functions change. Alerts don't fire on them: `checkThresholds` skips samples older than 48h, and every generated sample is ≤ 2026-10-15. Docs stay identifiable through `demo: true`.
+- **Tagging, to confirm with Hillel before `--apply`:** tag generated docs for this site as `isWorked: true, source: 'worked'` **instead of** `isReplay: true` (Hillel: not "demo"). Then the MA, the UI and reports treat them as normal data, with no functions change. Alerts don't fire on them: `checkThresholds` skips samples older than 48h, and every generated sample is ≤ 2026-10-15. Docs stay identifiable through `isWorked: true`.
 
 ## What to build (scanin-tool-data-replay)
 1. **`--trend=<axis>:<mm>`** in `gap-fill.js` (e.g. `--trend=HeightDisplacement:-3`).
    - The trend is **0 up to each prism's last untagged sample**, then linear (or gently eased, document which) to `<mm>` at `--end`, **relative to the baseline** the fill already uses.
    - The copy-&-follow shape + noise ride on top. Keep the derived fields consistent (TwoD / ThreeD / absolute coords) and 1-decimal precision, as the runbook requires.
    - The ±max-dev clamp must follow the trend: it applies to the deviation from baseline + trend, not from baseline.
-2. **`--tag=demo|replay`** (default `replay`, i.e. today's behavior). `demo` writes `demo: true, source: 'demo'` and no `isReplay`.
-   - On `--apply`, the fill must replace prior generated docs in the window **of either tag** (`isReplay` or `demo`), never untagged ones.
+2. **`--tag=worked|replay`** (default `replay`, i.e. today's behavior). `worked` writes `isWorked: true, source: 'worked'` and no `isReplay`.
+   - On `--apply`, the fill must replace prior generated docs in the window **of either tag** (`isReplay` or `isWorked`), never untagged ones.
 3. **`gap-verify.js`:**
    - accept the trend: smoothness checks on the detrended series;
    - report the total Height change from the first to the last 14 days (target ≈ −3 mm, ±0.5).
@@ -33,7 +33,7 @@ Hillel needs REP136 from the **site's start to 2026-10-15**, looking like real d
 ## Steps
 1. `gap-report.js e39vIWXDt7L0peeTW81q`: confirm the state above.
 2. Backup: `gap-backup.js --project=e39vIWXDt7L0peeTW81q --names=R11,R12,R13,R14,R15`.
-3. **Dry-run:** `gap-fill.js --project=e39vIWXDt7L0peeTW81q --names=R11,R12,R13,R14,R15 --start=<each prism's last untagged sample, i.e. the default> --end=2026-10-15T23:59 --trend=HeightDisplacement:-3 --tag=demo`. This regenerates the whole generated window (the existing `isReplay` docs after the untagged ones get replaced).
+3. **Dry-run:** `gap-fill.js --project=e39vIWXDt7L0peeTW81q --names=R11,R12,R13,R14,R15 --start=<each prism's last untagged sample, i.e. the default> --end=2026-10-15T23:59 --trend=HeightDisplacement:-3 --tag=worked`. This regenerates the whole generated window (the existing `isReplay` docs after the untagged ones get replaced).
 4. **Report the dry-run to Hillel and STOP:**
    - per prism: slots to write, docs to replace, simulated Height start/end, max day-to-day jump (detrended), E/N spans;
    - a small chart (HTML or PNG) of simulated Height for the 5 prisms.
