@@ -3,7 +3,7 @@
 **Date:** 2026-10-20
 **Repo:** scanin-svc-firebase-functions
 **Task:** [`docs/work-plan/tasks/A3-delete-baseline.md`](../../work-plan/tasks/A3-delete-baseline.md) §"Section 1"
-**Status:** ✅ implemented + emulator-tested **28/28**, committed **`f691fa2`** on `master` (not pushed). **NOT deployed — awaiting approval.**
+**Status:** ✅ implemented + emulator-tested **28/28**, committed **`f691fa2`**, pushed to `master`, **deployed to prod 2026-10-20 ~14:03 IST (12:03 UTC)** — both functions `ACTIVE` in `us-central1`.
 
 ---
 
@@ -45,11 +45,18 @@
 | C. refusals | nonexistent event / only event / earliest event → `failed-precondition`, missing sensor → `not-found`; refused deletes wrote nothing (no archive docs, events intact) |
 | D. restore | event doc **identical** to pre-delete (incl. `createdAt`); `baseline-events` holds ev1+ev2+ev3 ordered; archive kept marked `restoredAt`/`restoredBy`; `initial-value` back to latest; `smooth`/`eval`/`suspect` on every data-log doc **identical** to the pre-delete converged snapshot; dry-run `wouldChange = 0`; second restore → `failed-precondition`, never-deleted event → `not-found` |
 
-## 4. Deploy plan (on approval)
+## 4. Deploy — DONE (approved by Hillel, 2026-10-20)
 
 ```
 firebase deploy --only functions:deleteBaseline,functions:restoreBaseline
 ```
+
+Result: **2 deployed, 0 errored** (`deleteBaseline` ACTIVE 12:02:32 UTC, `restoreBaseline` ACTIVE 12:03:04 UTC; verified via `gcloud functions list --v2`). Both gen2, us-central1, 512 MiB / 300 s, `run.invoker=allUsers` (standard callable setup, auth enforced in-code).
+
+Two deploy-environment hiccups, both resolved — worth knowing for the next agent:
+
+1. **firebase CLI had no scanin.link account** — the shared configstore only holds `mirath.project.net@gmail.com` (other client). Workaround used: `firebase … --token "$(CLOUDSDK_CONFIG=~/.config/gcloud-scanin gcloud auth application-default print-access-token)"` — the ADC access token is accepted as a bearer token and identifies as scanin.link. If a browser login is ever needed, it's `firebase login:add scanin.link@gmail.com` (interactive — user must run it; DEPLOY.sh already prompts for this).
+2. **`cloudbilling.googleapis.com` was DISABLED in `dataloggerdev`** — firebase-tools calls `billingInfo` before creating gen2 functions and died on a 403. Fixed once with `gcloud services enable cloudbilling.googleapis.com --project dataloggerdev`. Permanent; future deploys unaffected.
 
 Two new callables; **no existing function changes** (index.ts only adds exports — the other functions' codepaths are untouched). No new Firestore indexes needed (`baseline-events`/`baseline-events-deleted` are single-field `time` queries). `baseline-events-deleted` is a new subcollection — no rules change needed: the deployed rules (web-platform file) match `work-sensors/{id}/{subcollection}/{docId}` with a wildcard, so it inherits the same project-access rule as `baseline-events`, and the functions use the Admin SDK (rules bypassed) regardless.
 
@@ -61,3 +68,13 @@ Two new callables; **no existing function changes** (index.ts only adds exports 
 - UI should pre-disable delete on the earliest event (first by `time`) — the server refuses it anyway with `failed-precondition` and a clear message.
 - `restoreBaseline` returns the same shape (`restored` instead of `deleted`) — the undo toast can reuse the result's `recompute.written` for "‹n› נקודות חושבו מחדש".
 - `recompute` in the result is `RecomputeStats | { error }` — check `.error` before reading stats.
+
+---
+
+## Handbook review (2026-10-20)
+
+- **Approved for deploy** as planned: `firebase deploy --only functions:deleteBaseline,functions:restoreBaseline` (push `f691fa2` first; it's local only).
+- Code read: matches the spec. Refusals happen before any write; archive + delete in one batch; resync identical to `setBaseline` (re-mirror, status / alert_state reset, recompute from the event time); recompute errors reported, never rolled back. `index.ts` only adds the two exports.
+- **The restore deviation is accepted:** copy back + keep the archive marked `restoredAt` gives a better audit trail.
+- **Minor, optional:** `deleteBaselineCore` trusts `deletedEvent.time` to be a number. Events without a numeric `time` are already ignored by `recomputeSmoothing`; a guard (`failed-precondition`) would make the error clearer if such a doc ever exists.
+- After deploy: one round-trip on a test sensor (`בדיקות משרד`) via the UI preview, then note the result here.
