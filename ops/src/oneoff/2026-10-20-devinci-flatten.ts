@@ -37,7 +37,8 @@ run(async () => {
   const sensors = (await projectSensors(PROJECT, "prism")).filter((s) => s.data.active !== false);
   console.log(`\n● ${sensors.length} active prisms — whole history\n`);
 
-  const plans: any[] = [];
+  type Pt = { t: number; v: Record<string, number> };
+  const loaded: { s: (typeof sensors)[number]; evSnap: FirebaseFirestore.QuerySnapshot; pts: Pt[] }[] = [];
   for (const s of sensors) {
     const evSnap = await db.collection(`work-sensors/${s.id}/baseline-events`).get();
     const snap = await db.collection(`work-sensors/${s.id}/data-log`).orderBy("time").get();
@@ -46,7 +47,55 @@ run(async () => {
       .map((x) => ({ t: x.time as number, v: Object.fromEntries(AXES.map((a) => [a, parseFloat(x[a])])) as Record<string, number> }))
       .filter((p) => AXES.some((a) => Number.isFinite(p.v[a])));
     if (pts.length < 2) { console.log(`  ${String(s.label).padEnd(7)} skipped (${pts.length} samples)`); continue; }
+    loaded.push({ s, evSnap, pts });
+  }
 
+  // pass 1 (per prism, no station info) → station moments = times where ≥ 5 prisms stepped within 12 h
+  const allTimes: number[] = [];
+  for (const L of loaded) solve(L.pts, []).forEach((sh) => allTimes.push(L.pts[sh.idx].t));
+  allTimes.sort((a, b) => a - b);
+  const stationTimes: number[] = [];
+  for (let i = 0; i < allTimes.length;) {
+    let j = i; while (j + 1 < allTimes.length && allTimes[j + 1] - allTimes[i] <= 12 * 3600e3) j++;
+    if (j - i + 1 >= 5) stationTimes.push(median(allTimes.slice(i, j + 1)));
+    i = j + 1;
+  }
+  console.log(`station-wide moments (≥5 prisms): ${stationTimes.map((t) => new Date(t).toISOString().slice(0, 16)).join(", ")}\n`);
+
+  const plans: any[] = [];
+  for (const { s, evSnap, pts } of loaded) {
+    const { shifts, init0, findSteps, offsets } = solveFull(pts, stationTimes);
+    const off = offsets();
+    const left = findSteps(off).length;
+    // events: start + one per sample index where the zero changes
+    const events: { time: number; initial: Record<string, number>; note: string }[] = [
+      { time: pts[0].t, initial: Object.fromEntries(Object.entries(off[0]).map(([a, v]) => [a, r1(v)])), note: "flatten: start of data (zero)" },
+    ];
+    void init0;
+    const idxs = [...new Set(shifts.map((x) => x.idx))].sort((a, b) => a - b);
+    for (const i of idxs) {
+      const d = Object.fromEntries(AXES.filter((a) => Math.abs((off[i][a] ?? 0) - (off[i - 1][a] ?? 0)) > 0.05).map((a) => [SHORT[a], r1((off[i][a] ?? 0) - (off[i - 1][a] ?? 0))]));
+      if (!Object.keys(d).length) continue;
+      events.push({ time: pts[i].t, initial: Object.fromEntries(Object.entries(off[i]).map(([a, v]) => [a, r1(v)])), note: `flatten: step ${JSON.stringify(d)}` });
+    }
+    const at = (t: number) => { let f = events[0]; for (const e of events) if (e.time <= t) f = e; return f.initial; };
+    if (args.dump === String(s.label)) {
+      const byDay = new Map<string, Record<string, number[]>>();
+      pts.forEach((p, i) => { const k = new Date(p.t).toISOString().slice(0, 10); const m = byDay.get(k) ?? {}; for (const a of AXES) (m[a] ??= []).push(p.v[a] - (off[i][a] ?? 0)); byDay.set(k, m); });
+      for (const [k, m] of byDay) console.log(`    ${k} n=${m[AXES[0]].length} ${AXES.map((a) => `${SHORT[a]} ${r1(median(m[a]))}`).join("  ")}`);
+      events.forEach((e) => console.log(`    event ${new Date(e.time).toISOString().slice(0, 16)} ${e.note}`));
+    }
+    const lastVals = pts.slice(-K);
+    const now = Object.fromEntries(AXES.map((a) => [SHORT[a], r1(median(lastVals.map((p) => p.v[a] - (at(p.t)[a] ?? 0)).filter(Number.isFinite)))]));
+    plans.push({ sensorId: s.id, name: String(s.label), from: pts[0].t, samples: pts.length, oldEvents: evSnap.docs.map((d) => ({ id: d.id, data: enc(d.data()) })), events, left, now,
+      sensorFields: { "initial-value": enc(s.data["initial-value"] ?? null), status: enc(s.data.status ?? null), alert_state: enc(s.data.alert_state ?? null) } });
+    console.log(`  ${String(s.label).padEnd(7)} from ${new Date(pts[0].t).toISOString().slice(0, 10)} · ${String(pts.length).padStart(4)} samples · old events ${evSnap.size} → new ${events.length} · now X/Y/Z ${now.X}/${now.Y}/${now.Z}${left ? ` · ⚠ ${left} step(s) left` : ""}`);
+  }
+  return finish(plans);
+
+  function solve(pts: Pt[], station: number[]) { return solveFull(pts, station).shifts; }
+
+  function solveFull(pts: Pt[], station: number[]) {
     // zero at the start
     const head = pts.slice(0, Math.min(K, pts.length));
     const init0: Record<string, number> = {};
@@ -81,45 +130,45 @@ run(async () => {
       }
       return found;
     };
-    // fix the biggest remaining step, repeat until none (cap 60)
+    // robust per-axis shift at idx (median of K after − median of K before), no consistency requirement
+    const shiftAt = (idx: number, off: Record<string, number>[], minAbs: number) => {
+      const s: Record<string, number> = {};
+      if (idx < 3 || idx > pts.length - 3) return s;
+      for (const a of AXES) {
+        const pv: number[] = [], nv: number[] = [];
+        for (let j = Math.max(0, idx - K); j < idx; j++) { const v = pts[j].v[a] - (off[j][a] ?? 0); if (Number.isFinite(v)) pv.push(v); }
+        for (let j = idx; j < Math.min(pts.length, idx + K); j++) { const v = pts[j].v[a] - (off[j][a] ?? 0); if (Number.isFinite(v)) nv.push(v); }
+        if (pv.length < 3 || nv.length < 3) continue;
+        const d = median(nv) - median(pv);
+        if (Math.abs(d) >= minAbs) s[a] = d;
+      }
+      return s;
+    };
+    // fix the biggest remaining step — on ALL axes (a jump detected on one axis is ironed on X, Y and Z) — until none (cap 60)
     for (let iter = 0; iter < 60; iter++) {
       const st = findSteps(offsets());
       if (!st.length) break;
       const big = st.reduce((p, q) => (q.mag > p.mag ? q : p));
-      shifts.push({ idx: big.idx, s: big.s });
+      shifts.push({ idx: big.idx, s: { ...shiftAt(big.idx, offsets(), 1), ...big.s } });
     }
-    const off = offsets();
-    const left = findSteps(off).length;
-    // events: start + one per sample index where the zero changes
-    const events: { time: number; initial: Record<string, number>; note: string }[] = [
-      { time: pts[0].t, initial: Object.fromEntries(Object.entries(off[0]).map(([a, v]) => [a, r1(v)])), note: "flatten: start of data (zero)" },
-    ];
-    const idxs = [...new Set(shifts.map((s) => s.idx))].sort((a, b) => a - b);
-    for (const i of idxs) {
-      const d = Object.fromEntries(AXES.filter((a) => Math.abs((off[i][a] ?? 0) - (off[i - 1][a] ?? 0)) > 0.05).map((a) => [SHORT[a], r1((off[i][a] ?? 0) - (off[i - 1][a] ?? 0))]));
-      if (!Object.keys(d).length) continue;
-      events.push({ time: pts[i].t, initial: Object.fromEntries(Object.entries(off[i]).map(([a, v]) => [a, r1(v)])), note: `flatten: step ${JSON.stringify(d)}` });
-    }
-    const at = (t: number) => { let f = events[0]; for (const e of events) if (e.time <= t) f = e; return f.initial; };
-    if (args.dump === String(s.label)) {
-      const byDay = new Map<string, Record<string, number[]>>();
-      pts.forEach((p, i) => { const k = new Date(p.t).toISOString().slice(0, 10); const m = byDay.get(k) ?? {}; for (const a of AXES) (m[a] ??= []).push(p.v[a] - (off[i][a] ?? 0)); byDay.set(k, m); });
-      for (const [k, m] of byDay) console.log(`    ${k} n=${m[AXES[0]].length} ${AXES.map((a) => `${SHORT[a]} ${r1(median(m[a]))}`).join("  ")}`);
-      events.forEach((e) => console.log(`    event ${new Date(e.time).toISOString().slice(0, 16)} ${e.note}`));
-      for (let i = K; i <= pts.length - K; i++) {
-        const a = "HeightDisplacement";
-        const pv = pts.slice(i - K, i).map((p, j) => p.v[a] - (off[i - K + j][a] ?? 0)), nv = pts.slice(i, i + K).map((p, j) => p.v[a] - (off[i + j][a] ?? 0));
-        const d = median(nv) - median(pv);
-        if (Math.abs(d) >= 3) console.log(`    Z cand ${new Date(pts[i].t).toISOString().slice(0, 16)} d=${r1(d)} spreadPrev=${r1(Math.max(...pv) - Math.min(...pv))} spreadNext=${r1(Math.max(...nv) - Math.min(...nv))} nv=${nv.map(r1).join(",")}`);
+    // station-wide moments: iron this prism there too (lower threshold), if it has data on both sides
+    for (const t of station) {
+      let idx = pts.findIndex((p) => p.t >= t - 6 * 3600e3);
+      if (idx < 0) continue;
+      // the strongest index within ±12 h of the station moment
+      let best = -1, bestMag = 0, bestS: Record<string, number> = {};
+      const off = offsets();
+      for (let i = idx; i < pts.length && pts[i].t <= t + 12 * 3600e3; i++) {
+        const s = shiftAt(i, off, 1.5);
+        const mag = Math.max(0, ...Object.values(s).map(Math.abs));
+        if (mag > bestMag) { best = i; bestMag = mag; bestS = s; }
       }
+      if (best > 0) shifts.push({ idx: best, s: bestS });
     }
-    const lastVals = pts.slice(-K);
-    const now = Object.fromEntries(AXES.map((a) => [SHORT[a], r1(median(lastVals.map((p) => p.v[a] - (at(p.t)[a] ?? 0)).filter(Number.isFinite)))]));
-    plans.push({ sensorId: s.id, name: String(s.label), from: pts[0].t, samples: pts.length, oldEvents: evSnap.docs.map((d) => ({ id: d.id, data: enc(d.data()) })), events, left, now,
-      sensorFields: { "initial-value": enc(s.data["initial-value"] ?? null), status: enc(s.data.status ?? null), alert_state: enc(s.data.alert_state ?? null) } });
-    console.log(`  ${String(s.label).padEnd(7)} from ${new Date(pts[0].t).toISOString().slice(0, 10)} · ${String(pts.length).padStart(4)} samples · old events ${evSnap.size} → new ${events.length} · now X/Y/Z ${now.X}/${now.Y}/${now.Z}${left ? ` · ⚠ ${left} step(s) left` : ""}`);
+    return { shifts, init0, findSteps, offsets };
   }
 
+  async function finish(plans: any[]) {
   const total = plans.reduce((n, p) => n + p.events.length, 0), archived = plans.reduce((n, p) => n + p.oldEvents.length, 0);
   console.log(`\n${plans.length} prisms · ${archived} old events → archive · ${total} new events · ${plans.filter((p) => !p.left).length}/${plans.length} with no step left`);
   if (!(await confirmApply(args, `flatten ${plans.length} DeVinci prisms (${archived} events archived, ${total} new)`))) return;
@@ -147,4 +196,5 @@ run(async () => {
   }
   await w.flush();
   console.log(`✅ ${w.committed} writes. Next — MA over the whole history:\n   (functions build dir) node scripts/recompute-smoothing.js --project=${PROJECT} --days=all --apply`);
+  }
 });
