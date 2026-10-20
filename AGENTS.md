@@ -193,7 +193,7 @@ This repo is the home base for operating the whole system.
 5. **Secrets:** `.env`, `serviceAccountKey.json`, `service-account.json`, and `~/.firebase-keys` exist locally and are gitignored. Never print, copy, or commit them.
 6. **Node versions:** web-platform builds on Node 12 and deploys on Node 20. Functions use Node 20. Use `nvm`.
 7. **Tests are sparse.** Most repos have no automated tests. Verify with builds (`ng build`, `npm run build`/`tsc`), the emulator, or dry-run scripts.
-8. **Inbox (cross-repo handoff).** To hand work, a question or feedback to another repo (or to the user), write a new file `../scanin-handbook/inbox/YYYYMMDD-HHMM-<slug>.md` using the frontmatter in `inbox/_template.md` (`title`, `from`, `to`, `kind`, `status: open`) and a Markdown body. Never edit or delete existing inbox files. The user routes messages to conversations from Mission Control; finished ones move to `inbox/done/`.
+8. **Inbox (cross-repo handoff).** To hand work, a question or feedback to another repo (or to the user), write a new file `../scanin-handbook/inbox/YYYYMMDD-HHMM-<slug>.md` using the frontmatter in `inbox/_template.md` (`title`, `from`, `to`, `kind`, `status: open`) and a Markdown body. Never edit or delete existing inbox files. The user routes messages to conversations from Mission Control, which tracks open/sent/done in the git-ignored `inbox/.state.json` (message files are never changed).
 
 ## 8. Google identity on this Mac (several clients side by side)
 
