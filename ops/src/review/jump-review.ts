@@ -105,7 +105,11 @@ main{max-width:860px;margin:14px auto;padding:0 12px}
 .note{background:#fff8c5;border-radius:8px;padding:6px 10px;margin:8px 0;display:inline-block}
 .jumps{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0} .jumps span{background:#f0f2f5;border-radius:6px;padding:2px 8px;direction:ltr}
 .chart{margin:6px 0 2px} .chart h3{font-size:13px;margin:6px 0 2px;color:#57606a;font-weight:600}
-svg{width:100%;height:120px;background:#fbfbfc;border-radius:8px;direction:ltr}
+svg{width:100%;height:120px;background:#fbfbfc;border-radius:8px;direction:ltr;display:block}
+.pair{display:flex;gap:8px;direction:ltr} .pair .main{flex:3.3} .pair .mini{flex:1;position:relative}
+.pair .mini svg{background:#f3f4f6} .pair .mini span{position:absolute;bottom:3px;left:6px;font-size:10px;color:#57606a;direction:ltr}
+.scale{display:flex;gap:6px;align-items:center;font-size:13px;color:#57606a;margin:6px 0}
+.scale button{border:1px solid #d0d7de;background:#fff;border-radius:6px;padding:2px 8px;cursor:pointer}.scale button.on{background:#1f2328;color:#fff}
 .btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
 .btns button{font-size:17px;padding:14px 8px;border-radius:10px;border:2px solid transparent;cursor:pointer;font-weight:700}
 .b-iron{background:#e8f1ff;color:#0b4fb3} .b-real{background:#ffeceb;color:#b42318} .b-unsure{background:#f0f2f5;color:#57606a}
@@ -127,15 +131,27 @@ let cur=Math.max(0,D.items.findIndex(it=>!S[it.idx]));if(cur<0)cur=D.items.lengt
 const LBL={iron:'לגהץ – קפיצה מדומה',real:'תזוזה אמיתית – להשאיר',unsure:'לא בטוח'};
 const fmt=t=>new Date(t).toLocaleDateString('he-IL',{timeZone:'Asia/Jerusalem',day:'2-digit',month:'2-digit',year:'2-digit'});
 function save(){localStorage.setItem(D.key,JSON.stringify(S))}
-function chart(it,ax){const pts=it.series[ax.key]||[];if(!pts.length)return '';
- const W=800,H=120,P=6;const vs=pts.map(p=>p[1]);let lo=Math.min(...vs),hi=Math.max(...vs);if(hi-lo<1){const m=(hi+lo)/2;lo=m-0.5;hi=m+0.5}
- const x=t=>P+(t-it.from)/(it.to-it.from)*(W-2*P),y=v=>H-P-(v-lo)/(hi-lo)*(H-2*P);
- const line=pts.map(p=>x(p[0]).toFixed(1)+','+y(p[1]).toFixed(1)).join(' ');
+let SCALE=Number(localStorage.getItem('jump-review:scale')||15);
+function setScale(s){SCALE=s;localStorage.setItem('jump-review:scale',s);render()}
+function median(a){const s=[...a].sort((p,q)=>p-q);const m=s.length>>1;return s.length?(s.length%2?s[m]:(s[m-1]+s[m])/2):0}
+function svg(it,pts,lo,hi,W,H,clip){const P=4;
+ const x=t=>P+(t-it.from)/(it.to-it.from)*(W-2*P),yy=v=>H-P-(v-lo)/(hi-lo)*(H-2*P);
+ const cl=v=>Math.max(lo,Math.min(hi,v));
+ const line=pts.map(p=>x(p[0]).toFixed(1)+','+yy(clip?cl(p[1]):p[1]).toFixed(1)).join(' ');
+ const out=clip?pts.filter(p=>p[1]<lo||p[1]>hi).map(p=>'<circle cx="'+x(p[0]).toFixed(1)+'" cy="'+yy(cl(p[1])).toFixed(1)+'" r="2.6" fill="#d1242f"/>').join(''):'';
+ const zero=clip?'<line x1="0" x2="'+W+'" y1="'+yy((lo+hi)/2)+'" y2="'+yy((lo+hi)/2)+'" stroke="#d0d7de"/>':'';
  const ev=it.events.map(e=>'<line x1="'+x(e.time)+'" x2="'+x(e.time)+'" y1="0" y2="'+H+'" stroke="#8250df" stroke-dasharray="4 3"/>').join('');
  const jx=x(it.time);
- return '<div class="chart"><h3>'+ax.he+' (מ״מ) · '+lo.toFixed(1)+' … '+hi.toFixed(1)+'</h3><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
- '<rect x="'+(jx-2)+'" y="0" width="4" height="'+H+'" fill="#f59f00" opacity=".55"/>'+ev+
- '<polyline fill="none" stroke="#1f6feb" stroke-width="1.6" points="'+line+'"/></svg></div>'}
+ return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+zero+'<rect x="'+(jx-2)+'" y="0" width="4" height="'+H+'" fill="#f59f00" opacity=".55"/>'+ev+
+ '<polyline fill="none" stroke="#1f6feb" stroke-width="1.6" points="'+line+'"/>'+out+'</svg>'}
+function chart(it,ax){const pts=it.series[ax.key]||[];if(!pts.length)return '';
+ const pre=pts.filter(p=>p[0]<it.time&&p[0]>=it.time-3*864e5).map(p=>p[1]);
+ const c=pre.length?median(pre):median(pts.filter(p=>p[0]<it.time).map(p=>p[1]).concat(pts.length?[]:[0]))||pts[0][1];
+ const vs=pts.map(p=>p[1]);let lo=Math.min(...vs),hi=Math.max(...vs);if(hi-lo<1){const m=(hi+lo)/2;lo=m-0.5;hi=m+0.5}
+ const nOut=pts.filter(p=>Math.abs(p[1]-c)>SCALE).length;
+ return '<div class="chart"><h3>'+ax.he+' (מ״מ) · סקאלה קבועה ±'+SCALE+' סביב '+c.toFixed(1)+(nOut?' · <b style="color:#d1242f">'+nOut+' נקודות מחוץ לסקאלה</b>':'')+'</h3>'+
+ '<div class="pair"><div class="main">'+svg(it,pts,c-SCALE,c+SCALE,800,120,true)+'</div>'+
+ '<div class="mini" title="תמונה מרחוק (סקאלה אוטומטית)">'+svg(it,pts,lo,hi,240,120,false)+'<span>'+lo.toFixed(0)+' … '+hi.toFixed(0)+'</span></div></div></div>'}
 function render(){const n=D.items.length,done=D.items.filter(it=>S[it.idx]).length;
  document.getElementById('count').textContent=done+' / '+n;document.getElementById('bar').style.width=(done/n*100)+'%';
  const c=document.getElementById('card');
@@ -144,6 +160,7 @@ function render(){const n=D.items.length,done=D.items.filter(it=>S[it.idx]).leng
  const jumps=D.axes.filter(ax=>it.jumps[ax.key]!==undefined).map(ax=>'<span>'+ax.he+': '+(it.jumps[ax.key]>0?'+':'')+it.jumps[ax.key]+'</span>').join('');
  c.innerHTML='<div class="top"><div><div class="name">'+it.name+'</div><div class="proj">'+it.project+'</div></div><div class="when">קפיצה ב-'+fmt(it.time)+'</div></div>'+
  (it.note?'<div class="note">'+it.note+'</div>':'')+'<div class="jumps">'+jumps+'</div>'+
+ '<div class="scale">סקאלה: '+[5,15,50].map(s=>'<button class="'+(s===SCALE?'on':'')+'" onclick="setScale('+s+')">±'+s+' מ״מ</button>').join('')+'<span>· אדום = מחוץ לסקאלה · מימין: תמונה מרחוק</span></div>'+
  D.axes.map(ax=>chart(it,ax)).join('')+
  '<div class="hint">כתום = מועד הקפיצה · סגול מקווקו = בייסליין קיים · '+fmt(it.from)+' – '+fmt(it.to)+'</div>'+
  '<div class="btns"><button class="b-iron '+(a.d==='iron'?'sel':'')+'" onclick="pick(\\'iron\\')">לגהץ<br><small>קפיצה מדומה</small></button>'+
