@@ -189,7 +189,8 @@ run(async () => {
       await w.delete(ref);
     }
     for (const e of p.events) {
-      await w.set(sRef.collection("baseline-events").doc(), { time: e.time, reason: "rebaseline", initial: e.initial, note: e.note, by: BY, createdAt: FieldValue.serverTimestamp() });
+      // step events keep the series continuous → continuity:true (the MA window spans them); the start-of-data zero is a normal reset
+      await w.set(sRef.collection("baseline-events").doc(), { time: e.time, reason: "rebaseline", initial: e.initial, note: e.note, by: BY, createdAt: FieldValue.serverTimestamp(), ...(e.note.startsWith("flatten: step") ? { continuity: true } : {}) });
     }
     const statusAxes = Object.fromEntries(Object.keys({ ...((p.sensorFields.status as any)?.axes ?? {}) }).map((a) => [a, "ok"]));
     await w.update(sRef, { "initial-value": p.events[p.events.length - 1].initial, "status.axes": statusAxes, "alert_state.axes": {} });
