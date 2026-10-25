@@ -1,0 +1,196 @@
+{
+  "title": "קפיצות לגיהוץ – JCTS_SAVYON_LIVING_A-02'",
+  "source": "step-inventory ≥200 mm since 2025-01-01",
+  "items": [
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3F",
+      "time": "2025-02-26T11:10",
+      "note": "X +383.1 · Y -230.7 מ״מ · חוזר ב-09-22"
+    },
+    {
+      "sensorId": "sen-prism-prism2",
+      "time": "2025-02-26T11:10",
+      "note": "X +431.7 · Y -266.6 מ״מ · חוזר ב-09-22"
+    },
+    {
+      "sensorId": "sen-prism-prism3",
+      "time": "2025-02-26T11:11",
+      "note": "X +432.0 · Y -264.9 מ״מ · חוזר ב-09-22"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3A",
+      "time": "2025-02-26T11:11",
+      "note": "X +347.4 · Y -210.0 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3D",
+      "time": "2025-02-26T11:11",
+      "note": "X +434.1 · Y -263.0 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism8",
+      "time": "2025-02-26T11:11",
+      "note": "X +377.9 · Y -269.2 מ״מ · מסתיים בבייסליין rebaseline ב-08-20"
+    },
+    {
+      "sensorId": "sen-prism-prism1",
+      "time": "2025-02-26T11:11",
+      "note": "X +374.3 · Y -272.2 מ״מ · מסתיים בבייסליין rebaseline ב-08-20"
+    },
+    {
+      "sensorId": "sen-prism-prism4",
+      "time": "2025-02-26T11:12",
+      "note": "X +374.4 · Y -270.5 מ״מ · חוזר ב-09-22"
+    },
+    {
+      "sensorId": "sen-prism-prism7",
+      "time": "2025-02-26T11:12",
+      "note": "X +376.8 · Y -269.5 מ״מ · מסתיים בבייסליין ats-setup ב-03-02"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_5F",
+      "time": "2025-02-26T11:12",
+      "note": "X +260.6 · Y -241.6 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism",
+      "time": "2025-02-26T11:13",
+      "note": "X +285.5 · Y -281.9 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism9",
+      "time": "2025-02-26T11:13",
+      "note": "X +290.1 · Y -278.4 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_5D",
+      "time": "2025-02-26T11:13",
+      "note": "X +266.0 · Y -254.4 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_4F",
+      "time": "2025-02-26T12:36",
+      "note": "X +323.8 · Y -239.9 מ״מ · חוזר ב-09-22"
+    },
+    {
+      "sensorId": "sen-prism-prism5",
+      "time": "2025-02-26T14:03",
+      "note": "X +286.9 · Y -280.1 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3E",
+      "time": "2025-03-11T15:35",
+      "note": "X +423.1 · Y -280.3 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_5E",
+      "time": "2025-03-11T15:36",
+      "note": "X +248.9 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3F",
+      "time": "2026-05-24T07:08",
+      "note": "X +8872.2 · Z +2716.3 מ״מ · חוזר ב-07-29"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3F",
+      "time": "2026-07-29T13:18",
+      "note": "X -8872.8 · Z -2716.1 מ״מ · חוזר ב-08-10"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3F",
+      "time": "2026-08-10T07:26",
+      "note": "X +8872.6 · Z +2716.0 מ״מ · חוזר ב-08-21"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3F",
+      "time": "2026-08-26T10:40",
+      "note": "X -8865.5 · Z -2719.2 מ״מ · חוזר ב-08-26"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3F",
+      "time": "2026-08-27T03:04",
+      "note": "X +8873.3 · Z +2717.4 מ״מ · חוזר ב-09-06"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3F",
+      "time": "2026-09-08T12:07",
+      "note": "X -8528.2 · Z -2938.4 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism9",
+      "time": "2026-09-08T12:10",
+      "note": "X +949.5 · Y +562.0 · Z -238.7 מ״מ · חוזר ב-09-09"
+    },
+    {
+      "sensorId": "sen-prism-prism9",
+      "time": "2026-09-22T14:05",
+      "note": "X -949.9 · Y -563.0 · Z +239.5 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism2",
+      "time": "2026-10-12T13:03",
+      "note": "Y +871.9 · X +771.8 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3A",
+      "time": "2026-10-12T13:04",
+      "note": "X +1045.6 · Y +946.8 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3F",
+      "time": "2026-10-12T13:05",
+      "note": "Y +865.6 · X +691.5 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_3E",
+      "time": "2026-10-12T13:05",
+      "note": "X +1281.0 · Y +944.8 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism1",
+      "time": "2026-10-12T13:06",
+      "note": "X +730.3 · Y +715.7 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism4",
+      "time": "2026-10-12T13:06",
+      "note": "X +851.1 · Y +750.6 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism7",
+      "time": "2026-10-12T13:06",
+      "note": "Y +892.8 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism8",
+      "time": "2026-10-12T13:07",
+      "note": "X +1065.5 · Y +811.7 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_4E",
+      "time": "2026-10-12T13:07",
+      "note": "X +1253.2 · Y +829.1 · Z -367.7 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_4F",
+      "time": "2026-10-12T13:07",
+      "note": "Y +690.5 · X +685.5 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism9",
+      "time": "2026-10-12T13:08",
+      "note": "X +1203.6 · Y +737.3 · Z -388.2 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_5F",
+      "time": "2026-10-12T13:09",
+      "note": "X +678.3 · Y +520.7 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "sen-prism-prism_JTCS_H2_5E",
+      "time": "2026-10-12T13:09",
+      "note": "X +1280.2 מ״מ · לא חוזר (פתוח)"
+    }
+  ]
+}

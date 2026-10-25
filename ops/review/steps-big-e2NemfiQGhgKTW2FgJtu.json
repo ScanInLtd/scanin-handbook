@@ -1,0 +1,31 @@
+{
+  "title": "קפיצות לגיהוץ – JCTS_JAFFA_68_A-05",
+  "source": "step-inventory ≥200 mm since 2025-01-01",
+  "items": [
+    {
+      "sensorId": "AG6010IORg3UCFmN0r3A",
+      "time": "2026-02-09T07:07",
+      "note": "Z +1829.1 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "xmXaS7p7cjlRTkoRZhrs",
+      "time": "2026-02-09T07:07",
+      "note": "Z -1829.3 מ״מ · חוזר ב-04-15"
+    },
+    {
+      "sensorId": "xmXaS7p7cjlRTkoRZhrs",
+      "time": "2026-04-23T05:43",
+      "note": "Z +1832.5 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "goGPs88egjdkXvbsMrnp",
+      "time": "2026-10-12T13:12",
+      "note": "X +226.0 מ״מ · לא חוזר (פתוח)"
+    },
+    {
+      "sensorId": "p8lLBLV4G5UPqZWE2f95",
+      "time": "2026-10-12T13:12",
+      "note": "X +217.8 מ״מ · לא חוזר (פתוח)"
+    }
+  ]
+}
