@@ -5,6 +5,7 @@ Paths are relative to the parent `scanin/` folder. Before running anything that 
 
 | When | Runbook | Repo tooling |
 |---|---|---|
+| **Prism report has holes in the MA line / wrong level eras** (diagnose → recompute → ironing → report display) | `scanin-handbook/docs/ops/prism-ma-gaps-runbook.md` | `ops/src/analysis/ma-gaps.ts`, functions `scripts/recompute-smoothing.js`, `ops/src/oneoff/2026-10-25-iron-approved.ts` + `-iron-apply.js` |
 | Prism sensors have data gaps / need daily series rebuilt | `scanin-tool-data-replay/docs/prism-gap-fill-runbook.md` | `scripts/gap-report.js`, `gap-backup.js`, `gap-fill.js`, `gap-verify.js`, `audit-daily-docs.js` |
 | Re-run / backfill daily prism aggregates | `scanin-worker-prism-daily/BACKFILL_GUIDE.md`, `BACKFILL_STRATEGY.md`, `DEPLOYMENT.md` | orchestrator `/rerunRange` (see gap-fill runbook step 4) |
 | Recalibrate sensor values (photon-otac a/b, data-log `x`) | `scanin-maintenance/README.md` | `src/scripts/recalibrate-preview.ts` → `recalibrate-run.ts`, `update-photon-otac-calibration.ts` |
