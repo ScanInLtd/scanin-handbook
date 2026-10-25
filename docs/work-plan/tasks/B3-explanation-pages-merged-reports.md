@@ -55,16 +55,16 @@ showExplanationPages: true          // master toggle (default true when the list
 // overlayTemplate: null = use the library page's default; true/false = override per config
 ```
 
-**How uploaded pages enter the PDF.** The pages are spliced at the PDF level with `pdf-lib`, not through HTML:
-1. Load the uploaded pages before rendering and count them (`introCount`).
-2. Render the report as today, but start the `pageNumber` helper at `1 + introCount`. That's a new `pageNumberOffset` option passed to `renderReport`, so the numbers stay correct after the splice.
-3. After Puppeteer: `pdf-lib` builds `[cover page] + [intro pages] + [rest of report] + [closing pages]`.
-   - **Images:** embedded on an A4 page, scaled to fit and centered, re-encoded at ≤1600 px JPEG like B1's shrink.
-   - **PDFs:** each page is scaled to A4 if it's another size.
-4. **`overlayTemplate: true`:** draw the report's **header band (top) and footer band (bottom)** on the uploaded page, with logo, report name/number and page number.
-   - The bands are rendered **once per run** by Puppeteer from the existing `page-header` / `page-footer` partials. They go on a transparent A4 page, which `pdf-lib` embeds (`embedPage` + `drawPage`) over each uploaded page, with the page number filled in.
-   - The upload is **covered** (not shrunk) in those bands. The library UI tells the uploader to keep the top ~2 cm and bottom ~2.5 cm empty. A "fit between header and footer" mode is a possible later option.
+**How uploaded pages enter the PDF** (as built, `scripts/services/explanationPages.js`):
+1. `renderReport` loads the pages from `report-data.json`'s `config`, normalizes each upload to A4 PDF pages and counts them.
+   - **Images:** fitted and centered on one A4 page, ≤1600 px JPEG.
+   - **PDFs:** every page is scaled to fit A4.
+2. The HTML render emits **one placeholder page per uploaded page** (`templates/pages/explanation/`: the real header section, an empty body, the brand footer). They go right after the cover and after the last sensor page. Page numbers come out right on their own, with no offset logic.
+3. After Puppeteer, `pdf-lib` rebuilds the PDF and swaps each placeholder for its upload. Intro placeholders are pages 2…; closing placeholders are the last N pages.
+4. **`overlayTemplate: true`:** the placeholder's **top 2 cm (header, with its page number) and bottom 2.5 cm (brand footer)** are clipped (`embedPages` with bounding boxes) and drawn over the upload.
+   - The upload is **covered** in those bands, not shrunk, so uploaders should keep those margins empty. A "fit between header and footer" mode is a possible later option.
    - With `overlayTemplate: false`, the page is inserted as is: it counts in the numbering but shows no number.
+5. A missing or broken page is skipped with a warning. `localPath` refs (local testing) are honored only when `render-only.js` sets `REPORTS_ALLOW_LOCAL_PAGES=1`.
 
 **Size guard:** an uploaded PDF over 5 MB or an image over 20 MB is rejected at upload (UI). An uploaded PDF isn't recompressed, so it must arrive reasonably sized.
 
@@ -168,9 +168,9 @@ orchestrator (merged config due / Run now)
 | Phase | Repo | Scope | Done when |
 |---|---|---|---|
 | **0** | reports | Link fallback above ~25 MB (upload + 7-day signed URL + email variant); IAM grant + bucket lifecycle (approval) | REP142 rendered at full size (pre-B1 images, local test) produces a link email with a working link. **Code committed 2026-10-20** (`5b49b70` + lifecycle fix). Stubbed test passes. IAM grant + lifecycle **applied**. Waiting on the canary deploy test. Worker SA = `568942189829-compute@`. |
-| **1** | reports | `ReportPages` + `introPages`/`closingPages`: pdf-lib splice, image → A4, header/footer overlay, `pageNumberOffset`; `render-only.js` shows them | A test config renders with a PDF intro page (overlay on) and an image closing page (overlay off). Page numbers are correct |
+| **1** | reports | `ReportPages` + `introPages`/`closingPages`: placeholder pages + pdf-lib splice, image → A4, header/footer overlay; `render-only.js --intro/--closing` | A test config renders with a PDF intro page (overlay on) and an image closing page (overlay off). Page numbers are correct. **Done 2026-10-20** (`f556b5c`, `pdf-lib` 1.17.1): REP142 with 2 intro + 2 closing pages → 10 pages, numbering continuous, 2.9 → 3.1 MB, 15 s. |
 | **2** | web-platform | Page library upload UI + pickers in the report editor; Firestore + Storage rules | Hillel uploads a page in the UI and sees it in a "Run now" PDF |
-| **3** | reports | `merged` type: `ReportRuns`, `/render-part`, `/merge-run`, fan-out, resume, cancel, progress, merge + global page numbers; `render-only.js --merged <id>` for local runs | A 3-child merged report renders locally and on a canary revision; killing one part mid-run and resuming finishes it |
+| **3** | reports | `merged` type: `ReportRuns`, `/render-part`, `/merge-run`, fan-out, resume, cancel, progress, merge + global page numbers; `render-only.js --merged <id>` for local runs | A 3-child merged report renders locally and on a canary revision; killing one part mid-run and resuming finishes it. **Done + deployed 2026-10-20** (`2b27c43`).<br>• Worker `reports-worker-00114-piq` (**concurrency 1**, so each part/report gets its own 4 GiB instance); orchestrator `reports-orchestrator-00006-m4s` (**timeout 3600**, `PARTS_CONCURRENCY=3`). Rollback: worker `00112-vek`, orchestrator `00005-c62`.<br>• Results: local e2e 46 s; kill-and-resume redid only the failed part (27 s); canary container: 3 parts in 50 s + merge 14 s; production "Run now" 55 s, 18 pages, 7.3 MB.<br>• Global page numbers come from header bands rendered with the real `header-content` partial and drawn over each page. `merged.pdf` isn't stored separately: delivery uses the Phase 0 link path when it's large.<br>• Test data left for the joint test: `ReportConfig/B3-MERGED-TEST` (manual, no recipients), `ReportPages/b3-test-intro`, `ReportPages/b3-test-closing` (archived). |
 | **4** | web-platform | Merged editor + status display | Hillel builds a merged report in the UI end to end |
 
 Order: 0 → 1 → (2 ∥ 3) → 4. Phase 1 is useful on its own, for single reports.
