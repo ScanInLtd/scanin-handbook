@@ -7,7 +7,7 @@
  * Answers stay in the browser (localStorage) and are exported with one click (copy text + JSON).
  * No server, no login, no external fonts/libs: open the file anywhere, incl. a phone.
  *
- * Input JSON: { title, key, from, intro, items: [{ sensorId, context? }] }
+ * Input JSON: { title, key, from, intro, skipSingle?, items: [{ sensorId, context? }] }  (skipSingle: leave out prisms with one level)
  * Usage: npx tsx src/review/level-review.ts --input=review/level-decisions-2026-10-25.json [--out=review/level-review-2026-10-25.html]
  */
 import * as fs from "node:fs";
@@ -16,62 +16,14 @@ import { db } from "../lib/firebase";
 import { parseArgs, run, str } from "../lib/cli";
 import { projectName } from "../lib/sensors";
 import { DAY, median } from "../lib/signal";
+import { type Pt, clusterLevels, periods } from "../lib/levels";
 
 const AXES = [
   { key: "EastingDisplacement", he: "מזרח (X)" },
   { key: "NorthingDisplacement", he: "צפון (Y)" },
   { key: "HeightDisplacement", he: "גובה (Z)" },
 ] as const;
-const LEVEL_TH = 150; // mm: samples within this (max over axes) of a level's centre belong to it
 const COLORS = ["#2563eb", "#ea580c", "#16a34a", "#9333ea", "#0891b2"];
-
-type Pt = { t: number; v: number[]; suspect: boolean };
-
-function clusterLevels(pts: Pt[]) {
-  const levels: { c: number[]; n: number }[] = [];
-  const label: number[] = [];
-  for (const p of pts) {
-    let best = -1, bestD = Infinity;
-    levels.forEach((l, i) => {
-      const d = Math.max(...p.v.map((x, k) => (Number.isFinite(x) ? Math.abs(x - l.c[k]) : 0)));
-      if (d < bestD) { bestD = d; best = i; }
-    });
-    if (best >= 0 && bestD <= LEVEL_TH) {
-      const l = levels[best];
-      l.n++;
-      const w = 1 / Math.min(l.n, 50);
-      l.c = l.c.map((c, k) => (Number.isFinite(p.v[k]) ? c + (p.v[k] - c) * w : c));
-      label.push(best);
-    } else {
-      levels.push({ c: p.v.map((x) => (Number.isFinite(x) ? x : 0)), n: 1 });
-      label.push(levels.length - 1);
-    }
-  }
-  // small clusters → noise (-1); renumber the rest by first appearance
-  const minN = Math.max(5, Math.round(pts.length * 0.01));
-  const keep = levels.map((l) => l.n >= minN);
-  const order: number[] = [];
-  label.forEach((l) => { if (keep[l] && !order.includes(l)) order.push(l); });
-  return label.map((l) => (keep[l] ? order.indexOf(l) : -1));
-}
-
-function periods(pts: Pt[], lab: number[]) {
-  // run-length over the time-ordered labels (noise ignored); runs < 3 samples absorbed into neighbours
-  const runs: { level: number; from: number; to: number; n: number }[] = [];
-  pts.forEach((p, i) => {
-    if (lab[i] < 0) return;
-    const last = runs[runs.length - 1];
-    if (last && last.level === lab[i]) { last.to = p.t; last.n++; }
-    else runs.push({ level: lab[i], from: p.t, to: p.t, n: 1 });
-  });
-  const merged: typeof runs = [];
-  for (const r of runs) {
-    const last = merged[merged.length - 1];
-    if (r.n < 3 && last) { last.to = r.to; continue; }
-    if (last && last.level === r.level) { last.to = r.to; last.n += r.n; } else merged.push({ ...r });
-  }
-  return merged;
-}
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
 const fmtD = (t: number) => new Date(t).toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "2-digit", timeZone: "Asia/Jerusalem" });
@@ -153,6 +105,7 @@ run(async () => {
       const med = AXES.map((_, k) => median(mine.map((p) => p.v[k]).filter(Number.isFinite)));
       return { l, n: mine.length, med, nearZero: med.every((m) => !Number.isFinite(m) || Math.abs(m) < 60), runs: runs.filter((r) => r.level === l) };
     });
+    if (input.skipSingle && nLevels < 2) { console.log(`${s.name ?? it.sensorId}: one level only (spikes, no level to choose) — skipped`); continue; }
     const current = runs.length ? runs[runs.length - 1].level : -1;
     const tMin = pts[0]?.t ?? from, tMax = pts[pts.length - 1]?.t ?? Date.now();
     const name = s.name ?? it.sensorId;

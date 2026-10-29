@@ -58,3 +58,26 @@ So after today, only NAVON has a large never-computed share, and it's blocked on
 ## Open for Nathan
 1. JAFFA_68 "1", "2", NAVON "9", "18", SAVYON LIVING "3": which level is the right one (two prisms in one sensor?). The approved ironing would make today's data wrong.
 2. NAVON giant steps (65 steps ≥ 200 mm on 18 prisms since 2025, `ops/review/steps-big-ge8lO1KCbxU4RnpgL7xs.json`): review before the NAVON recompute.
+
+## Level decisions applied (2026-10-25, afternoon)
+
+Nathan's answers to `ops/review/level-review-2026-10-25.html`: יפו 68 "1" A, "2" A, נבון "9" A, "18" B, סביון מגורים "3" C.
+Applied with `ops/src/oneoff/2026-10-25-level-decisions.ts` (user ran `--apply`, 45 writes; backups
+`ops/out/devinci-iron-backup-2026-10-25T14-55-12-590Z.json`, `…T14-55-35-175Z.json`). Each sensor's baseline
+events were replaced by one clean set (old ones in `baseline-events-deleted`): every stretch on another level is
+aligned to the chosen one (`reason: iron`, continuity); יפו 1, יפו 2, נבון 18 got a new zero on the chosen level
+(it sat 1.8–2.5 m from the old zero); נבון 18's 02.07.2026 ats-setup is kept. Raw data untouched. Then a
+full-history MA recompute for the 5 sensors (7,634 writes, no alert evaluation).
+
+| Prism | MA, last 12 months | MA beyond ±100 mm | Today's MA E/N/H (mm) |
+|---|---|---|---|
+| יפו 68 "1" | 96 % | 0 | −0.3 / 1.4 / 0.7 |
+| יפו 68 "2" | 95 % | 0 | −1.0 / 1.5 / 2.7 |
+| נבון "9" | 85 % | 0 | 1.4 / 1.7 / −0.7 |
+| נבון "18" | 88 % | 0 | 1.5 / −0.7 / −0.5 |
+| סביון מגורים "3" | 90 % | 0 | 11.1 / −0.9 / −1.7 |
+
+Left (not on the chosen level, unstable inside, steps remain): נבון "18" Nov 2024–Feb 2025 (240 mm); סביון "3"
+Dec 2024–Feb 2025 (200 mm) and 27.08–08.09.2026 (437 mm). Option: mark them suspect (another write).
+Note: נבון "9" was processed by both runs; the second rewrote the same initials, and its 09.08.2026 event lost the
+`continuity` flag. That has no effect, since functions treat `reason: iron` as continuity.

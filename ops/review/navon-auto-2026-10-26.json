@@ -1,0 +1,29 @@
+{
+ "items": [
+  {
+   "sensorId": "sen-prism-PRISM_JTCS_H0_8A",
+   "name": "NAVON 15",
+   "keepAt": "2026-06-01T00:00:00Z"
+  },
+  {
+   "sensorId": "sen-prism-PRISM_JTCS_H0_8B",
+   "name": "NAVON 16",
+   "keepAt": "2026-06-01T00:00:00Z"
+  },
+  {
+   "sensorId": "sen-prism-PRISM_JTCS_H0_10A",
+   "name": "NAVON 19",
+   "keepAt": "2026-06-01T00:00:00Z"
+  },
+  {
+   "sensorId": "sen-prism-PRISM_JTCS_H0_11A",
+   "name": "NAVON 21",
+   "keepAt": "2026-06-01T00:00:00Z"
+  },
+  {
+   "sensorId": "sen-prism-PRISM_JTCS_H0_11B",
+   "name": "NAVON 22",
+   "keepAt": "2026-06-01T00:00:00Z"
+  }
+ ]
+}
