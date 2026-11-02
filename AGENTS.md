@@ -79,7 +79,7 @@ Reference repos with relative paths (`../scanin-svc-mqtt-bridge/...`). Each repo
 - **No tests** (`npm test` is a stub).
 
 ### 2.3 Firebase Functions — `scanin-svc-firebase-functions`
-- **Stack:** TypeScript, Node 20, a mix of `firebase-functions` v1 and v2 APIs. Uses SendGrid, a WhatsApp sender (`alerts/whatsappService.ts`), and Puppeteer/chartjs for vibration reports.
+- **Stack:** TypeScript, Node 22, a mix of `firebase-functions` v1 and v2 APIs. Uses SendGrid, a WhatsApp sender (`alerts/whatsappService.ts`), and Puppeteer/chartjs for vibration reports.
 - **Exports** (`src/index.ts`):
 
 | Function | Trigger | Purpose |
@@ -191,7 +191,7 @@ This repo is the home base for operating the whole system.
 3. **Shared types are duplicated.** `shared-status-types` exists in web-platform, functions, and reports. A schema change means updating all three, plus any bridge writers.
 4. **Cross-repo tasks:** write the spec in `docs/monitoring/tasks/` (or a new `docs/<topic>/`), implement in each repo, then record the outcome in `feedbacks/` and the progress tracker.
 5. **Secrets:** `.env`, `serviceAccountKey.json`, `service-account.json`, and `~/.firebase-keys` exist locally and are gitignored. Never print, copy, or commit them.
-6. **Node versions:** web-platform builds on Node 12 and deploys on Node 20. Functions use Node 20. Use `nvm`.
+6. **Node versions:** web-platform builds on Node 12 and deploys on Node 20. Functions use Node 22 (nodejs20 runtime decommissioned 2026-10-30). Use `nvm`.
 7. **Tests are sparse.** Most repos have no automated tests. Verify with builds (`ng build`, `npm run build`/`tsc`), the emulator, or dry-run scripts.
 8. **Inbox (cross-repo handoff).** To hand work, a question or feedback to another repo (or to the user), write a new file `../scanin-handbook/inbox/YYYYMMDD-HHMM-<slug>.md` using the frontmatter in `inbox/_template.md` (`title`, `from`, `to`, `kind`, `status: open`) and a Markdown body. Never edit or delete existing inbox files. The user routes messages to conversations from Mission Control, which tracks open/sent/done in the git-ignored `inbox/.state.json` (message files are never changed).
 
