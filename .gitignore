@@ -10,3 +10,6 @@ firebase-debug*.log
 docs/signal-and-alerts/local-art/
 
 .DS_Store
+
+# Devin session metadata
+.mission/

@@ -179,6 +179,8 @@ This repo is the home base for operating the whole system.
   - `src/queries/`: read-only investigations.
   - `src/oneoff/YYYY-MM-DD-<what>.ts`: committed records of maintenance runs. Start from `_template-write.ts`.
   - `out/`: CSV exports (gitignored).
+  - Comprehensive read-only site review: `./go.sh run src/review/site-audit.ts --from=2025-11-01 --out=out/site-audit-2026-11-01`. All active projects are inventoried; demo/test sites are separated, dense histories are explicitly capped, and vibration/battery sensors receive inventory checks rather than displacement-MA analysis. The HTML is self-contained and never writes to production.
+  - Audit verification: from `ops/`, run `./node_modules/.bin/tsx src/review/site-audit-model-test.ts`. To regenerate the UI without rereading production, run `./node_modules/.bin/tsx src/review/site-audit.ts --render=out/site-audit-2026-11-01.json --out=out/site-audit-2026-11-01`. Export decisions before closing or replacing the snapshot.
 - **Docs:** `docs/ops/firestore-access.md` covers auth, queries, logs, the write protocol, and a data-model cheat sheet. `docs/ops/runbook-index.md` lists the runbooks that live in other repos.
 - **Agent protocol:** read-only queries are fine to run. For writes, write a `oneoff` script, show the dry-run output to the user, and let the user run it with `--apply`. It requires typing `yes` in a terminal, so agents can't apply it themselves. If auth fails, ask the user to run `./go.sh preflight`, because browser login is interactive.
 
