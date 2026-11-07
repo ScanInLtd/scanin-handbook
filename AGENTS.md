@@ -76,6 +76,7 @@ Reference repos with relative paths (`../scanin-svc-mqtt-bridge/...`). Each repo
 - **Config:** `src/config/config.js` reads `.env` (`MQTT_BROKER`, `MQTT_PORT`, `MQTT_USER/PASSWORD`, `MQTT_CA_CERT_PATH`, `BASE_PATH`, `FIREBASE_KEY_PATH`). Keys are mounted from `~/.firebase-keys` and `~/.mqtt-keys`.
 - **Protocol docs:** `docs/esp_server_protocol.md`, `docs/settings_synchronization_protocol.md` (device side: `../scanin-fw-datalogger/PROTOCOL.md`).
 - **Deploy:** on the VM, `./deploy.sh`. Alternatives are described in `DEPLOYMENT.md` and `MODERN_DEPLOYMENT.md`. Logs: `docker logs -f monitoring-bridge` (alias `bridge-log`).
+- **Deploy from the MacBook (verified 2026-11-07):** `~/.ssh/config` has a `si-bridge` alias → `HostName 35.240.35.198`, `User scanin.link`, `IdentityFile ~/.ssh/google_compute_engine` — direct SSH works, no `gcloud compute ssh` needed. The VM's `deploy.sh` runs `git pull origin master`, so **push the commit first**, then run `echo n | ssh si-bridge 'cd ~/monitoring-bridge && ./deploy.sh deploy'` (the `echo n` answers the trailing "View logs?" prompt; use `ssh -t` instead if you want the interactive menu). Verify with `ssh si-bridge 'docker logs --tail=50 monitoring-bridge'` or `./deploy.sh status`.
 - **No tests** (`npm test` is a stub).
 
 ### 2.3 Firebase Functions — `scanin-svc-firebase-functions`
