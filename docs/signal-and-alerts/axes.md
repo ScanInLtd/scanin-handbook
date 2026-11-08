@@ -55,10 +55,15 @@ _Part of: [`plan.md`](./plan.md). Evidence: `ops/src/analysis/axis-audit.ts` (re
     },
     "TwoDDisplacement": { …, "role": "derived", "derivedFrom": ["EastingDisplacement", "NorthingDisplacement"] }
   },
-  "smoothingWindowHours": 48
+  "smoothingWindowHours": 48,
+  "defaultThresholds": {               // initial thresholds for NEW sensors only (alertable axes)
+    "HeightDisplacement": { "warn": { "gap": 4 }, "alarm": { "gap": 6 } }
+  }
 }
 ```
-One reviewed table, readable by anyone, edited only through a committed oneoff script (no ad-hoc console edits).
+One reviewed table, readable by anyone. Edited in the UI at **Settings → Sensor Types** (admin): each save is a transaction guarded by `axesVersion`, bumps it, stamps `axesSource` with the editor, and appends a before/after entry to `{type}/history`. Bulk or scripted changes still go through a committed oneoff script. No ad-hoc console edits.
+
+`defaultThresholds` uses the `work-sensors.thresholds.axes` schema. It is applied when a sensor is created, by the bridge (ESP + ATS) and by the UI's manual install, and only on axes that are `alertable`. Existing sensors keep their own thresholds. The legacy `defaultThreshold` (singular, normal/high/low min/max) is no longer read. Set 2026-11-08: tilt x/y 0.2/0.3°, prism E/N/H 4/6 mm, cracktemp x 2/3 mm.
 
 ### 4.2 Per sensor, the user decides by setting thresholds
 
